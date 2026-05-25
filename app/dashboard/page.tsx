@@ -1,14 +1,29 @@
+import { PlaceholderSection } from '@/components/ui/PlaceholderSection';
+import { Greeting } from '@/components/dashboard/greeting';
+import { BalanceSection } from '@/components/dashboard/balance-section';
+import { QuickActionsSection } from '@/components/dashboard/quick-actions';
+import { RecentActivitySection } from '@/components/dashboard/recent-activity';
+
 export default function DashboardPage() {
   return (
-    <div className="flex min-h-screen flex-col bg-background p-8">
-      <div className="max-w-6xl mx-auto w-full space-y-4">
-        <h1 className="text-2xl font-semibold text-foreground tracking-tight">Dashboard</h1>
-        <p className="text-muted-foreground text-sm">Welcome to BagiTHR Dashboard. Content will be placed here.</p>
-        
-        <div className="w-full h-64 rounded-xl border border-dashed border-border flex items-center justify-center bg-muted/20 mt-8">
-          <p className="text-sm text-muted-foreground">Dashboard Area</p>
-        </div>
+    <div className="space-y-6 md:space-y-8 pb-6 md:pb-8">
+      {/* Welcome Title */}
+      <Greeting 
+        name="Faiz" 
+        subtitle="Everything you need, all in one dashboard." 
+      />
+
+      {/* Balance Cards Section */}
+      <BalanceSection />
+
+      {/* Quick Actions Section */}
+      <div className="space-y-4">
+        <h2 className="text-lg font-semibold text-black">Quick Actions</h2>
+        <QuickActionsSection />
       </div>
+
+      {/* Recent Activity Section */}
+      <RecentActivitySection />
     </div>
   );
 }

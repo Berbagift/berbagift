@@ -312,4 +312,21 @@
   html {
     @apply font-sans;
   }
+
+  /* Custom minimalist scrollbar for sidebar */
+  .sidebar-scrollbar::-webkit-scrollbar {
+    width: 4px;
+    background: transparent;
+  }
+  .sidebar-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .sidebar-scrollbar::-webkit-scrollbar-thumb {
+    background: var(--primary-900); /* dark green thumb */
+    border-radius: 4px;
+    transition: background 0.2s ease;
+  }
+  .sidebar-scrollbar:hover::-webkit-scrollbar-thumb {
+    background: var(--primary-800);
+  }
 }
