@@ -1,0 +1,315 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-inter-tight), "Inter Tight", sans-serif;
+  --font-heading: var(--font-inter-tight), "Inter Tight", sans-serif;
+
+  /* Neutral Palette */
+  --color-neutral-1: var(--neutral-1);
+  --color-neutral-2: var(--neutral-2);
+  --color-neutral-3: var(--neutral-3);
+  --color-neutral-4: var(--neutral-4);
+  --color-neutral-5: var(--neutral-5);
+  --color-neutral-6: var(--neutral-6);
+  --color-neutral-7: var(--neutral-7);
+  --color-neutral-8: var(--neutral-8);
+  --color-neutral-9: var(--neutral-9);
+  --color-neutral-10: var(--neutral-10);
+  --color-neutral-11: var(--neutral-11);
+  --color-neutral-12: var(--neutral-12);
+  --color-neutral-13: var(--neutral-13);
+
+  /* Primary Green */
+  --color-primary-50: var(--primary-50);
+  --color-primary-100: var(--primary-100);
+  --color-primary-200: var(--primary-200);
+  --color-primary-300: var(--primary-300);
+  --color-primary-400: var(--primary-400);
+  --color-primary-500: var(--primary-500);
+  --color-primary-600: var(--primary-600);
+  --color-primary-700: var(--primary-700);
+  --color-primary-800: var(--primary-800);
+  --color-primary-900: var(--primary-900);
+
+  /* Secondary Green */
+  --color-secondary-50: var(--secondary-50);
+  --color-secondary-100: var(--secondary-100);
+  --color-secondary-200: var(--secondary-200);
+  --color-secondary-300: var(--secondary-300);
+  --color-secondary-400: var(--secondary-400);
+  --color-secondary-500: var(--secondary-500);
+  --color-secondary-600: var(--secondary-600);
+  --color-secondary-700: var(--secondary-700);
+  --color-secondary-800: var(--secondary-800);
+  --color-secondary-900: var(--secondary-900);
+
+  /* Error Red */
+  --color-error-50: var(--error-50);
+  --color-error-100: var(--error-100);
+  --color-error-200: var(--error-200);
+  --color-error-300: var(--error-300);
+  --color-error-400: var(--error-400);
+  --color-error-500: var(--error-500);
+  --color-error-600: var(--error-600);
+  --color-error-700: var(--error-700);
+  --color-error-800: var(--error-800);
+  --color-error-900: var(--error-900);
+
+  /* Orange Warning */
+  --color-warning-50: var(--warning-50);
+  --color-warning-100: var(--warning-100);
+  --color-warning-200: var(--warning-200);
+  --color-warning-300: var(--warning-300);
+  --color-warning-400: var(--warning-400);
+  --color-warning-500: var(--warning-500);
+  --color-warning-600: var(--warning-600);
+  --color-warning-700: var(--warning-700);
+  --color-warning-800: var(--warning-800);
+  --color-warning-900: var(--warning-900);
+
+  /* Purple Accent */
+  --color-accent-purple-50: var(--accent-purple-50);
+  --color-accent-purple-100: var(--accent-purple-100);
+  --color-accent-purple-200: var(--accent-purple-200);
+  --color-accent-purple-300: var(--accent-purple-300);
+  --color-accent-purple-400: var(--accent-purple-400);
+  --color-accent-purple-500: var(--accent-purple-500);
+  --color-accent-purple-600: var(--accent-purple-600);
+  --color-accent-purple-700: var(--accent-purple-700);
+  --color-accent-purple-800: var(--accent-purple-800);
+  --color-accent-purple-900: var(--accent-purple-900);
+
+  /* Shadcn Semantic Overrides */
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+}
+
+:root {
+  /* NEUTRAL PALETTE */
+  --neutral-1: #ffffff;
+  --neutral-2: #fcfcfc;
+  --neutral-3: #f5f5f5;
+  --neutral-4: #f0f0f0;
+  --neutral-5: #d9d9d9;
+  --neutral-6: #bfbfbf;
+  --neutral-7: #8c8c8c;
+  --neutral-8: #595959;
+  --neutral-9: #454545;
+  --neutral-10: #262626;
+  --neutral-11: #1f1f1f;
+  --neutral-12: #141414;
+  --neutral-13: #000000;
+
+  /* PRIMARY GREEN */
+  --primary-50: #e9f9ef;
+  --primary-100: #baedcd;
+  --primary-200: #99e4b5;
+  --primary-300: #6bd893;
+  --primary-400: #4ed17e;
+  --primary-500: #22c55e;
+  --primary-600: #1fb356;
+  --primary-700: #188c43;
+  --primary-800: #136c34;
+  --primary-900: #0e5327;
+
+  /* SECONDARY GREEN */
+  --secondary-50: #e8f6ed;
+  --secondary-100: #b7e2c7;
+  --secondary-200: #94d5ac;
+  --secondary-300: #63c186;
+  --secondary-400: #45b56e;
+  --secondary-500: #16a34a;
+  --secondary-600: #149443;
+  --secondary-700: #107435;
+  --secondary-800: #0c5a29;
+  --secondary-900: #09441f;
+
+  /* SOFT GREEN BACKGROUND */
+  --green-soft-1: #fcfffd;
+  --green-soft-2: #f4fef8;
+  --green-soft-3: #effef4;
+  --green-soft-4: #e8fdef;
+  --green-soft-5: #e3fdec;
+  --green-soft-6: #dcfce7;
+  --green-soft-7: #c8e5d2;
+  --green-soft-8: #9cb3a4;
+  --green-soft-9: #798b7f;
+  --green-soft-10: #5c6a61;
+
+  /* GREEN BORDER SYSTEM */
+  --green-border-1: #f8fefa;
+  --green-border-2: #eafdf0;
+  --green-border-3: #e0fbe9;
+  --green-border-4: #d1fae0;
+  --green-border-5: #c9f9d9;
+  --green-border-6: #bbf7d0;
+  --green-border-7: #aae1bd;
+  --green-border-8: #85af94;
+  --green-border-9: #678872;
+  --green-border-10: #4f6857;
+
+  /* ERROR RED */
+  --error-50: #fdecec;
+  --error-100: #fac5c5;
+  --error-200: #f8a9a9;
+  --error-300: #f48282;
+  --error-400: #f26969;
+  --error-500: #ef4444;
+  --error-600: #d93e3e;
+  --error-700: #aa3030;
+  --error-800: #832525;
+  --error-900: #641d1d;
+
+  /* ORANGE WARNING */
+  --warning-50: #fef5e7;
+  --warning-100: #fce1b3;
+  --warning-200: #fad28f;
+  --warning-300: #f8be5c;
+  --warning-400: #f7b13c;
+  --warning-500: #f59e0b;
+  --warning-600: #df900a;
+  --warning-700: #ae7008;
+  --warning-800: #875706;
+  --warning-900: #674205;
+
+  /* PURPLE ACCENT */
+  --accent-purple-50: #f6eefe;
+  --accent-purple-100: #e4cafd;
+  --accent-purple-200: #d7b1fb;
+  --accent-purple-300: #c58dfa;
+  --accent-purple-400: #b977f9;
+  --accent-purple-500: #a855f7;
+  --accent-purple-600: #994de1;
+  --accent-purple-700: #773caf;
+  --accent-purple-800: #5c2f88;
+  --accent-purple-900: #472468;
+
+  /* SHADCN SEMANTIC MAPPING */
+  --background: var(--neutral-1);
+  --foreground: var(--neutral-13);
+  
+  --card: var(--neutral-1);
+  --card-foreground: var(--neutral-13);
+  
+  --popover: var(--neutral-1);
+  --popover-foreground: var(--neutral-13);
+  
+  --primary: var(--primary-500);
+  --primary-foreground: var(--neutral-1);
+  
+  --secondary: var(--neutral-3);
+  --secondary-foreground: var(--neutral-11);
+  
+  --muted: var(--neutral-2);
+  --muted-foreground: var(--neutral-8);
+  
+  --accent: var(--neutral-3);
+  --accent-foreground: var(--neutral-13);
+  
+  --destructive: var(--error-500);
+  --destructive-foreground: var(--neutral-1);
+  
+  --border: var(--neutral-4);
+  --input: var(--neutral-4);
+  --ring: var(--primary-500);
+  
+  --radius: 0.75rem;
+
+  --sidebar: var(--neutral-2);
+  --sidebar-foreground: var(--neutral-13);
+  --sidebar-primary: var(--primary-500);
+  --sidebar-primary-foreground: var(--neutral-1);
+  --sidebar-accent: var(--neutral-3);
+  --sidebar-accent-foreground: var(--neutral-13);
+  --sidebar-border: var(--neutral-4);
+  --sidebar-ring: var(--primary-500);
+}
+
+.dark {
+  --background: var(--neutral-13);
+  --foreground: var(--neutral-1);
+  
+  --card: var(--neutral-12);
+  --card-foreground: var(--neutral-1);
+  
+  --popover: var(--neutral-12);
+  --popover-foreground: var(--neutral-1);
+  
+  --primary: var(--primary-500);
+  --primary-foreground: var(--neutral-1);
+  
+  --secondary: var(--neutral-10);
+  --secondary-foreground: var(--neutral-3);
+  
+  --muted: var(--neutral-11);
+  --muted-foreground: var(--neutral-6);
+  
+  --accent: var(--neutral-11);
+  --accent-foreground: var(--neutral-1);
+  
+  --destructive: var(--error-600);
+  --destructive-foreground: var(--neutral-1);
+  
+  --border: var(--neutral-10);
+  --input: var(--neutral-10);
+  --ring: var(--primary-600);
+
+  --sidebar: var(--neutral-12);
+  --sidebar-foreground: var(--neutral-1);
+  --sidebar-primary: var(--primary-500);
+  --sidebar-primary-foreground: var(--neutral-1);
+  --sidebar-accent: var(--neutral-10);
+  --sidebar-accent-foreground: var(--neutral-1);
+  --sidebar-border: var(--neutral-10);
+  --sidebar-ring: var(--primary-600);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+  html {
+    @apply font-sans;
+  }
+}
