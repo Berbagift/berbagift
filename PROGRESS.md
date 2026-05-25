@@ -2,36 +2,44 @@
 
 > Note for AI Assistant: Always update this file at the end of each session. Always read this file at the beginning of a new session to restore context.
 
-## Current Objective
-- [x] Initialize Next.js App Router project
-- [x] Setup TailwindCSS & shadcn/ui
-- [x] Setup base folder structure
-- [x] Slice landing page UI (Hero, Features, Steps, Showcase, Payments, CTA)
-- [x] Slice Dashboard Shell (Sidebar, Header, Layout)
-- [x] Slice Dashboard Phase 2 (Greeting, Balance Cards, Quick Actions, Recent Activity)
-- [x] Phase 3: Responsive Behavior & Mobile Adaptation
+## 🚀 Project Milestones
+- [x] **Phase 1**: Initialize Next.js App Router, TailwindCSS & shadcn/ui.
+- [x] **Phase 2**: Slice landing page UI (Hero, Features, Steps, Showcase, Payments, CTA).
+- [x] **Phase 3**: Slice Dashboard Shell & Overview (Sidebar, Header, Layout, Balance Cards, Quick Actions, Recent Activity).
+- [x] **Phase 4**: Responsive Behavior & Mobile Adaptation across all layouts.
+- [x] **Phase 5**: Inner Pages (All Activity & Inbox) with polymorphic data tables.
+- [x] **Phase 6**: Wallet & Balance Management (Interactive token charts and IDR cards).
 
-## Completed (Last Session)
-### Phase 3: Responsive Behavior & Mobile Adaptation ✅ (Completed)
-- **Status:** Done
-- **Objective:** Ensure the dashboard layouts adapt gracefully across tablet and mobile devices while preserving the established design aesthetic.
-- **Key Deliverables:**
-  - Responsive Grid & Spacing across Dashboard views.
-  - Mobile Sidebar & Topbar (Drawer navigation, sticky header).
-  - Stacked Card layout for Activity Table on mobile.
-  - Minimalist 404 Page creation.
-- Replaced all `rounded-xl`, `rounded-lg`, etc. with `rounded-md` across the dashboard to enforce a stricter, tighter fintech UI design.
-- Replaced all ad-hoc borders with `border-neutral-5` consistently across cards, tables, sections, and navigation components.
-- Adjusted the Balance Cards layout (increased logo size for visual dominance, improved vertical centering, tightened rhythm).
-- Adjusted Quick Action cards layout (enlarged icon container, refined alignments).
-- Created a robust, modular Recent Activity Table with a `StatusBadge` component, `ActivityRow` mapping, and header interactions.
-- Refined Recent Activity layout by adding a section-level border, removing the table's outer wrapper border, and isolating the `rounded-t-md` styling strictly to the column headers.
-- Maintained strict 8px/12px/16px/20px/24px spacing rhythms without oversized whitespace.
-- Used `placehold.co` dynamically for placeholders.
+## 🏗️ Current Codebase Architecture & Context
 
-## In Progress / Active Bugs
-- Ready for next steps in Dashboard development (e.g., building remaining placeholders or deeper interactions).
+The project follows a strict fintech SaaS aesthetic: compact spacing (rounded-md), subtle hierarchy (border-neutral-200), and avoids oversized shadows or flashy gradients. The architecture favors modularity and state isolation.
 
-## Context & References
-- Adhere to technical architecture in `AI_RULES.md`
-- Adhere to product specifications in `PRD.md`
+### 1. App Shell & Navigation Layer
+- **`DashboardLayout` (Client Component)**: The root provider for dashboard state. Manages the `isMobileMenuOpen` boolean. Passes state to `Header` (for drawer triggers) and `Sidebar` (for visibility).
+- **`Header` & `Sidebar`**: Renders top-bar navigation and static routing (`next/link`). Adapts seamlessly to mobile overlays.
+
+### 2. Dashboard Overview (`app/dashboard/page.tsx`)
+- Acts as the primary assembly point for the dashboard widgets.
+- Uses stateless presentational components (`Greeting`, `QuickActionsSection`) alongside data wrappers (`BalanceSection`).
+- **`RecentActivitySection`**: Uses a structural shell that imports the shared `ActivityTable` specifically for the overview, injecting shortened default data.
+
+### 3. Shared Data Display Tier
+- **`ActivityTable` (Polymorphic Component)**: The core data table. Accepts an optional `data?: ActivityRowProps[]` prop. Rendered by both `RecentActivitySection` and `AllActivityPage`, functioning as a pure CSS Grid matrix.
+- **`ActivityRow`**: Handles complex rendering of data objects (icons, text, timestamps). Uses decoupled DOM nodes: a flex layout for mobile and a strict `grid-cols-5` track for desktop to bypass CSS `display: contents` bugs.
+- **`StatusBadge`**: Ingests literal strings (`'success'`, `'processing'`) and outputs specific Tailwind color tokens.
+
+### 4. Deep-Dive Pages (Activity & Inbox)
+- **`AllActivityPage` (`app/dashboard/activity/page.tsx`)**: Injects an extended `ALL_ACTIVITY_DATA` array into `<ActivityTable />`. Uses a double-border structural wrapper to isolate the outer padded layout from the raw table elements.
+- **`InboxPage` (`app/dashboard/inbox/page.tsx`)**: Driven by a `TABS` array state map. Generates category buttons with conditional styling derived from a `tab.active` boolean and numeric `tab.count` badges. Utilizes native `overflow-x-auto` for mobile scrolling.
+
+### 5. Wallet & Balance Management (`app/dashboard/balance/page.tsx`)
+The Balance page is a highly interactive, state-driven Client Component designed for dynamic token analysis.
+- **Centralized Data Config (`lib/data/tokens.ts`)**: Acts as the single source of truth for token configurations (XLM, USDC). Exports strict TS interfaces (`TokenConfig`, `ChartDataPoint`). This allows adding new tokens without touching UI components.
+- **Stateful Controller**: Uses `useState('XLM')` to track `activeTokenId`. The `toggleToken` function safely transitions state and passes downward data flow (injecting the active `TokenConfig`) into presentation components.
+- **`ChartHeader`**: Dynamically binds background colors (`token.logoBg`), icons, and formatted currency amounts (`toLocaleString()`). The "Change token" button triggers the parent `onToggleToken` prop.
+- **`ChartRangeTabs`**: Manages visual toggles for timeframes using internal `activeRange` state and subtle emerald backgrounds.
+- **`BalanceChart`**: Utilizes `recharts` to render a `ResponsiveContainer`. Configured with a `type="natural"` interpolation for an organic curve, and a custom `linearGradient` `<defs>` tag (fading from 0.35 to 0.0 opacity) for a lightweight fintech aesthetic. The `margin={{ bottom: 30 }}` prevents X-axis clipping.
+- **Action Cards**: 
+  - **`TransferCard`**: Uses constrained text widths (`max-w-[480px]`) and a dedicated security badge (`bg-amber-50`).
+  - **`IdrBalanceCard`**: Implements a precise layout structure handling numeric values and two primary action buttons (Withdraw vs. Top Up) using `flex-1` for perfect width distribution.
+- **Responsive Grid**: Uses `grid-cols-1 md:grid-cols-2` for the lower cards. This enforces an exact 50/50 symmetrical width distribution on desktop (preventing components from feeling unnaturally large or imbalanced), while safely collapsing into a vertical stack on mobile.

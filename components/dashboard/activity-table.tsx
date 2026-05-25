@@ -44,11 +44,15 @@ const ACTIVITY_DATA: ActivityRowProps[] = [
   },
 ];
 
-export function ActivityTable() {
+export interface ActivityTableProps {
+  data?: ActivityRowProps[];
+}
+
+export function ActivityTable({ data = ACTIVITY_DATA }: ActivityTableProps) {
   return (
     <div className="w-full">
       {/* Table Header */}
-      <div className="hidden md:grid grid-cols-5 gap-4 px-4 py-3 border border-neutral-5 rounded-t-md bg-muted/10">
+      <div className="hidden md:grid grid-cols-5 gap-4 px-4 py-3 border border-neutral-5 rounded-tr-md rounded-tl-md">
         <div className="col-span-1 flex items-center gap-2 text-sm font-medium text-black">
           Activity Type <i className="fi fi-rr-caret-down text-[10px] text-neutral-7" />
         </div>
@@ -68,11 +72,11 @@ export function ActivityTable() {
 
       {/* Table Body */}
       <div className="flex flex-col">
-        {ACTIVITY_DATA.map((row, idx) => (
-          <ActivityRow 
-            key={idx} 
-            {...row} 
-            isLast={idx === ACTIVITY_DATA.length - 1} 
+        {data.map((row, idx) => (
+          <ActivityRow
+            key={idx}
+            {...row}
+            isLast={idx === data.length - 1}
           />
         ))}
       </div>
