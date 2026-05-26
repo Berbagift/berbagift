@@ -14,7 +14,7 @@ export function PercentageSelectors({ activePercentage, onSelect }: PercentageSe
   ];
 
   return (
-    <div className="flex items-center gap-0.5 bg-neutral-50 rounded-md p-0.5 h-7">
+    <div className="flex items-center gap-0.5 bg-neutral-2 rounded-md p-0.5 h-7">
       {options.map((opt) => (
         <button
           key={opt.label}
@@ -23,7 +23,7 @@ export function PercentageSelectors({ activePercentage, onSelect }: PercentageSe
             "text-base font-medium px-2 h-full rounded transition-colors",
             activePercentage === opt.value
               ? "bg-[#e8f5e9] text-[#22c55e]"
-              : "text-black hover:bg-neutral-100"
+              : "text-black hover:bg-neutral-3"
           )}
         >
           {opt.label}

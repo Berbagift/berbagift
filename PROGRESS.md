@@ -10,6 +10,7 @@
 - [x] **Phase 5**: Inner Pages (All Activity & Inbox) with polymorphic data tables.
 - [x] **Phase 6**: Wallet & Balance Management (Interactive token charts and IDR cards).
 - [x] **Phase 7**: Swap Token Interface (Reversible state, reusable blocks, strict fintech UI).
+- [x] **Phase 8**: Send THR Page & Shared Component System (Multi-recipient chips, custom amount inputs, shared finance/forms layer).
 
 ## 🏗️ Current Codebase Architecture & Context
 
@@ -57,3 +58,11 @@ The Swap Token page relies on a self-contained, highly modular architecture to m
 - **Reversible Logic**: The `handleSwapDirection` explicitly swaps string values and token IDs without triggering side-effect heavy calculation loops, making the UI feel instantly responsive.
 - **`SwapModule`**: The central visual container. Stays constrained using `max-w-[740px]` rather than stretching edge-to-edge, maintaining an editorial, premium SaaS aesthetic. The "Swap Direction" button utilizes a structural `flex-col` gap layout (rather than absolute overlap positioning) to float naturally between the FROM and TO cards.
 - **`SwapBlock` (Strict Validation)**: A highly reusable UI component handling both "FROM" and "TO" states. Implements strict regex-based decimal input validation (`isValidDecimalInput`) combined with `inputMode="decimal"` to prevent invalid non-numeric keystrokes natively on the client. Uses strict Tailwind constraints to avoid generic DEX styling.
+
+### 7. Send THR Page (`app/sendthr/page.tsx`)
+The Send THR page provides a centered, high-density dashboard form layout designed for multi-recipient rewards transfers.
+- **`useSendThrState` Hook**: Manages local form state, including a dynamic `Recipient` array, amount validations using clean numeric utils, active token selections, and optional custom text message parameters.
+- **Recipient input mechanism**: Implements an interactive multi-chip list (`RecipientChip`) inside a border-monitored wrapping field. Pressing enter automatically appends new usernames with custom initials calculations and allows instant removal.
+- **`TokenAmountField` integration**: Utilizes size `lg` formatting to render high-contrast inputs (`text-3xl`) and enlarged fiat badges (`text-xl`) to capture a premium fintech tool feel.
+- **`DashboardLayout` compatibility**: Placed inside a customized `/sendthr` root app router group which imports and wraps the page under the global app layout controls while retaining the precise sidebar navigation.
+

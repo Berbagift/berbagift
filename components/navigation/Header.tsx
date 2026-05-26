@@ -13,6 +13,7 @@ const getPageTitle = (pathname: string) => {
   if (pathname.includes('/inbox')) return 'My Inbox';
   if (pathname.includes('/balance')) return 'My Balance';
   if (pathname.includes('/swap')) return 'Swap Token';
+  if (pathname.includes('/sendthr')) return 'Send THR';
   if (pathname.includes('/rooms')) return 'Explore Rooms';
   if (pathname.includes('/create-room')) return 'Create Room';
   if (pathname.includes('/profile')) return 'My Profile';
@@ -48,7 +49,7 @@ export function Header({ onMenuClick }: HeaderProps) {
           <div className="w-8 h-8 lg:w-10 lg:h-10 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-700 font-semibold text-sm">
             FH
           </div>
-          <div className="hidden sm:block text-sm text-right">
+          <div className="hidden sm:block text-sm text-left">
             <p className="font-semibold text-black leading-none mb-1">Faiz</p>
             <p className="text-neutral-7 text-xs leading-none">@faizhazan.creator</p>
           </div>

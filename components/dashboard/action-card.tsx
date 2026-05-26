@@ -1,16 +1,18 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
+import Link from 'next/link';
 
 interface ActionCardProps {
   title: string;
   subtitle: string;
   icon: string;
   colorClass: string;
+  href?: string;
 }
 
-export function ActionCard({ title, subtitle, icon, colorClass }: ActionCardProps) {
-  return (
-    <button className="flex items-center gap-4 p-4 rounded-md border border-neutral-5 bg-card shadow-none text-left transition-colors hover:border-neutral-5 hover:bg-neutral-2/50 group w-full h-full">
+export function ActionCard({ title, subtitle, icon, colorClass, href }: ActionCardProps) {
+  const content = (
+    <>
       <div className={cn("w-14 h-14 rounded-md flex items-center justify-center flex-shrink-0 transition-transform group-hover:scale-105", colorClass)}>
         <i className={cn(icon, "text-2xl")} />
       </div>
@@ -20,6 +22,23 @@ export function ActionCard({ title, subtitle, icon, colorClass }: ActionCardProp
           {subtitle}
         </p>
       </div>
+    </>
+  );
+
+  const className = "flex items-center gap-4 p-4 rounded-md border border-neutral-5 bg-card shadow-none text-left transition-colors hover:border-neutral-5 hover:bg-neutral-2/50 group w-full h-full cursor-pointer";
+
+  if (href) {
+    return (
+      <Link href={href} className={className}>
+        {content}
+      </Link>
+    );
+  }
+
+  return (
+    <button className={className}>
+      {content}
     </button>
   );
 }
+

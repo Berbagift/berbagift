@@ -85,7 +85,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                       "flex items-center gap-3 px-3 py-2 rounded-md text-[15px] font-medium transition-colors",
                       isActive
                         ? "bg-[#16a34a] text-white"
-                        : "text-black hover:bg-neutral-100"
+                        : "text-black hover:bg-neutral-3"
                     )}
                   >
                     <i className={cn(item.icon, "text-[18px] flex-shrink-0 w-5 text-center mt-[1px]")} />

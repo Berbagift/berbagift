@@ -1,6 +1,6 @@
 export function IdrBalanceCard() {
   return (
-    <div className="bg-white border border-neutral-200 rounded-md p-6 md:p-8 flex flex-col justify-between h-full shadow-[0_2px_8px_-2px_rgba(0,0,0,0.02)]">
+    <div className="bg-white border border-neutral-5 rounded-md p-6 md:p-8 flex flex-col justify-between h-full shadow-[0_2px_8px_-2px_rgba(0,0,0,0.02)]">
       {/* Top Section */}
       <div className="flex items-start justify-between relative mb-8">
         <div className="flex gap-4 items-start">
@@ -11,7 +11,7 @@ export function IdrBalanceCard() {
           
           {/* Text Block */}
           <div className="flex flex-col pt-1">
-            <span className="text-[15px] text-neutral-500 font-medium mb-1">
+            <span className="text-[15px] text-neutral-8 font-medium mb-1">
               Your IDR Balance
             </span>
             <span className="text-3xl md:text-[32px] font-semibold text-black leading-none tracking-tight">
@@ -21,7 +21,7 @@ export function IdrBalanceCard() {
         </div>
 
         {/* Visibility Toggle - Anchored Top Right */}
-        <button className="w-10 h-10 border border-neutral-100 rounded-md flex items-center justify-center text-neutral-400 hover:bg-neutral-50 hover:text-neutral-600 transition-colors shrink-0 absolute right-0 top-0">
+        <button className="w-10 h-10 border border-neutral-3 rounded-md flex items-center justify-center text-neutral-7 hover:bg-neutral-2 hover:text-neutral-9 transition-colors shrink-0 absolute right-0 top-0">
           <i className="fi fi-rr-eye text-base"></i>
         </button>
       </div>
