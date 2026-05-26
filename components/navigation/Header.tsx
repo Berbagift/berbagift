@@ -1,11 +1,29 @@
+'use client';
+
 import React from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 
 interface HeaderProps {
   onMenuClick?: () => void;
 }
 
+const getPageTitle = (pathname: string) => {
+  if (pathname.includes('/activity')) return 'All Activity';
+  if (pathname.includes('/inbox')) return 'My Inbox';
+  if (pathname.includes('/balance')) return 'My Balance';
+  if (pathname.includes('/swap')) return 'Swap Token';
+  if (pathname.includes('/rooms')) return 'Explore Rooms';
+  if (pathname.includes('/create-room')) return 'Create Room';
+  if (pathname.includes('/profile')) return 'My Profile';
+  if (pathname.includes('/help')) return 'Help Center';
+  return 'Overview';
+};
+
 export function Header({ onMenuClick }: HeaderProps) {
+  const pathname = usePathname();
+  const pageTitle = getPageTitle(pathname || '');
+
   return (
     <header className="h-20 border-b border-neutral-5 bg-background flex items-center justify-between px-4 lg:px-8 sticky top-0 z-20">
       <div className="flex items-center gap-3">
@@ -16,12 +34,12 @@ export function Header({ onMenuClick }: HeaderProps) {
             <img src="https://placehold.co/120x40/transparent/000000?text=BagiTHR" alt="BagiTHR Logo" className="h-6 object-contain" />
           </Link>
         </div>
-        <h1 className="text-xl font-semibold text-black hidden lg:block">Overview</h1>
+        <h1 className="text-2xl font-semibold text-black hidden lg:block">{pageTitle}</h1>
       </div>
 
       {/* Center title on mobile */}
-      <div className="absolute left-1/2 -translate-x-1/2 lg:hidden">
-        <h1 className="text-lg font-semibold text-black">Overview</h1>
+      <div className="absolute left-1/2 -translate-x-1/2 lg:hidden pointer-events-none">
+        <h1 className="text-lg font-semibold text-black">{pageTitle}</h1>
       </div>
 
       <div className="flex items-center gap-3 lg:gap-4">
@@ -37,7 +55,7 @@ export function Header({ onMenuClick }: HeaderProps) {
         </div>
 
         {/* Mobile Menu Button */}
-        <button 
+        <button
           onClick={onMenuClick}
           className="lg:hidden w-10 h-10 flex items-center justify-center text-black hover:bg-neutral-5 rounded-md transition-colors"
         >

@@ -1,6 +1,9 @@
+'use client';
+
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import Image from 'next/image';
+import { usePathname } from 'next/navigation';
 
 const SIDEBAR_NAV = [
   {
@@ -40,6 +43,8 @@ interface SidebarProps {
 }
 
 export function Sidebar({ isOpen, onClose }: SidebarProps) {
+  const pathname = usePathname();
+
   return (
     <aside 
       className={cn(
@@ -70,20 +75,20 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
             </h3>
             <div className="flex flex-col gap-1 mt-1">
               {group.items.map((item, j) => {
-                const isActive = item.name === 'Overview'; // Placeholder active state
+                const isActive = pathname === item.href || (item.href !== '/dashboard' && pathname?.startsWith(item.href));
                 return (
                   <Link
                     key={j}
                     href={item.href}
                     onClick={onClose}
                     className={cn(
-                      "flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors",
+                      "flex items-center gap-3 px-3 py-2 rounded-md text-[15px] font-medium transition-colors",
                       isActive
-                        ? "bg-muted/50 text-black"
-                        : "text-neutral-7 hover:bg-muted/30 hover:text-black"
+                        ? "bg-[#16a34a] text-white"
+                        : "text-black hover:bg-neutral-100"
                     )}
                   >
-                    <i className={cn(item.icon, "text-lg flex-shrink-0 w-5 text-center")} />
+                    <i className={cn(item.icon, "text-[18px] flex-shrink-0 w-5 text-center mt-[1px]")} />
                     {item.name}
                   </Link>
                 );

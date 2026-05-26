@@ -12,15 +12,9 @@ export default function InboxPage() {
 
   return (
     <div className="space-y-6 md:space-y-8 pb-6 md:pb-8">
-      {/* Inbox Header */}
-      <div className="flex flex-col md:flex-row md:items-start md:items-center justify-between gap-4">
-        <div className="flex flex-col gap-1">
-          <h1 className="text-3xl font-medium text-black tracking-tight">Inbox</h1>
-          <p className="text-base font-medium text-neutral-500">
-            Stay updated on your account activity
-          </p>
-        </div>
-        <Button variant="outline" className="h-10 rounded-md border-neutral-200 text-black flex items-center gap-2 self-start md:self-auto">
+      {/* Top Action Row */}
+      <div className="flex justify-end">
+        <Button variant="outline" className="h-10 rounded-md border-neutral-200 text-black flex items-center gap-2">
           <i className="fi fi-rr-check mt-[2px]" />
           Mark all as read
         </Button>

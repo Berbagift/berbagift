@@ -94,7 +94,7 @@
   --color-sidebar-primary: var(--sidebar-primary);
   --color-sidebar-foreground: var(--sidebar-foreground);
   --color-sidebar: var(--sidebar);
-  
+
   --color-ring: var(--ring);
   --color-input: var(--input);
   --color-border: var(--border);
@@ -119,6 +119,34 @@
   --radius-2xl: calc(var(--radius) * 1.8);
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
+
+  /* --- Ukuran Kecil (Line Height 125% / 1.25) --- */
+
+  --font-size-xxs: 10px;
+  --font-size-xxs--line-height: 1.25;
+
+  --font-size-xs: 12px;
+  --font-size-xs--line-height: 1.25;
+
+  --font-size-sm: 14px;
+  --font-size-sm--line-height: 1.25;
+
+  --font-size-base: 16px;
+  --font-size-base--line-height: 1.25;
+
+  /* --- Ukuran Besar (Line Height 150% / 1.5) --- */
+
+  --font-size-xl: 20px;
+  --font-size-xl--line-height: 1.5;
+
+  --font-size-2xl: 24px;
+  --font-size-2xl--line-height: 1.5;
+
+  --font-size-3xl: 32px;
+  --font-size-3xl--line-height: 1.5;
+
+  --font-size-4xl: 36px;
+  --font-size-4xl--line-height: 1.5;
 }
 
 :root {
@@ -224,32 +252,32 @@
   /* SHADCN SEMANTIC MAPPING */
   --background: var(--neutral-1);
   --foreground: var(--neutral-13);
-  
+
   --card: var(--neutral-1);
   --card-foreground: var(--neutral-13);
-  
+
   --popover: var(--neutral-1);
   --popover-foreground: var(--neutral-13);
-  
+
   --primary: var(--primary-500);
   --primary-foreground: var(--neutral-1);
-  
+
   --secondary: var(--neutral-3);
   --secondary-foreground: var(--neutral-11);
-  
+
   --muted: var(--neutral-2);
   --muted-foreground: var(--neutral-8);
-  
+
   --accent: var(--neutral-3);
   --accent-foreground: var(--neutral-13);
-  
+
   --destructive: var(--error-500);
   --destructive-foreground: var(--neutral-1);
-  
+
   --border: var(--neutral-4);
   --input: var(--neutral-4);
   --ring: var(--primary-500);
-  
+
   --radius: 0.75rem;
 
   --sidebar: var(--neutral-2);
@@ -265,28 +293,28 @@
 .dark {
   --background: var(--neutral-13);
   --foreground: var(--neutral-1);
-  
+
   --card: var(--neutral-12);
   --card-foreground: var(--neutral-1);
-  
+
   --popover: var(--neutral-12);
   --popover-foreground: var(--neutral-1);
-  
+
   --primary: var(--primary-500);
   --primary-foreground: var(--neutral-1);
-  
+
   --secondary: var(--neutral-10);
   --secondary-foreground: var(--neutral-3);
-  
+
   --muted: var(--neutral-11);
   --muted-foreground: var(--neutral-6);
-  
+
   --accent: var(--neutral-11);
   --accent-foreground: var(--neutral-1);
-  
+
   --destructive: var(--error-600);
   --destructive-foreground: var(--neutral-1);
-  
+
   --border: var(--neutral-10);
   --input: var(--neutral-10);
   --ring: var(--primary-600);
@@ -305,12 +333,21 @@
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-background text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1;
   }
+
   html {
     @apply font-sans;
+  }
+
+  /* Ensure all actionable elements have a pointer cursor */
+  button, 
+  a, 
+  [role="button"] {
+    @apply cursor-pointer;
   }
 
   /* Custom minimalist scrollbar for sidebar */
@@ -318,14 +355,18 @@
     width: 4px;
     background: transparent;
   }
+
   .sidebar-scrollbar::-webkit-scrollbar-track {
     background: transparent;
   }
+
   .sidebar-scrollbar::-webkit-scrollbar-thumb {
-    background: var(--primary-900); /* dark green thumb */
+    background: var(--primary-900);
+    /* dark green thumb */
     border-radius: 4px;
     transition: background 0.2s ease;
   }
+
   .sidebar-scrollbar:hover::-webkit-scrollbar-thumb {
     background: var(--primary-800);
   }

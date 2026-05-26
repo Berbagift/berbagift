@@ -8,7 +8,7 @@ export function ChartRangeTabs() {
   const [activeRange, setActiveRange] = useState('1 Year');
 
   return (
-    <div className="flex items-center gap-1 md:gap-2 overflow-x-auto no-scrollbar bg-neutral-50/50 p-1 rounded-lg">
+    <div className="flex items-center gap-1 md:gap-2 overflow-x-auto no-scrollbar bg-neutral-50/50 p-1 rounded-md">
       {RANGES.map((range) => {
         const isActive = activeRange === range;
         return (

@@ -9,14 +9,20 @@
 - [x] **Phase 4**: Responsive Behavior & Mobile Adaptation across all layouts.
 - [x] **Phase 5**: Inner Pages (All Activity & Inbox) with polymorphic data tables.
 - [x] **Phase 6**: Wallet & Balance Management (Interactive token charts and IDR cards).
+- [x] **Phase 7**: Swap Token Interface (Reversible state, reusable blocks, strict fintech UI).
 
 ## 🏗️ Current Codebase Architecture & Context
 
 The project follows a strict fintech SaaS aesthetic: compact spacing (rounded-md), subtle hierarchy (border-neutral-200), and avoids oversized shadows or flashy gradients. The architecture favors modularity and state isolation.
 
+### 0. Global UI & Interaction Guidelines
+- **Global Cursor Rules**: A root CSS directive (`app/globals.css`) enforces `cursor-pointer` on all `<button>`, `<a>`, and `[role="button"]` elements. This guarantees a consistent UX for actionable items across the entire app without needing repetitive utility classes.
+- **Shared UI Icons**: Reusable custom SVGs (e.g., `SwapIcon`) are centralized in `components/ui/` for consistent branding across multiple pages and components.
+
 ### 1. App Shell & Navigation Layer
 - **`DashboardLayout` (Client Component)**: The root provider for dashboard state. Manages the `isMobileMenuOpen` boolean. Passes state to `Header` (for drawer triggers) and `Sidebar` (for visibility).
-- **`Header` & `Sidebar`**: Renders top-bar navigation and static routing (`next/link`). Adapts seamlessly to mobile overlays.
+- **`Header` (Dynamic Routing)**: Uses `usePathname` to dynamically render the current page title (e.g., "Swap Token", "All Activity"). This centralizes the routing state and eliminates redundant `<h1 />` tags across all internal page components.
+- **`Sidebar`**: Utilizes `usePathname` for dynamic active states. Enforces strict styling consistency: active links use the brand's primary emerald background (`bg-[#16a34a]`) with white text, while inactive links uniformly use `text-black`. Adapts seamlessly to mobile overlays.
 
 ### 2. Dashboard Overview (`app/dashboard/page.tsx`)
 - Acts as the primary assembly point for the dashboard widgets.
@@ -43,3 +49,11 @@ The Balance page is a highly interactive, state-driven Client Component designed
   - **`TransferCard`**: Uses constrained text widths (`max-w-[480px]`) and a dedicated security badge (`bg-amber-50`).
   - **`IdrBalanceCard`**: Implements a precise layout structure handling numeric values and two primary action buttons (Withdraw vs. Top Up) using `flex-1` for perfect width distribution.
 - **Responsive Grid**: Uses `grid-cols-1 md:grid-cols-2` for the lower cards. This enforces an exact 50/50 symmetrical width distribution on desktop (preventing components from feeling unnaturally large or imbalanced), while safely collapsing into a vertical stack on mobile.
+
+### 6. Swap Token Interface (`app/dashboard/swap/page.tsx`)
+The Swap Token page relies on a self-contained, highly modular architecture to manage bidirectional UI flow.
+- **Centralized Utils (`lib/utils/currency.ts`)**: Extracted all domain logic (mock exchange rates, fiat calculation) and string parsing/formatting into pure, independent helper functions to adhere to Clean Code principles.
+- **`useSwapState` Hook**: Acts strictly as a React state orchestrator. It manages reversible UI state (`fromToken`, `toToken`, amounts, percentages) but delegates complex math and formatting to the `currency` utils.
+- **Reversible Logic**: The `handleSwapDirection` explicitly swaps string values and token IDs without triggering side-effect heavy calculation loops, making the UI feel instantly responsive.
+- **`SwapModule`**: The central visual container. Stays constrained using `max-w-[740px]` rather than stretching edge-to-edge, maintaining an editorial, premium SaaS aesthetic. The "Swap Direction" button utilizes a structural `flex-col` gap layout (rather than absolute overlap positioning) to float naturally between the FROM and TO cards.
+- **`SwapBlock` (Strict Validation)**: A highly reusable UI component handling both "FROM" and "TO" states. Implements strict regex-based decimal input validation (`isValidDecimalInput`) combined with `inputMode="decimal"` to prevent invalid non-numeric keystrokes natively on the client. Uses strict Tailwind constraints to avoid generic DEX styling.

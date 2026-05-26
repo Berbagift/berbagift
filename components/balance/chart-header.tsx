@@ -1,6 +1,7 @@
 import Image from 'next/image';
 import { ChartRangeTabs } from '@/components/balance/chart-range-tabs';
 import { TokenConfig } from '@/lib/data/tokens';
+import { SwapIcon } from '../ui/swap-icon';
 
 interface ChartHeaderProps {
   token: TokenConfig;
@@ -15,13 +16,13 @@ export function ChartHeader({ token, onToggleToken }: ChartHeaderProps) {
         <h2 className="text-sm font-medium text-neutral-500 mb-4">
           {token.symbol} Performance & Wallet Balance
         </h2>
-        
+
         <div className="flex items-start gap-4">
           {/* Logo */}
           <div className={`${token.logoBg} rounded-full flex items-center justify-center w-16 h-16 shrink-0 text-white mt-1`}>
-             <i className={`fi ${token.logoIcon} text-2xl`}></i>
+            <i className={`fi ${token.logoIcon} text-2xl`}></i>
           </div>
-          
+
           <div className="flex flex-col">
             <span className="text-4xl md:text-[44px] font-semibold text-black tracking-tight leading-none mb-3">
               {token.balance.toLocaleString()} {token.symbol}
@@ -40,14 +41,14 @@ export function ChartHeader({ token, onToggleToken }: ChartHeaderProps) {
 
       {/* Right side: Controls */}
       <div className="flex flex-col items-start md:items-end justify-between gap-6">
-        <button 
+        <button
           onClick={onToggleToken}
           className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-black border border-neutral-200 rounded-md hover:bg-neutral-50 transition-colors"
         >
-          <i className="fi fi-rr-arrows-repeat text-neutral-500"></i>
+          <SwapIcon></SwapIcon>
           Change token
         </button>
-        
+
         <ChartRangeTabs />
       </div>
     </div>

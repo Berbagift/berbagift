@@ -5,7 +5,7 @@ export function IdrBalanceCard() {
       <div className="flex items-start justify-between relative mb-8">
         <div className="flex gap-4 items-start">
           {/* Icon Block */}
-          <div className="bg-[#f3e8ff] rounded-xl flex items-center justify-center w-16 h-16 shrink-0 mt-1">
+          <div className="bg-[#f3e8ff] rounded-md flex items-center justify-center w-16 h-16 shrink-0 mt-1">
             <i className="fi fi-rr-credit-card text-2xl text-[#a855f7]"></i>
           </div>
           

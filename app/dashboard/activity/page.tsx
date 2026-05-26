@@ -80,14 +80,6 @@ const ALL_ACTIVITY_DATA: ActivityRowProps[] = [
 export default function AllActivityPage() {
   return (
     <div className="space-y-6 md:space-y-8 pb-6 md:pb-8">
-      {/* Page Header */}
-      <div className="flex flex-col gap-1">
-        <h1 className="text-3xl font-medium text-black tracking-tight">All Activity</h1>
-        <p className="text-base font-medium text-neutral-500">
-          Track all your incoming and outgoing transactions
-        </p>
-      </div>
-
       {/* Top Action Row */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="relative w-full md:w-80">
