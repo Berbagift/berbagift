@@ -5,10 +5,12 @@ import { ChartHeader } from '@/components/balance/chart-header';
 import { BalanceChart } from '@/components/balance/balance-chart';
 import { TransferCard } from '@/components/balance/transfer-card';
 import { IdrBalanceCard } from '@/components/balance/idr-balance-card';
+import { TopUpBalanceModal } from '@/components/balance/top-up-balance-modal';
 import { TOKENS } from '@/lib/data/tokens';
 
 export default function BalancePage() {
   const [activeTokenId, setActiveTokenId] = useState('XLM');
+  const [isTopUpOpen, setIsTopUpOpen] = useState(false);
   const token = TOKENS[activeTokenId];
 
   const toggleToken = () => {
@@ -29,9 +31,14 @@ export default function BalancePage() {
           <TransferCard />
         </div>
         <div>
-          <IdrBalanceCard />
+          <IdrBalanceCard onTopUpClick={() => setIsTopUpOpen(true)} />
         </div>
       </div>
+
+      <TopUpBalanceModal
+        isOpen={isTopUpOpen}
+        onClose={() => setIsTopUpOpen(false)}
+      />
     </div>
   );
 }

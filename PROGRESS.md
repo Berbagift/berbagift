@@ -11,6 +11,7 @@
 - [x] **Phase 6**: Wallet & Balance Management (Interactive token charts and IDR cards).
 - [x] **Phase 7**: Swap Token Interface (Reversible state, reusable blocks, strict fintech UI).
 - [x] **Phase 8**: Send THR Page & Shared Component System (Multi-recipient chips, custom amount inputs, shared finance/forms layer).
+- [x] **Phase 9**: Send THR Envelope Selection (Zustand state refactoring, live envelope preview, modular preset/upload selection tabs).
 
 ## 🏗️ Current Codebase Architecture & Context
 
@@ -59,10 +60,12 @@ The Swap Token page relies on a self-contained, highly modular architecture to m
 - **`SwapModule`**: The central visual container. Stays constrained using `max-w-[740px]` rather than stretching edge-to-edge, maintaining an editorial, premium SaaS aesthetic. The "Swap Direction" button utilizes a structural `flex-col` gap layout (rather than absolute overlap positioning) to float naturally between the FROM and TO cards.
 - **`SwapBlock` (Strict Validation)**: A highly reusable UI component handling both "FROM" and "TO" states. Implements strict regex-based decimal input validation (`isValidDecimalInput`) combined with `inputMode="decimal"` to prevent invalid non-numeric keystrokes natively on the client. Uses strict Tailwind constraints to avoid generic DEX styling.
 
-### 7. Send THR Page (`app/sendthr/page.tsx`)
-The Send THR page provides a centered, high-density dashboard form layout designed for multi-recipient rewards transfers.
-- **`useSendThrState` Hook**: Manages local form state, including a dynamic `Recipient` array, amount validations using clean numeric utils, active token selections, and optional custom text message parameters.
-- **Recipient input mechanism**: Implements an interactive multi-chip list (`RecipientChip`) inside a border-monitored wrapping field. Pressing enter automatically appends new usernames with custom initials calculations and allows instant removal.
-- **`TokenAmountField` integration**: Utilizes size `lg` formatting to render high-contrast inputs (`text-3xl`) and enlarged fiat badges (`text-xl`) to capture a premium fintech tool feel.
-- **`DashboardLayout` compatibility**: Placed inside a customized `/sendthr` root app router group which imports and wraps the page under the global app layout controls while retaining the precise sidebar navigation.
+### 7. Send THR & Envelope Selection
+The Send THR flow uses a global state management system via Zustand to persist user selections across multiple steps and pages.
+- **Global Zustand Store (`hooks/use-send-thr-state.ts`)**: Replaces local state with a `zustand` store (`useSendThrStore`). This persists Recipients, Amount, Message, and Envelope selection data seamlessly when navigating from the form (`/sendthr`) to the envelope customization step (`/sendthr/envelope`).
+- **Form Module (`components/sendthr/sendthr-module.tsx`)**: Manages multi-recipient chips and custom amount inputs. Validates input state before routing to the envelope page.
+- **Envelope Selection Architecture (`/sendthr/envelope`)**: Uses a responsive 2-column layout.
+  - **`EnvelopeSelector`**: Tab-driven UI separating preset templates (`EnvelopeTemplateCard` mapped from `lib/data/envelopes.ts`) from the custom image upload view (`UploadSection`).
+  - **API-Ready Custom Upload**: `UploadSection` simulates an API upload flow, dynamically appending items to the Zustand `uploadedDesigns` array and enabling native deletion.
+  - **Live Preview (`EnvelopePreview`)**: A sticky sticky-on-desktop panel that reacts instantly to Zustand store changes, displaying the final aesthetic card with the dynamically generated `bgUrl`, recipient names, and configured amount overlay in a premium frosted-glass presentation.
 

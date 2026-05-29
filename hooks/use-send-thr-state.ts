@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { create } from 'zustand';
 import { TOKENS, TokenConfig } from '@/lib/data/tokens';
 import { getFiatEquivalent } from '@/lib/utils/currency';
 
@@ -8,26 +8,74 @@ export interface Recipient {
   initials: string;
 }
 
+export interface UploadedDesign {
+  id: string;
+  url: string;
+  title: string;
+}
+
+export type UploadMode = 'preset' | 'upload';
+
+interface SendThrState {
+  // Transfer Form State
+  recipients: Recipient[];
+  amount: string;
+  message: string;
+  tokenId: string;
+  activeToken: TokenConfig;
+  
+  // Envelope Selection State
+  selectedTemplateId: string | null;
+  uploadMode: UploadMode;
+  uploadedDesigns: UploadedDesign[];
+  selectedUploadedDesignId: string | null;
+
+  // Actions
+  toggleToken: () => void;
+  setTokenId: (id: string) => void;
+  addRecipient: (username: string) => void;
+  removeRecipient: (id: string) => void;
+  handleAmountChange: (val: string) => void;
+  handleMessageChange: (val: string) => void;
+  getFiatEquivalent: (amt: string) => string;
+
+  setUploadMode: (mode: UploadMode) => void;
+  setSelectedTemplateId: (id: string | null) => void;
+  setSelectedUploadedDesignId: (id: string | null) => void;
+  addUploadedDesign: (design: UploadedDesign) => void;
+  removeUploadedDesign: (id: string) => void;
+}
+
 const DEFAULT_RECIPIENTS: Recipient[] = [];
 
-export function useSendThrState() {
-  const [recipients, setRecipients] = useState<Recipient[]>(DEFAULT_RECIPIENTS);
-  const [amount, setAmount] = useState<string>('345,65');
-  const [message, setMessage] = useState<string>('');
-  const [tokenId, setTokenId] = useState<string>('USDC');
+export const useSendThrStore = create<SendThrState>((set, get) => ({
+  recipients: DEFAULT_RECIPIENTS,
+  amount: '',
+  message: '',
+  tokenId: 'USDC',
+  activeToken: TOKENS['USDC'],
 
-  const activeToken = TOKENS[tokenId];
+  selectedTemplateId: 'preset-1', // Default selection
+  uploadMode: 'preset',
+  uploadedDesigns: [],
+  selectedUploadedDesignId: null,
 
-  const toggleToken = () => {
-    setTokenId((prev) => (prev === 'USDC' ? 'XLM' : 'USDC'));
-  };
+  toggleToken: () => set((state) => {
+    const newId = state.tokenId === 'USDC' ? 'XLM' : 'USDC';
+    return { tokenId: newId, activeToken: TOKENS[newId] };
+  }),
 
-  const addRecipient = (username: string) => {
-    if (!username.trim()) return;
+  setTokenId: (id: string) => set(() => ({
+    tokenId: id,
+    activeToken: TOKENS[id] || TOKENS['USDC']
+  })),
+
+  addRecipient: (username: string) => set((state) => {
+    if (!username.trim()) return state;
     const cleanUsername = username.trim().toLowerCase().replace(/^@/, '');
     
     // Avoid duplicates
-    if (recipients.some(r => r.username.toLowerCase() === cleanUsername)) return;
+    if (state.recipients.some(r => r.username.toLowerCase() === cleanUsername)) return state;
 
     const initials = cleanUsername.slice(0, 2).toUpperCase();
     const newRecipient: Recipient = {
@@ -35,32 +83,38 @@ export function useSendThrState() {
       username: cleanUsername,
       initials,
     };
-    setRecipients([...recipients, newRecipient]);
-  };
+    return { recipients: [...state.recipients, newRecipient] };
+  }),
 
-  const removeRecipient = (id: string) => {
-    setRecipients(recipients.filter((r) => r.id !== id));
-  };
+  removeRecipient: (id: string) => set((state) => ({
+    recipients: state.recipients.filter((r) => r.id !== id)
+  })),
 
-  const handleAmountChange = (val: string) => {
-    setAmount(val);
-  };
+  handleAmountChange: (val: string) => set({ amount: val }),
+  
+  handleMessageChange: (val: string) => set({ message: val }),
 
-  const handleMessageChange = (val: string) => {
-    setMessage(val);
-  };
+  getFiatEquivalent: (amt: string) => getFiatEquivalent(amt, get().tokenId),
 
-  return {
-    recipients,
-    amount,
-    message,
-    activeToken,
-    toggleToken,
-    setTokenId,
-    addRecipient,
-    removeRecipient,
-    handleAmountChange,
-    handleMessageChange,
-    getFiatEquivalent: (amt: string) => getFiatEquivalent(amt, tokenId),
-  };
+  setUploadMode: (mode: UploadMode) => set({ uploadMode: mode }),
+  
+  setSelectedTemplateId: (id: string | null) => set({ selectedTemplateId: id, selectedUploadedDesignId: null }),
+  
+  setSelectedUploadedDesignId: (id: string | null) => set({ selectedUploadedDesignId: id, selectedTemplateId: null }),
+
+  addUploadedDesign: (design: UploadedDesign) => set((state) => ({
+    uploadedDesigns: [...state.uploadedDesigns, design],
+    selectedUploadedDesignId: design.id,
+    selectedTemplateId: null,
+  })),
+
+  removeUploadedDesign: (id: string) => set((state) => ({
+    uploadedDesigns: state.uploadedDesigns.filter((d) => d.id !== id),
+    selectedUploadedDesignId: state.selectedUploadedDesignId === id ? null : state.selectedUploadedDesignId
+  })),
+}));
+
+// Provide a backward-compatible hook for components that used useSendThrState
+export function useSendThrState() {
+  return useSendThrStore();
 }

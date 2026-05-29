@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { useRouter } from 'next/navigation';
 import { useSendThrState } from '@/hooks/use-send-thr-state';
 import { BalanceHeaderCard } from '@/components/finance/balance-header-card';
 import { TokenAmountField } from '@/components/forms/token-amount-field';
@@ -11,12 +12,20 @@ import { SecurityNote } from '@/components/finance/security-note';
 import { TOKENS } from '@/lib/data/tokens';
 
 export function SendThrModule() {
+  const router = useRouter();
   const state = useSendThrState();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // In a real application, this would trigger the wallet signature / transfer pipeline
-    alert(`Transfer of ${state.amount} ${state.activeToken.symbol} initiated to ${state.recipients.length} recipients.`);
+    if (state.recipients.length === 0) {
+      alert('Please add at least one recipient');
+      return;
+    }
+    if (!state.amount || parseFloat(state.amount) <= 0) {
+      alert('Please enter a valid amount');
+      return;
+    }
+    router.push('/sendthr/envelope');
   };
 
   return (

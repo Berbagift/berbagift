@@ -1,4 +1,8 @@
-export function IdrBalanceCard() {
+interface IdrBalanceCardProps {
+  onTopUpClick?: () => void;
+}
+
+export function IdrBalanceCard({ onTopUpClick }: IdrBalanceCardProps) {
   return (
     <div className="bg-white border border-neutral-5 rounded-md p-6 md:p-8 flex flex-col justify-between h-full shadow-[0_2px_8px_-2px_rgba(0,0,0,0.02)]">
       {/* Top Section */}
@@ -31,7 +35,11 @@ export function IdrBalanceCard() {
         <button className="flex-1 flex items-center justify-center gap-2 px-4 py-2 border border-[#22c55e] text-[#22c55e] rounded-md text-sm font-medium hover:bg-[#f0fdf4] transition-colors shadow-sm h-[42px]">
           Withdraw <i className="fi fi-rr-money-bill-wave"></i>
         </button>
-        <button className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-[#22c55e] hover:bg-[#16a34a] text-white rounded-md text-sm font-medium transition-colors shadow-sm h-[42px]">
+        <button
+          type="button"
+          onClick={onTopUpClick}
+          className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-[#22c55e] hover:bg-[#16a34a] text-white rounded-md text-sm font-medium transition-colors shadow-sm h-[42px]"
+        >
           Top Up Balance <i className="fi fi-rr-plus-small text-lg"></i>
         </button>
       </div>
