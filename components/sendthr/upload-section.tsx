@@ -24,7 +24,7 @@ export function UploadSection() {
         <div className="w-16 h-16 bg-neutral-2 rounded-full flex items-center justify-center mb-6 text-neutral-8">
           <i className="fi fi-rr-cloud-upload text-3xl mt-1"></i>
         </div>
-        <span className="text-base font-medium text-black mb-1">Add your own envelope design</span>
+        <span className="text-base font-medium text-black dark:text-neutral-1 mb-1">Add your own envelope design</span>
         <span className="text-sm text-neutral-6">in PNG or JPG format</span>
         <span className="text-sm text-neutral-6">(minimum size 436 × 624 px)</span>
       </div>
@@ -41,7 +41,7 @@ export function UploadSection() {
         <div className="w-10 h-10 bg-neutral-2 rounded-full flex items-center justify-center mb-3 text-neutral-8">
           <i className="fi fi-rr-cloud-upload text-lg mt-1"></i>
         </div>
-        <span className="text-sm font-medium text-black">Upload Design</span>
+        <span className="text-sm font-medium text-black dark:text-neutral-1">Upload Design</span>
       </div>
 
       {/* Uploaded Designs Grid */}
@@ -51,7 +51,7 @@ export function UploadSection() {
           onClick={() => state.setSelectedUploadedDesignId(design.id)}
           className={cn(
             "relative flex flex-col items-start gap-3 p-3 rounded-md border text-left transition-all cursor-pointer overflow-hidden",
-            state.selectedUploadedDesignId === design.id ? "border-[#16a34a] bg-[#16a34a]/5" : "border-neutral-5 hover:border-neutral-8 bg-white"
+            state.selectedUploadedDesignId === design.id ? "border-[#16a34a] bg-[#16a34a]/5" : "border-neutral-5 hover:border-neutral-8 bg-white dark:bg-card"
           )}
         >
           <div className="relative w-full aspect-[3/2] rounded overflow-hidden bg-neutral-2">
@@ -69,7 +69,7 @@ export function UploadSection() {
           </div>
 
           <div className="flex items-center justify-between w-full px-1">
-            <span className="text-sm font-medium text-black truncate pr-2">{design.title}</span>
+            <span className="text-sm font-medium text-black dark:text-neutral-1 truncate pr-2">{design.title}</span>
             <button
               onClick={(e) => {
                 e.stopPropagation();

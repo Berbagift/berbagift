@@ -17,8 +17,8 @@ export function ActionCard({ title, subtitle, icon, colorClass, href }: ActionCa
         <i className={cn(icon, "text-2xl")} />
       </div>
       <div className="flex flex-col gap-1">
-        <h3 className="text-base font-medium text-black leading-tight">{title}</h3>
-        <p className="text-sm font-medium text-neutral-7 leading-snug">
+        <h3 className="text-base font-medium text-black dark:text-neutral-1 leading-tight">{title}</h3>
+        <p className="text-sm font-medium text-neutral-7 dark:text-neutral-6 leading-snug">
           {subtitle}
         </p>
       </div>

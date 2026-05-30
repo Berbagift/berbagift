@@ -23,7 +23,7 @@ export function PercentageSelectors({ activePercentage, onSelect }: PercentageSe
             "text-base font-medium px-2 h-full rounded transition-colors",
             activePercentage === opt.value
               ? "bg-[#e8f5e9] text-[#22c55e]"
-              : "text-black hover:bg-neutral-3"
+              : "text-black dark:text-neutral-1 hover:bg-neutral-3"
           )}
         >
           {opt.label}

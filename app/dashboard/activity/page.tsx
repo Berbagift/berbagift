@@ -83,21 +83,21 @@ export default function AllActivityPage() {
       {/* Top Action Row */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="relative w-full md:w-80">
-          <i className="fi fi-rr-search absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500 mt-[2px]" />
+          <i className="fi fi-rr-search absolute left-3 top-1/2 -translate-y-1/2 text-neutral-7 dark:text-neutral-6 mt-[2px]" />
           <Input 
             type="text" 
             placeholder="Search activity..." 
-            className="pl-10 h-10 rounded-md border-neutral-200 bg-white"
+            className="pl-10 h-10 rounded-md border-neutral-4 dark:border-border bg-white dark:bg-card"
           />
         </div>
-        <Button variant="outline" className="h-10 rounded-md border-neutral-200 text-black flex items-center gap-2">
+        <Button variant="outline" className="h-10 rounded-md border-neutral-4 dark:border-border text-black dark:text-neutral-1 flex items-center gap-2">
           <i className="fi fi-rr-filter mt-[2px]" />
           Filter Type
         </Button>
       </div>
 
       {/* Table Container */}
-      <div className="border border-neutral-5 rounded-md p-5 bg-white">
+      <div className="border border-neutral-5 rounded-md p-5 bg-white dark:bg-card">
         <ActivityTable data={ALL_ACTIVITY_DATA} />
       </div>
     </div>

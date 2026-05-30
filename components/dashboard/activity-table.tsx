@@ -53,20 +53,20 @@ export function ActivityTable({ data = ACTIVITY_DATA }: ActivityTableProps) {
     <div className="w-full">
       {/* Table Header */}
       <div className="hidden md:grid grid-cols-5 gap-4 px-4 py-3 border border-neutral-5 rounded-tr-md rounded-tl-md">
-        <div className="col-span-1 flex items-center gap-2 text-sm font-medium text-black">
-          Activity Type <i className="fi fi-rr-caret-down text-[10px] text-neutral-7" />
+        <div className="col-span-1 flex items-center gap-2 text-sm font-medium text-black dark:text-neutral-1">
+          Activity Type <i className="fi fi-rr-caret-down text-[10px] text-neutral-7 dark:text-neutral-6" />
         </div>
-        <div className="col-span-1 flex items-center gap-2 text-sm font-medium text-black">
-          Details <i className="fi fi-rr-caret-down text-[10px] text-neutral-7" />
+        <div className="col-span-1 flex items-center gap-2 text-sm font-medium text-black dark:text-neutral-1">
+          Details <i className="fi fi-rr-caret-down text-[10px] text-neutral-7 dark:text-neutral-6" />
         </div>
-        <div className="col-span-1 flex items-center gap-2 text-sm font-medium text-black">
-          Amount <i className="fi fi-rr-caret-down text-[10px] text-neutral-7" />
+        <div className="col-span-1 flex items-center gap-2 text-sm font-medium text-black dark:text-neutral-1">
+          Amount <i className="fi fi-rr-caret-down text-[10px] text-neutral-7 dark:text-neutral-6" />
         </div>
-        <div className="col-span-1 flex items-center gap-2 text-sm font-medium text-black">
-          Status <i className="fi fi-rr-caret-down text-[10px] text-neutral-7" />
+        <div className="col-span-1 flex items-center gap-2 text-sm font-medium text-black dark:text-neutral-1">
+          Status <i className="fi fi-rr-caret-down text-[10px] text-neutral-7 dark:text-neutral-6" />
         </div>
-        <div className="col-span-1 flex items-center justify-end gap-2 text-sm font-medium text-black text-right">
-          Time <i className="fi fi-rr-caret-down text-[10px] text-neutral-7" />
+        <div className="col-span-1 flex items-center justify-end gap-2 text-sm font-medium text-black dark:text-neutral-1 text-right">
+          Time <i className="fi fi-rr-caret-down text-[10px] text-neutral-7 dark:text-neutral-6" />
         </div>
       </div>
 

@@ -31,7 +31,7 @@ export function EnvelopePreview() {
     : "Recipient Name";
 
   return (
-    <div className="border border-neutral-5 rounded-md p-6 bg-white flex flex-col h-full min-h-[600px] lg:sticky lg:top-6">
+    <div className="border border-neutral-5 rounded-md p-6 bg-white dark:bg-card flex flex-col h-full min-h-[600px] lg:sticky lg:top-6">
       <div className="flex items-center gap-2 mb-6 text-[#16a34a]">
         <i className="fi fi-rr-eye text-sm"></i>
         <span className="text-base font-medium">Live Preview</span>
@@ -48,13 +48,13 @@ export function EnvelopePreview() {
         />
 
         {/* Foreground Content */}
-        <div className="relative z-10 flex flex-col items-center max-w-[80%] bg-white/70 backdrop-blur-md p-8 rounded-2xl shadow-sm border border-white/50">
+        <div className="relative z-10 flex flex-col items-center max-w-[80%] bg-white dark:bg-card/70 backdrop-blur-md p-8 rounded-2xl shadow-sm border border-white/50">
           <div className="w-16 h-16 bg-[#16a34a]/10 text-[#16a34a] rounded-full flex items-center justify-center mb-6">
             <i className="fi fi-rr-gift text-2xl mt-1"></i>
           </div>
 
           <span className="text-sm text-neutral-8 font-medium mb-1">To</span>
-          <h3 className="text-2xl font-bold text-black mb-6">
+          <h3 className="text-2xl font-bold text-black dark:text-neutral-1 mb-6">
             {recipientName}
           </h3>
 

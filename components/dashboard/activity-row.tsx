@@ -35,17 +35,17 @@ export function ActivityRow({
             <div className={cn("w-8 h-8 rounded-md flex items-center justify-center flex-shrink-0", iconBgClass, iconColorClass)}>
               <i className={icon} />
             </div>
-            <span className="font-medium text-black">{type}</span>
+            <span className="font-medium text-black dark:text-neutral-1">{type}</span>
           </div>
-          <div className="text-xs text-neutral-7">
+          <div className="text-xs text-neutral-7 dark:text-neutral-6">
             {time}
           </div>
         </div>
 
         {/* Details & Amount */}
         <div className="flex flex-row justify-between items-center">
-          <div className="text-black">{details}</div>
-          <div className="font-medium text-black">{amount}</div>
+          <div className="text-black dark:text-neutral-1">{details}</div>
+          <div className="font-medium text-black dark:text-neutral-1">{amount}</div>
         </div>
 
         {/* Status */}
@@ -60,18 +60,18 @@ export function ActivityRow({
           <div className={cn("w-8 h-8 rounded-md flex items-center justify-center flex-shrink-0", iconBgClass, iconColorClass)}>
             <i className={icon} />
           </div>
-          <span className="font-medium text-black">{type}</span>
+          <span className="font-medium text-black dark:text-neutral-1">{type}</span>
         </div>
-        <div className="col-span-1 text-black">
+        <div className="col-span-1 text-black dark:text-neutral-1">
           {details}
         </div>
-        <div className="col-span-1 font-medium text-black">
+        <div className="col-span-1 font-medium text-black dark:text-neutral-1">
           {amount}
         </div>
         <div className="col-span-1">
           <StatusBadge status={status} />
         </div>
-        <div className="col-span-1 text-right text-neutral-7">
+        <div className="col-span-1 text-right text-neutral-7 dark:text-neutral-6">
           {time}
         </div>
       </div>

@@ -11,7 +11,7 @@ export function SummaryCards() {
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
       {/* Recipient Card */}
-      <div className="border border-neutral-5 rounded-md p-4 bg-white flex flex-col gap-2">
+      <div className="border border-neutral-5 rounded-md p-4 bg-white dark:bg-card flex flex-col gap-2">
         <span className="text-sm font-medium text-neutral-8">Recipient</span>
         <div className="flex flex-wrap items-center gap-2">
           {primaryRecipient ? (
@@ -34,17 +34,17 @@ export function SummaryCards() {
       </div>
 
       {/* Amount Card */}
-      <div className="border border-neutral-5 rounded-md p-4 bg-white flex flex-col gap-2">
+      <div className="border border-neutral-5 rounded-md p-4 bg-white dark:bg-card flex flex-col gap-2">
         <span className="text-sm font-medium text-neutral-8">Amount</span>
         <div className="flex items-center">
-          <span className="text-xl font-semibold text-black">
+          <span className="text-xl font-semibold text-black dark:text-neutral-1">
             {state.amount || '0'} {state.activeToken.symbol}
           </span>
         </div>
       </div>
 
       {/* Message Card */}
-      <div className="border border-neutral-5 rounded-md p-4 bg-white flex flex-col gap-2">
+      <div className="border border-neutral-5 rounded-md p-4 bg-white dark:bg-card flex flex-col gap-2">
         <span className="text-sm font-medium text-neutral-8">Message</span>
         <div className="flex items-start flex-1">
           <p className="text-sm text-neutral-6 line-clamp-2">

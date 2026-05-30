@@ -28,7 +28,7 @@ export function BalanceCard({
         
         <div className="flex flex-col flex-1 gap-1">
           <div className="flex items-center justify-between w-full">
-            <span className="text-base font-medium text-neutral-7">{title}</span>
+            <span className="text-base font-medium text-neutral-7 dark:text-neutral-6">{title}</span>
             {percentage && (
               <div 
                 className={cn(
@@ -41,8 +41,8 @@ export function BalanceCard({
               </div>
             )}
           </div>
-          <h3 className="text-2xl font-medium text-black tracking-tight">{amount}</h3>
-          <p className="text-base font-medium text-neutral-7 mt-0.5">
+          <h3 className="text-2xl font-medium text-black dark:text-neutral-1 tracking-tight">{amount}</h3>
+          <p className="text-base font-medium text-neutral-7 dark:text-neutral-6 mt-0.5">
             {subtitle}
           </p>
         </div>

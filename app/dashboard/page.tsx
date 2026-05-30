@@ -18,7 +18,7 @@ export default function DashboardPage() {
 
       {/* Quick Actions Section */}
       <div className="space-y-4">
-        <h2 className="text-lg font-semibold text-black">Quick Actions</h2>
+        <h2 className="text-lg font-semibold text-black dark:text-neutral-1">Quick Actions</h2>
         <QuickActionsSection />
       </div>
 

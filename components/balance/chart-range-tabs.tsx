@@ -20,7 +20,7 @@ export function ChartRangeTabs() {
               ${
                 isActive
                   ? 'bg-emerald-50 text-emerald-600'
-                  : 'text-black hover:bg-neutral-3'
+                  : 'text-black dark:text-neutral-1 hover:bg-neutral-3'
               }
             `}
           >

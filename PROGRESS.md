@@ -12,19 +12,24 @@
 - [x] **Phase 7**: Swap Token Interface (Reversible state, reusable blocks, strict fintech UI).
 - [x] **Phase 8**: Send THR Page & Shared Component System (Multi-recipient chips, custom amount inputs, shared finance/forms layer).
 - [x] **Phase 9**: Send THR Envelope Selection (Zustand state refactoring, live envelope preview, modular preset/upload selection tabs).
+- [x] **Phase 10**: Explore Rooms Page (Component-based dashboard density layout, local search/filter state, API-ready mock service layer).
+- [x] **Phase 11**: Retractable Sidebar & Dark Theme Architecture (Coordinated layout state, native `localStorage` theme toggle, semantic neutral-1 to neutral-13 mapping).
 
 ## 🏗️ Current Codebase Architecture & Context
 
-The project follows a strict fintech SaaS aesthetic: compact spacing (rounded-md), subtle hierarchy (border-neutral-200), and avoids oversized shadows or flashy gradients. The architecture favors modularity and state isolation.
+The project follows a strict fintech SaaS aesthetic: compact spacing (rounded-md), subtle hierarchy (border-neutral-4), and avoids oversized shadows or flashy gradients. The architecture favors modularity and state isolation.
 
 ### 0. Global UI & Interaction Guidelines
 - **Global Cursor Rules**: A root CSS directive (`app/globals.css`) enforces `cursor-pointer` on all `<button>`, `<a>`, and `[role="button"]` elements. This guarantees a consistent UX for actionable items across the entire app without needing repetitive utility classes.
 - **Shared UI Icons**: Reusable custom SVGs (e.g., `SwapIcon`) are centralized in `components/ui/` for consistent branding across multiple pages and components.
+- **Strict Color Semantics**: The application exclusively uses a defined 13-step neutral palette (`neutral-1` to `neutral-13`) and semantic tokens (`bg-background`, `bg-card`, `border-border`). Tailwind's default hundreds (`neutral-500`, `neutral-900`) are explicitly avoided to guarantee perfect dark mode inversion.
 
-### 1. App Shell & Navigation Layer
-- **`DashboardLayout` (Client Component)**: The root provider for dashboard state. Manages the `isMobileMenuOpen` boolean. Passes state to `Header` (for drawer triggers) and `Sidebar` (for visibility).
-- **`Header` (Dynamic Routing)**: Uses `usePathname` to dynamically render the current page title (e.g., "Swap Token", "All Activity"). This centralizes the routing state and eliminates redundant `<h1 />` tags across all internal page components.
-- **`Sidebar`**: Utilizes `usePathname` for dynamic active states. Enforces strict styling consistency: active links use the brand's primary emerald background (`bg-[#16a34a]`) with white text, while inactive links uniformly use `text-black`. Adapts seamlessly to mobile overlays.
+### 1. App Shell, Navigation & Theme Orchestration
+The layout shell has been deeply refactored to support complex coordinated states without introducing heavy global state managers (like Zustand) where unnecessary.
+- **`DashboardLayout` (State Orchestrator)**: The root client provider for the dashboard interface. Manages two critical boolean states: `isMobileMenuOpen` and `isDesktopSidebarOpen`. Passes these states downwards to dynamically adjust main content margins (`lg:ml-[280px]` vs `lg:ml-[80px]`).
+- **`Sidebar`**: Reacts to `isDesktopOpen` to smoothly transition its width via native CSS. Implements conditional rendering to hide text labels and bottom cards when retracted, leaving only icons. The logo transitions seamlessly between the Sidebar and Header based on this state.
+- **`Header`**: Detects if the sidebar is retracted (`!isDesktopSidebarOpen`). If true, it visually injects a redundant "BagiTHR" brand logo on its left side to simulate a persistent YouTube-like branding UX.
+- **Theme System (`ThemeToggle`)**: A standalone client component that interfaces directly with `localStorage` and toggles the `.dark` class on `document.documentElement`. The `globals.css` maps the `.dark` variant to shift variables like `--background` from `neutral-1` to `neutral-12`, creating a soft, Claude-like premium aesthetic without blinding contrasts.
 
 ### 2. Dashboard Overview (`app/dashboard/page.tsx`)
 - Acts as the primary assembly point for the dashboard widgets.
@@ -69,3 +74,22 @@ The Send THR flow uses a global state management system via Zustand to persist u
   - **API-Ready Custom Upload**: `UploadSection` simulates an API upload flow, dynamically appending items to the Zustand `uploadedDesigns` array and enabling native deletion.
   - **Live Preview (`EnvelopePreview`)**: A sticky sticky-on-desktop panel that reacts instantly to Zustand store changes, displaying the final aesthetic card with the dynamically generated `bgUrl`, recipient names, and configured amount overlay in a premium frosted-glass presentation.
 
+### 8. Explore Rooms Page (`app/dashboard/rooms/page.tsx`)
+The Explore Rooms page is built with a scalable, component-based architecture prioritizing density, scanning efficiency, and API-readiness.
+- **Mock Service Layer**: `room.service.ts` intercepts mock JSON files, mimicking a REST backend interface with artificial network delays (`setTimeout`). This ensures UI components don't require heavy refactoring when connected to a real database.
+- **Modular Component Isolation (`components/rooms/`)**: Extracted all complex UI elements from the main page file:
+  - `RoomCard`: A self-contained component combining `ParticipantStack`, `RoomStats`, and `RoomActions`.
+  - `ParticipantStack`: Manages negative overlapping margins dynamically based on a z-index loop to create a connected circle visualization.
+  - `RoomFilterTabs` & `RoomSearch`: Presentational components that pass their controlled values back to the parent layout for data filtering.
+- **Responsive Fluid Grid**: Utilizes Tailwind grid (`grid-cols-1` to `2xl:grid-cols-5`) to maximize display density on ultra-wide screens without leaving dead space, strictly following the provided reference density.
+
+### 9. Room Detail Page (`app/dashboard/rooms/join/[roomId]/page.tsx`)
+The Room Detail page introduces dynamic routing and detailed component isolation.
+- **Breadcrumb Navigation**: Utilizes a dynamic breadcrumb sequence ("Explore Rooms > Detail Room") rather than pulling from global routing arrays, maintaining localized context mapping.
+- **Mock API Expansion**: Established two new mock JSON schemas: `room-detail.json` for deep statistics and countdown state, and `room-activity.json` for a simulated real-time feed of participants joining/leaving.
+- **Component Architecture**: Deeply isolated UI units in `components/rooms/detail/`:
+  - `RoomStatsCard` and `RoomDataBlock` manage the core metrics (Reward Pool, Winners, Participants).
+  - `ClaimInstructionSection` iteratively maps `ClaimInstructionStep` components avoiding hardcoded JSX duplication.
+  - `LiveActivityCard` and `LiveActivityItem` present a scrollable feed of the latest events.
+- **State & Custom Hooks**: Created `useCountdown` hook to independently manage the `setInterval` logic, providing clean, formatted timestamps and signaling a reactive `isFinished` state which directly influences the `RoomStatusBanner` (`waiting` vs `claim_open` vs `ended`) and disables Action Buttons natively.
+- **Responsive Layout & Visual Polish**: Adopts a highly responsive `75% 25%` grid layout for optimal dashboard breathing room. Fully refined spacing, breadcrumb navigation, and scrollbars to rigorously match the Figma specification.

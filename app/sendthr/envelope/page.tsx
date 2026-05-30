@@ -34,7 +34,7 @@ export default function EnvelopeSelectionPage() {
       <div className="flex items-center justify-end gap-3 mt-4">
         <button
           onClick={() => router.back()}
-          className="px-5 py-2.5 rounded-md border border-neutral-5 text-black font-medium text-sm hover:bg-neutral-2 transition-colors flex items-center gap-2"
+          className="px-5 py-2.5 rounded-md border border-neutral-5 text-black dark:text-neutral-1 font-medium text-sm hover:bg-neutral-2 transition-colors flex items-center gap-2"
         >
           <i className="fi fi-rr-angle-small-left text-lg leading-none"></i>
           Back to Previous

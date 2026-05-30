@@ -57,7 +57,7 @@ export function TokenAmountField({
   };
 
   return (
-    <div className={cn("border border-neutral-5 rounded-md p-6 flex flex-col gap-3 bg-white", className)}>
+    <div className={cn("border border-neutral-5 rounded-md p-6 flex flex-col gap-3 bg-white dark:bg-card", className)}>
       {/* Top Row: Label & Accessory */}
       {(label || topRightAccessory) && (
         <div className="flex items-center justify-between">
@@ -75,7 +75,7 @@ export function TokenAmountField({
             onClick={handlePillClick}
             disabled={!showDropdown || (!onTokenClick && (!availableTokens || availableTokens.length === 0))}
             className={cn(
-              "flex items-center justify-between gap-3 px-3 py-2.5 border border-neutral-5 rounded-md bg-white transition-colors shrink-0 w-[130px]",
+              "flex items-center justify-between gap-3 px-3 py-2.5 border border-neutral-5 rounded-md bg-white dark:bg-card transition-colors shrink-0 w-[130px]",
               showDropdown && (onTokenClick || availableTokens) ? "hover:bg-neutral-2 cursor-pointer" : "cursor-default"
             )}
           >
@@ -83,16 +83,16 @@ export function TokenAmountField({
               <div className={cn("w-6 h-6 rounded-full flex items-center justify-center text-white shrink-0", token.logoBg)}>
                 <i className={cn(token.logoIcon, "text-[11px] mt-0.5")}></i>
               </div>
-              <span className="font-semibold text-black text-sm">{token.symbol}</span>
+              <span className="font-semibold text-black dark:text-neutral-1 text-sm">{token.symbol}</span>
             </div>
             {showDropdown && (onTokenClick || availableTokens) && (
-              <i className="fi fi-rr-angle-small-down text-neutral-7 mt-0.5"></i>
+              <i className="fi fi-rr-angle-small-down text-neutral-7 dark:text-neutral-6 mt-0.5"></i>
             )}
           </button>
 
           {/* Dropdown Menu */}
           {isDropdownOpen && availableTokens && (
-            <div className="absolute top-full left-0 mt-1 w-[180px] bg-white border border-neutral-5 rounded-md shadow-lg z-50 py-1 overflow-hidden">
+            <div className="absolute top-full left-0 mt-1 w-[180px] bg-white dark:bg-card border border-neutral-5 rounded-md shadow-lg z-50 py-1 overflow-hidden">
               {availableTokens.map((t) => (
                 <button
                   key={t.id}
@@ -107,7 +107,7 @@ export function TokenAmountField({
                     <div className={cn("w-6 h-6 rounded-full flex items-center justify-center text-white shrink-0", t.logoBg)}>
                       <i className={cn(t.logoIcon, "text-[11px] mt-0.5")}></i>
                     </div>
-                    <span className="font-medium text-black text-sm">{t.symbol}</span>
+                    <span className="font-medium text-black dark:text-neutral-1 text-sm">{t.symbol}</span>
                   </div>
                   {t.id === token.id && (
                     <i className="fi fi-rr-check text-[#16a34a] text-xs"></i>
@@ -119,7 +119,7 @@ export function TokenAmountField({
         </div>
 
         {/* Amount Input */}
-        <div className="flex-grow border border-neutral-5 rounded-md bg-white overflow-hidden flex items-center px-3 py-1.5 focus-within:border-neutral-8 transition-colors">
+        <div className="flex-grow border border-neutral-5 rounded-md bg-white dark:bg-card overflow-hidden flex items-center px-3 py-1.5 focus-within:border-neutral-8 transition-colors">
           <input
             type="text"
             inputMode="decimal"
@@ -132,7 +132,7 @@ export function TokenAmountField({
             }}
             placeholder="0"
             className={cn(
-              "w-full bg-transparent border-none outline-none font-medium text-black placeholder:text-neutral-6",
+              "w-full bg-transparent border-none outline-none font-medium text-black dark:text-neutral-1 placeholder:text-neutral-6",
               isLg ? "text-2xl md:text-3xl" : "text-[22px]"
             )}
           />

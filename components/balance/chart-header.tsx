@@ -24,7 +24,7 @@ export function ChartHeader({ token, onToggleToken }: ChartHeaderProps) {
           </div>
 
           <div className="flex flex-col">
-            <span className="text-4xl md:text-[44px] font-semibold text-black tracking-tight leading-none mb-3">
+            <span className="text-4xl md:text-[44px] font-semibold text-black dark:text-neutral-1 tracking-tight leading-none mb-3">
               {token.balance.toLocaleString()} {token.symbol}
             </span>
             <div className="flex items-center gap-2">
@@ -43,7 +43,7 @@ export function ChartHeader({ token, onToggleToken }: ChartHeaderProps) {
       <div className="flex flex-col items-start md:items-end justify-between gap-6">
         <button
           onClick={onToggleToken}
-          className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-black border border-neutral-5 rounded-md hover:bg-neutral-2 transition-colors"
+          className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-black dark:text-neutral-1 border border-neutral-5 rounded-md hover:bg-neutral-2 transition-colors"
         >
           <SwapIcon></SwapIcon>
           Change token

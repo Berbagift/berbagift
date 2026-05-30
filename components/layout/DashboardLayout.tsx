@@ -10,6 +10,7 @@ interface DashboardLayoutProps {
 
 export function DashboardLayout({ children }: DashboardLayoutProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isDesktopSidebarOpen, setIsDesktopSidebarOpen] = useState(true);
 
   return (
     <div className="min-h-screen bg-background flex">
@@ -17,6 +18,8 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       <Sidebar 
         isOpen={isMobileMenuOpen} 
         onClose={() => setIsMobileMenuOpen(false)} 
+        isDesktopOpen={isDesktopSidebarOpen}
+        onDesktopToggle={() => setIsDesktopSidebarOpen(!isDesktopSidebarOpen)}
       />
       
       {/* Mobile Overlay */}
@@ -28,13 +31,17 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       )}
       
       {/* Main Content Wrapper */}
-      <div className="flex-1 lg:ml-[280px] flex flex-col min-h-screen w-full max-w-full">
+      <div className={`flex-1 flex flex-col min-h-screen w-full max-w-full transition-all duration-300 ease-in-out ${isDesktopSidebarOpen ? 'lg:ml-[280px]' : 'lg:ml-[80px]'}`}>
         {/* Header */}
-        <Header onMenuClick={() => setIsMobileMenuOpen(true)} />
+        <Header 
+          onMenuClick={() => setIsMobileMenuOpen(true)} 
+          isDesktopSidebarOpen={isDesktopSidebarOpen}
+          onDesktopToggle={() => setIsDesktopSidebarOpen(!isDesktopSidebarOpen)}
+        />
         
         {/* Page Content */}
         <main className="flex-1 p-4 md:p-6 lg:p-8 overflow-x-hidden">
-          <div className="max-w-7xl mx-auto w-full">
+          <div className="w-full max-w-[1600px] mx-auto">
             {children}
           </div>
         </main>

@@ -13,7 +13,7 @@ export function SwapModule() {
   const state = useSwapState();
 
   return (
-    <div className="w-full max-w-[740px] mx-auto bg-white border border-neutral-5 rounded-md p-6 md:p-8 flex flex-col shadow-[0_2px_8px_-2px_rgba(0,0,0,0.02)]">
+    <div className="w-full max-w-[740px] mx-auto bg-white dark:bg-card border border-neutral-5 rounded-md p-6 md:p-8 flex flex-col shadow-[0_2px_8px_-2px_rgba(0,0,0,0.02)]">
 
       {/* Top Balance Section */}
       <BalanceHeaderCard
@@ -43,7 +43,7 @@ export function SwapModule() {
         <div className="flex justify-center py-1.5 relative z-10">
           <button
             onClick={state.handleSwapDirection}
-            className="w-12 h-12 bg-white border border-neutral-5 rounded-full flex items-center justify-center text-[#16a34a] hover:bg-neutral-2 hover:scale-105 transition-all shadow-md"
+            className="w-12 h-12 bg-white dark:bg-card border border-neutral-5 rounded-full flex items-center justify-center text-[#16a34a] hover:bg-neutral-2 hover:scale-105 transition-all shadow-md"
           >
             <SwapIcon className="w-[18px] h-[18px]" />
           </button>

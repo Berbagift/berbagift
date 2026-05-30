@@ -37,11 +37,11 @@ export function TopUpBalanceModal({ isOpen, onClose }: TopUpBalanceModalProps) {
         role="dialog"
         aria-modal="true"
         aria-labelledby="top-up-title"
-        className="max-h-[calc(100vh-64px)] w-full max-w-[760px] overflow-y-auto rounded-md border border-neutral-5 bg-white p-6 shadow-[0_24px_80px_-24px_rgba(0,0,0,0.35)] md:p-10"
+        className="max-h-[calc(100vh-64px)] w-full max-w-[760px] overflow-y-auto rounded-md border border-neutral-5 bg-white dark:bg-card p-6 shadow-[0_24px_80px_-24px_rgba(0,0,0,0.35)] md:p-10"
       >
         <div className="flex flex-col gap-8">
             <div className="flex flex-col gap-3">
-              <h2 id="top-up-title" className="text-3xl font-semibold text-black">
+              <h2 id="top-up-title" className="text-3xl font-semibold text-black dark:text-neutral-1">
                 Top up balance
               </h2>
               <p className="text-xl font-medium text-neutral-8">
@@ -60,7 +60,7 @@ export function TopUpBalanceModal({ isOpen, onClose }: TopUpBalanceModalProps) {
                   const nextAmount = Number(event.target.value.replace(/\D/g, ''));
                   setAmount(nextAmount || 0);
                 }}
-                className="h-16 rounded-md border border-neutral-5 px-5 text-xl font-semibold text-black outline-none transition-colors focus:border-[#16a34a]"
+                className="h-16 rounded-md border border-neutral-5 px-5 text-xl font-semibold text-black dark:text-neutral-1 outline-none transition-colors focus:border-[#16a34a]"
               />
 
               <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
@@ -76,7 +76,7 @@ export function TopUpBalanceModal({ isOpen, onClose }: TopUpBalanceModalProps) {
                         'h-12 rounded-full border px-4 text-xl font-semibold transition-colors',
                         isSelected
                           ? 'border-[#dcfce7] bg-[#e8f6ed] text-[#16a34a]'
-                          : 'border-neutral-5 bg-white text-neutral-8 hover:bg-neutral-2',
+                          : 'border-neutral-5 bg-white dark:bg-card text-neutral-8 hover:bg-neutral-2',
                       ].join(' ')}
                     >
                       {formatIdr(preset)}
@@ -98,7 +98,7 @@ export function TopUpBalanceModal({ isOpen, onClose }: TopUpBalanceModalProps) {
                   className="h-[72px] w-[160px] shrink-0 object-contain"
                 />
                 <div className="flex min-w-0 flex-1 flex-col gap-2">
-                  <h3 className="text-xl font-semibold text-black">QRIS Payment</h3>
+                  <h3 className="text-xl font-semibold text-black dark:text-neutral-1">QRIS Payment</h3>
                   <p className="text-xl font-medium leading-snug text-neutral-8">
                     Pay using any e-wallet or mobile banking app
                   </p>
@@ -114,11 +114,11 @@ export function TopUpBalanceModal({ isOpen, onClose }: TopUpBalanceModalProps) {
                 Top up summary
               </span>
               <div className="rounded-md border border-neutral-5 px-6 py-2">
-                <div className="flex items-center justify-between gap-4 border-b border-neutral-5 py-5 text-xl font-semibold text-black">
+                <div className="flex items-center justify-between gap-4 border-b border-neutral-5 py-5 text-xl font-semibold text-black dark:text-neutral-1">
                   <span>Top up amount</span>
                   <span>{amountText}</span>
                 </div>
-                <div className="flex items-center justify-between gap-4 border-b border-neutral-5 py-5 text-xl font-semibold text-black">
+                <div className="flex items-center justify-between gap-4 border-b border-neutral-5 py-5 text-xl font-semibold text-black dark:text-neutral-1">
                   <span>Platform fee</span>
                   <span>Free</span>
                 </div>

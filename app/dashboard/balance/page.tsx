@@ -20,7 +20,7 @@ export default function BalancePage() {
   return (
     <div className="space-y-6 md:space-y-8 pb-6 md:pb-8">
       {/* Main Chart Container */}
-      <div className="bg-white border border-neutral-200 rounded-md p-8 shadow-[0_2px_8px_-2px_rgba(0,0,0,0.05)] w-full overflow-hidden">
+      <div className="bg-white dark:bg-card border border-neutral-4 dark:border-border rounded-md p-8 shadow-[0_2px_8px_-2px_rgba(0,0,0,0.05)] w-full overflow-hidden">
         <ChartHeader token={token} onToggleToken={toggleToken} />
         <BalanceChart data={token.chartData} />
       </div>
