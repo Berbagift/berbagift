@@ -8,7 +8,7 @@ interface SectionCardProps {
 
 export function SectionCard({ children, className }: SectionCardProps) {
   return (
-    <div className={cn("border border-neutral-5 rounded-md p-6 bg-white dark:bg-card", className)}>
+    <div className={cn("border border-border rounded-md p-6 bg-white dark:bg-card", className)}>
       {children}
     </div>
   );

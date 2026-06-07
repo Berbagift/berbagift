@@ -31,13 +31,13 @@ export function EnvelopePreview() {
     : "Recipient Name";
 
   return (
-    <div className="border border-neutral-5 rounded-md p-6 bg-white dark:bg-card flex flex-col h-full min-h-[600px] lg:sticky lg:top-6">
+    <div className="border border-border rounded-md p-6 bg-white dark:bg-card flex flex-col h-full min-h-[600px] lg:sticky lg:top-6">
       <div className="flex items-center gap-2 mb-6 text-[#16a34a]">
         <i className="fi fi-rr-eye text-sm"></i>
         <span className="text-base font-medium">Live Preview</span>
       </div>
 
-      <div className="relative w-full flex-1 rounded-xl overflow-hidden shadow-sm border border-neutral-5 flex items-center justify-center p-8 text-center bg-neutral-2">
+      <div className="relative w-full flex-1 rounded-xl overflow-hidden shadow-sm border border-border flex items-center justify-center p-8 text-center bg-neutral-2">
         {/* Background Image */}
         <Image
           src={bgUrl}

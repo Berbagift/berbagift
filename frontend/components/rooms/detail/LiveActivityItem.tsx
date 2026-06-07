@@ -12,7 +12,7 @@ interface LiveActivityItemProps {
 
 export function LiveActivityItem({ activity }: LiveActivityItemProps) {
   return (
-    <div className="flex items-center justify-between py-2 border-b border-neutral-3 dark:border-border/50 last:border-0">
+    <div className="flex items-center justify-between py-2 border-b border-border last:border-0">
       <div className="flex items-center gap-3">
         <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-700 font-semibold text-xs flex-shrink-0">
           {activity.avatar}

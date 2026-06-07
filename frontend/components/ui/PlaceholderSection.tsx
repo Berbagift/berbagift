@@ -9,7 +9,7 @@ export function PlaceholderSection({ label, className, ...props }: PlaceholderSe
   return (
     <div 
       className={cn(
-        "w-full rounded-md border border-dashed border-neutral-5 flex items-center justify-center bg-muted/20 text-neutral-7 dark:text-neutral-6",
+        "w-full rounded-md border border-dashed border-border flex items-center justify-center bg-muted/20 text-neutral-7 dark:text-neutral-6",
         className
       )}
       {...props}

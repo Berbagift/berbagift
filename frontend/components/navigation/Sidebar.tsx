@@ -50,7 +50,7 @@ export function Sidebar({ isOpen, onClose, isDesktopOpen = true, onDesktopToggle
   return (
     <aside
       className={cn(
-        "fixed left-0 top-0 bottom-0 border-r border-neutral-5 dark:border-border bg-background flex flex-col z-40 transition-all duration-300 ease-in-out",
+        "fixed left-0 top-0 bottom-0 border-r border-border bg-background flex flex-col z-40 transition-all duration-300 ease-in-out overflow-x-hidden",
         isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0",
         isDesktopOpen ? "w-[280px]" : "w-[280px] lg:w-[80px]"
       )}
@@ -70,9 +70,9 @@ export function Sidebar({ isOpen, onClose, isDesktopOpen = true, onDesktopToggle
         </Link>
         <button
           onClick={onClose}
-          className="lg:hidden w-8 h-8 flex items-center justify-center text-neutral-7 dark:text-neutral-6 hover:text-black dark:text-neutral-1 dark:hover:text-white transition-colors rounded-md hover:bg-neutral-5 dark:hover:bg-neutral-10"
+          className="lg:hidden min-w-[44px] min-h-[44px] flex items-center justify-center text-neutral-7 dark:text-neutral-6 hover:text-black dark:text-neutral-1 dark:hover:text-white transition-colors rounded-md hover:bg-neutral-5 dark:hover:bg-neutral-10"
         >
-          <i className="fi fi-rr-cross text-sm" />
+          <i className="fi fi-rr-cross text-base" />
         </button>
 
         {/* Desktop Logo / Toggle */}
@@ -144,8 +144,8 @@ export function Sidebar({ isOpen, onClose, isDesktopOpen = true, onDesktopToggle
       </div>
 
       {/* Bottom Invite Card Placeholder */}
-      <div className={cn("px-8 pb-8 transition-all duration-300", isDesktopOpen ? "opacity-100" : "lg:opacity-0 lg:pointer-events-none lg:overflow-hidden lg:h-0 lg:p-0")}>
-        <div className="bg-emerald-50 dark:bg-emerald-950/50 rounded-md p-4 border border-neutral-5 dark:border-border flex flex-col gap-3 relative overflow-hidden">
+      <div className={cn("px-8 pb-8 transition-opacity duration-300 flex-shrink-0", isDesktopOpen ? "opacity-100 delay-150" : "lg:opacity-0 lg:pointer-events-none")}>
+        <div className="w-[216px] bg-emerald-50 dark:bg-emerald-950/50 rounded-md p-4 border border-border flex flex-col gap-3 relative overflow-hidden">
           <p className="text-sm font-semibold text-emerald-900 dark:text-emerald-50 leading-tight z-10 w-2/3">
             Bring your friends into everyday celebrations
           </p>

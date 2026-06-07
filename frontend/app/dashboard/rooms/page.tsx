@@ -87,9 +87,9 @@ export default function ExploreRoomsPage() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-white dark:bg-black">
+    <div className="flex flex-col min-h-screen bg-background">
       {/* Header Section */}
-      <div className="flex flex-col gap-6 p-8 border-b border-neutral-3 dark:border-border/50 bg-white dark:bg-black sticky top-0 z-10">
+      <div className="flex flex-col gap-6 p-8 border-b border-border bg-background sticky top-0 z-10">
         <div className="flex flex-col md:flex-row md:items-start justify-between gap-10">
           <div className="flex flex-col max-w-3xl">
             <h1 className="text-3xl font-semibold text-black dark:text-neutral-1 mb-2">
@@ -114,7 +114,7 @@ export default function ExploreRoomsPage() {
       </div>
 
       {/* Main Content Area */}
-      <div className="flex-1 p-8 bg-white dark:bg-black">
+      <div className="flex-1 p-8 bg-background">
         {isLoading ? (
           <div className="flex justify-center items-center h-64">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-secondary-500"></div>

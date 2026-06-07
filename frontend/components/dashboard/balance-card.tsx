@@ -20,7 +20,7 @@ export function BalanceCard({
   percentageType,
 }: BalanceCardProps) {
   return (
-    <div className="flex flex-col p-5 rounded-md border border-neutral-5 bg-card shadow-none">
+    <div className="flex flex-col p-5 rounded-md border border-border bg-card shadow-none">
       <div className="flex items-center gap-4">
         {/* Logo Placeholder */}
         {/* eslint-disable-next-line @next/next/no-img-element */}

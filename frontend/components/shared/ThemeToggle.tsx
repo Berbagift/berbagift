@@ -23,7 +23,7 @@ export function ThemeToggle() {
     const newTheme = theme === 'light' ? 'dark' : 'light';
     setTheme(newTheme);
     localStorage.setItem('theme', newTheme);
-    
+
     if (newTheme === 'dark') {
       document.documentElement.classList.add('dark');
     } else {
@@ -36,12 +36,39 @@ export function ThemeToggle() {
   }
 
   return (
-    <button
-      onClick={toggleTheme}
-      className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-neutral-5 dark:hover:bg-neutral-10 transition-colors text-neutral-8 dark:text-neutral-6"
-      aria-label="Toggle theme"
-    >
-      <i className={cn("fi", theme === 'dark' ? "fi-rr-sun" : "fi-rr-moon", "text-lg mt-0.5")} />
-    </button>
+    <div className="flex items-center p-0.5 rounded-full border border-neutral-8 bg-background">
+      <button
+        onClick={() => {
+          setTheme('light');
+          localStorage.setItem('theme', 'light');
+          document.documentElement.classList.remove('dark');
+        }}
+        className={cn(
+          "w-7 h-6 flex items-center justify-center rounded-full transition-colors",
+          theme === 'light' 
+            ? "bg-neutral-2 text-black" 
+            : "text-neutral-6 hover:text-neutral-1"
+        )}
+        aria-label="Light mode"
+      >
+        <i className="fi fi-rr-sun text-[13px] mt-0.5" />
+      </button>
+      <button
+        onClick={() => {
+          setTheme('dark');
+          localStorage.setItem('theme', 'dark');
+          document.documentElement.classList.add('dark');
+        }}
+        className={cn(
+          "w-7 h-6 flex items-center justify-center rounded-full transition-colors",
+          theme === 'dark' 
+            ? "bg-neutral-10 text-white" 
+            : "text-neutral-6 hover:text-black"
+        )}
+        aria-label="Dark mode"
+      >
+        <i className="fi fi-rr-moon text-[13px] mt-0.5" />
+      </button>
+    </div>
   );
 }

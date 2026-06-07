@@ -18,7 +18,7 @@ export function BalanceHeaderCard({
   className
 }: BalanceHeaderCardProps) {
   return (
-    <div className={cn("border border-neutral-5 rounded-md p-5 bg-white dark:bg-card flex items-center justify-between shadow-[0_2px_8px_-2px_rgba(0,0,0,0.02)]", className)}>
+    <div className={cn("border border-border rounded-md p-5 bg-white dark:bg-card flex items-center justify-between shadow-[0_2px_8px_-2px_rgba(0,0,0,0.02)]", className)}>
       <div className="flex flex-col gap-1">
         <span className="text-neutral-8 font-medium text-sm">My Balance</span>
         <div className="flex items-baseline md:items-center gap-2 md:gap-3 flex-wrap">
@@ -34,7 +34,7 @@ export function BalanceHeaderCard({
       <button
         type="button"
         onClick={onToggleToken}
-        className="flex items-center gap-1.5 border border-neutral-5 rounded-md px-3 py-1.5 hover:bg-neutral-2 active:bg-neutral-3 transition-colors text-[13px] font-medium text-black dark:text-neutral-1 shrink-0 cursor-pointer"
+        className="flex items-center gap-1.5 border border-border rounded-md px-3 py-1.5 hover:bg-neutral-2 active:bg-neutral-3 transition-colors text-[13px] font-medium text-black dark:text-neutral-1 shrink-0 cursor-pointer"
       >
         <SwapIcon className="w-[12px] h-[12px]" />
         Change token

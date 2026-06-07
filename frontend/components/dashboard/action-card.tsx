@@ -25,7 +25,7 @@ export function ActionCard({ title, subtitle, icon, colorClass, href }: ActionCa
     </>
   );
 
-  const className = "flex items-center gap-4 p-4 rounded-md border border-neutral-5 bg-card shadow-none text-left transition-colors hover:border-neutral-5 hover:bg-neutral-2/50 group w-full h-full cursor-pointer";
+  const className = "flex items-center gap-4 p-4 rounded-md border border-border bg-card shadow-none text-left transition-colors hover:border-border hover:bg-neutral-2/50 group w-full h-full cursor-pointer";
 
   if (href) {
     return (

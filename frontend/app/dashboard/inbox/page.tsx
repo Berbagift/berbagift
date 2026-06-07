@@ -14,14 +14,14 @@ export default function InboxPage() {
     <div className="space-y-6 md:space-y-8 pb-6 md:pb-8">
       {/* Top Action Row */}
       <div className="flex justify-end">
-        <Button variant="outline" className="h-10 rounded-md border-neutral-4 dark:border-border text-black dark:text-neutral-1 flex items-center gap-2">
+        <Button variant="outline" className="h-10 rounded-md border-border text-black dark:text-neutral-1 flex items-center gap-2">
           <i className="fi fi-rr-check mt-[2px]" />
           Mark all as read
         </Button>
       </div>
 
       {/* Category Tabs */}
-      <div className="flex items-center w-full overflow-x-auto border border-neutral-4 dark:border-border rounded-md bg-white dark:bg-card sidebar-scrollbar">
+      <div className="flex items-center w-full overflow-x-auto border border-border rounded-md bg-white dark:bg-card sidebar-scrollbar">
         {TABS.map((tab, idx) => (
           <React.Fragment key={idx}>
             <div className="flex-1 min-w-[160px]">
@@ -50,7 +50,7 @@ export default function InboxPage() {
       </div>
 
       {/* Inbox Content Area (Empty State) */}
-      <div className="border border-neutral-4 dark:border-border rounded-md bg-white dark:bg-card py-24 min-h-[400px] flex flex-col items-center justify-center text-center">
+      <div className="border border-border rounded-md bg-white dark:bg-card py-24 min-h-[400px] flex flex-col items-center justify-center text-center">
         <div className="w-16 h-16 rounded-full bg-neutral-2 dark:bg-neutral-10 flex items-center justify-center mb-4">
           <i className="fi fi-rr-envelope-open text-3xl text-neutral-5 mt-[2px]" />
         </div>

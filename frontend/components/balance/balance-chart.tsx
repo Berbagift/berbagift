@@ -16,11 +16,11 @@ interface BalanceChartProps {
 
 export function BalanceChart({ data }: BalanceChartProps) {
   return (
-    <div className="w-full h-[450px] mt-12 mb-4">
+    <div className="w-full h-[300px] sm:h-[350px] md:h-[400px] lg:h-[450px] mt-8 lg:mt-12 mb-4">
       <ResponsiveContainer width="100%" height="100%">
         <AreaChart
           data={data}
-          margin={{ top: 20, right: 0, left: -20, bottom: 30 }}
+          margin={{ top: 20, right: 10, left: -20, bottom: 20 }}
         >
           <defs>
             <linearGradient id="colorBalance" x1="0" y1="0" x2="0" y2="1">
@@ -45,13 +45,13 @@ export function BalanceChart({ data }: BalanceChartProps) {
           />
           <Tooltip
             contentStyle={{
-              backgroundColor: '#fff',
-              border: '1px solid #e5e5e5',
+              backgroundColor: 'var(--color-card)',
+              border: '1px solid var(--color-border)',
               borderRadius: '6px',
               boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
             }}
-            itemStyle={{ color: '#171717', fontWeight: 500 }}
-            labelStyle={{ color: '#737373', marginBottom: '4px' }}
+            itemStyle={{ color: 'var(--color-foreground)', fontWeight: 500 }}
+            labelStyle={{ color: 'var(--color-neutral-8)', marginBottom: '4px' }}
           />
           <Area
             type="natural"

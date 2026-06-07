@@ -37,7 +37,7 @@ function BreadcrumbNav({
   items: BreadcrumbItem[];
   isMobile?: boolean
 }) {
-  const textSize = isMobile ? "text-lg" : "text-2xl";
+  const textSize = isMobile ? "text-lg" : "text-xl";
 
   return (
     <nav aria-label="Breadcrumb" className="min-h-0 min-w-0">
@@ -83,11 +83,19 @@ export function Header({ onMenuClick, isDesktopSidebarOpen = true, onDesktopTogg
 
   const renderTitle = (isMobile: boolean = false) => {
     if (isEnvelopePage) {
+      if (isMobile) {
+        return (
+          <Link href="/sendthr" className="flex items-center gap-2 text-lg font-semibold text-black dark:text-neutral-1 hover:opacity-80 transition-opacity">
+            <i className="fi fi-rr-arrow-left text-base mt-0.5" />
+            <span className="truncate">Envelope Design</span>
+          </Link>
+        );
+      }
       return (
         <BreadcrumbNav
           isMobile={isMobile}
           items={[
-            { label: "Send THR", href: "/dashboard/sendthr" },
+            { label: "Send THR", href: "/sendthr" },
             { label: "Envelope Design" }
           ]}
         />
@@ -95,6 +103,14 @@ export function Header({ onMenuClick, isDesktopSidebarOpen = true, onDesktopTogg
     }
 
     if (isRoomDetailPage) {
+      if (isMobile) {
+        return (
+          <Link href="/dashboard/rooms" className="flex items-center gap-2 text-lg font-semibold text-black dark:text-neutral-1 hover:opacity-80 transition-opacity">
+            <i className="fi fi-rr-arrow-left text-base mt-0.5" />
+            <span className="truncate">Detail Room</span>
+          </Link>
+        );
+      }
       return (
         <BreadcrumbNav
           isMobile={isMobile}
@@ -107,24 +123,24 @@ export function Header({ onMenuClick, isDesktopSidebarOpen = true, onDesktopTogg
     }
 
     return (
-      <h1 className={`${isMobile ? 'text-lg' : 'text-2xl'} font-semibold text-black dark:text-neutral-1`}>
+      <h1 className={`${isMobile ? 'text-lg' : 'text-xl'} font-semibold text-black dark:text-neutral-1`}>
         {pageTitle}
       </h1>
     );
   };
 
   return (
-    <header className="h-20 border-b border-neutral-5 bg-background flex items-center justify-between px-4 lg:px-8 sticky top-0 z-20">
+    <header className="h-20 border-b border-border bg-background flex items-center justify-between px-4 lg:px-8 sticky top-0 z-20">
       <div className="flex items-center gap-3">
-        {/* Logo - Mobile Only */}
+        {/* Logo - Mobile Only (Acts as Sidebar Toggle) */}
         <div className="lg:hidden">
-          <Link href="/dashboard" className="flex items-center gap-2">
+          <button onClick={onMenuClick} className="flex items-center gap-2 focus:outline-none hover:opacity-80 transition-opacity">
             <img src="https://placehold.co/40x40/transparent/000000?text=B" alt="BagiTHR Logo" className="h-6 w-6 object-contain" />
             <div className="text-xl font-medium flex items-center">
               <span className="text-black dark:text-neutral-1">Bagi</span>
               <span className="text-primary-500">THR</span>
             </div>
-          </Link>
+          </button>
         </div>
 
         {/* Desktop Hamburger & Logo (Shown only when Sidebar is collapsed) */}
@@ -167,14 +183,6 @@ export function Header({ onMenuClick, isDesktopSidebarOpen = true, onDesktopTogg
             </p>
           </div>
         </div>
-
-        {/* Mobile Menu Button */}
-        <button
-          onClick={onMenuClick}
-          className="lg:hidden w-10 h-10 flex items-center justify-center text-black dark:text-neutral-1 hover:bg-neutral-5 dark:hover:bg-neutral-10 rounded-md transition-colors"
-        >
-          <i className="fi fi-rr-menu-burger text-lg mt-1" />
-        </button>
       </div>
     </header>
   );

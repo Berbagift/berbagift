@@ -15,7 +15,7 @@ export function EnvelopeTemplateCard({ template, isSelected, onSelect }: Envelop
       onClick={onSelect}
       className={cn(
         "relative flex flex-col items-start gap-3 p-3 rounded-md border text-left transition-all overflow-hidden",
-        isSelected ? "border-[#16a34a] bg-[#16a34a]/5" : "border-neutral-5 hover:border-neutral-8 bg-white dark:bg-card"
+        isSelected ? "border-[#16a34a] bg-[#16a34a]/5" : "border-border hover:border-neutral-8 bg-white dark:bg-card"
       )}
     >
       <div className="relative w-full aspect-[3/2] rounded overflow-hidden bg-neutral-2">

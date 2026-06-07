@@ -11,7 +11,7 @@ interface RoomCardProps {
 
 export function RoomCard({ room, onSave, onJoin }: RoomCardProps) {
   return (
-    <div className="flex flex-col bg-white dark:bg-card border border-neutral-4 dark:border-border rounded-xl p-6 hover:border-secondary-300 transition-all duration-200 hover:shadow-sm group h-full">
+    <div className="flex flex-col bg-white dark:bg-card border border-border rounded-xl p-6 hover:border-secondary-300 transition-all duration-200 hover:shadow-sm group h-full">
       {/* Header */}
       <div className="flex flex-col gap-2 mb-4">
         <h3 className="text-xl font-semibold text-black dark:text-neutral-1 line-clamp-2 leading-tight">
@@ -56,7 +56,7 @@ export function RoomCard({ room, onSave, onJoin }: RoomCardProps) {
         />
 
         {/* Footer Status */}
-        <div className="flex items-center gap-2 pt-4 border-t border-neutral-3 dark:border-border/50">
+        <div className="flex items-center gap-2 pt-4 border-t border-border">
           <i className="fi fi-rr-calendar text-neutral-8 dark:text-neutral-6 text-sm flex items-center mt-[2px]" />
           <span className="text-xs font-medium text-neutral-8 dark:text-neutral-6">
             {room.statusText}

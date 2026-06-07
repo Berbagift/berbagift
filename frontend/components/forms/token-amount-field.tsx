@@ -57,7 +57,7 @@ export function TokenAmountField({
   };
 
   return (
-    <div className={cn("border border-neutral-5 rounded-md p-6 flex flex-col gap-3 bg-white dark:bg-card", className)}>
+    <div className={cn("border border-border rounded-md p-4 sm:p-5 md:p-6 flex flex-col gap-2 md:gap-3 bg-white dark:bg-card", className)}>
       {/* Top Row: Label & Accessory */}
       {(label || topRightAccessory) && (
         <div className="flex items-center justify-between">
@@ -67,7 +67,7 @@ export function TokenAmountField({
       )}
 
       {/* Middle Row: Selectors & Input */}
-      <div className="flex gap-3">
+      <div className="flex gap-2 md:gap-3">
         {/* Token Selector Pill */}
         <div className="relative" ref={dropdownRef}>
           <button
@@ -75,7 +75,7 @@ export function TokenAmountField({
             onClick={handlePillClick}
             disabled={!showDropdown || (!onTokenClick && (!availableTokens || availableTokens.length === 0))}
             className={cn(
-              "flex items-center justify-between gap-3 px-3 py-2.5 border border-neutral-5 rounded-md bg-white dark:bg-card transition-colors shrink-0 w-[130px]",
+              "flex items-center justify-between gap-1.5 md:gap-3 px-2 md:px-3 py-2 md:py-2.5 border border-border rounded-md bg-white dark:bg-card transition-colors shrink-0 w-[110px] md:w-[130px]",
               showDropdown && (onTokenClick || availableTokens) ? "hover:bg-neutral-2 cursor-pointer" : "cursor-default"
             )}
           >
@@ -92,7 +92,7 @@ export function TokenAmountField({
 
           {/* Dropdown Menu */}
           {isDropdownOpen && availableTokens && (
-            <div className="absolute top-full left-0 mt-1 w-[180px] bg-white dark:bg-card border border-neutral-5 rounded-md shadow-lg z-50 py-1 overflow-hidden">
+            <div className="absolute top-full left-0 mt-1 w-[180px] bg-white dark:bg-card border border-border rounded-md shadow-lg z-50 py-1 overflow-hidden">
               {availableTokens.map((t) => (
                 <button
                   key={t.id}
@@ -119,7 +119,7 @@ export function TokenAmountField({
         </div>
 
         {/* Amount Input */}
-        <div className="flex-grow border border-neutral-5 rounded-md bg-white dark:bg-card overflow-hidden flex items-center px-3 py-1.5 focus-within:border-neutral-8 transition-colors">
+        <div className="flex-grow border border-border rounded-md bg-white dark:bg-card overflow-hidden flex items-center px-3 py-1.5 focus-within:border-neutral-8 transition-colors">
           <input
             type="text"
             inputMode="decimal"
@@ -133,7 +133,7 @@ export function TokenAmountField({
             placeholder="0"
             className={cn(
               "w-full bg-transparent border-none outline-none font-medium text-black dark:text-neutral-1 placeholder:text-neutral-6",
-              isLg ? "text-2xl md:text-3xl" : "text-[22px]"
+              isLg ? "text-xl md:text-2xl lg:text-3xl" : "text-lg md:text-[22px]"
             )}
           />
         </div>
@@ -143,7 +143,7 @@ export function TokenAmountField({
       <div className="flex justify-end mt-1 pr-1">
         <span className={cn(
           "text-neutral-8 font-medium",
-          isLg ? "text-[16px] md:text-base" : "text-[15px]"
+          isLg ? "text-sm sm:text-[15px] md:text-base" : "text-sm sm:text-[15px]"
         )}>
           Equal to = {equivalentFiat}
         </span>

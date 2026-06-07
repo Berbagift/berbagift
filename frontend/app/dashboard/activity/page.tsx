@@ -87,17 +87,17 @@ export default function AllActivityPage() {
           <Input 
             type="text" 
             placeholder="Search activity..." 
-            className="pl-10 h-10 rounded-md border-neutral-4 dark:border-border bg-white dark:bg-card"
+            className="pl-10 h-10 rounded-md border-border bg-white dark:bg-card"
           />
         </div>
-        <Button variant="outline" className="h-10 rounded-md border-neutral-4 dark:border-border text-black dark:text-neutral-1 flex items-center gap-2">
+        <Button variant="outline" className="h-10 rounded-md border-border text-black dark:text-neutral-1 flex items-center gap-2">
           <i className="fi fi-rr-filter mt-[2px]" />
           Filter Type
         </Button>
       </div>
 
       {/* Table Container */}
-      <div className="border border-neutral-5 rounded-md p-5 bg-white dark:bg-card">
+      <div className="border border-border rounded-md p-5 bg-white dark:bg-card">
         <ActivityTable data={ALL_ACTIVITY_DATA} />
       </div>
     </div>

@@ -20,7 +20,7 @@ export function PercentageSelectors({ activePercentage, onSelect }: PercentageSe
           key={opt.label}
           onClick={() => onSelect(opt.value)}
           className={cn(
-            "text-base font-medium px-2 h-full rounded transition-colors",
+            "text-xs sm:text-sm md:text-base font-medium px-1.5 sm:px-2 h-full rounded transition-colors",
             activePercentage === opt.value
               ? "bg-[#e8f5e9] text-[#22c55e]"
               : "text-black dark:text-neutral-1 hover:bg-neutral-3"

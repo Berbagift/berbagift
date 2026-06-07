@@ -80,11 +80,11 @@ export default function RoomDetailPage() {
       <div className="p-4 sm:p-6 lg:p-0">
         
         {/* Header Section */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-semibold text-black dark:text-neutral-1 mb-4">
+        <div className="mb-4 md:mb-8">
+          <h1 className="text-xl md:text-2xl lg:text-3xl font-semibold text-black dark:text-neutral-1 mb-2 md:mb-4">
             {roomData.title}
           </h1>
-          <p className="text-xl text-neutral-8 dark:text-neutral-6 max-w-3xl">
+          <p className="text-base md:text-lg lg:text-xl text-neutral-8 dark:text-neutral-6 max-w-3xl">
             {roomData.description}
           </p>
         </div>

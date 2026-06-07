@@ -2,7 +2,7 @@ import Link from 'next/link';
 
 export function TransferCard() {
   return (
-    <div className="bg-white dark:bg-card border border-neutral-5 rounded-md p-6 md:p-8 flex flex-col justify-between h-full shadow-[0_2px_8px_-2px_rgba(0,0,0,0.02)]">
+    <div className="bg-white dark:bg-card border border-border rounded-md p-6 md:p-8 flex flex-col justify-between h-full shadow-[0_2px_8px_-2px_rgba(0,0,0,0.02)]">
       {/* Top Zone */}
       <div className="flex gap-6 md:gap-8 mb-10 items-start">
         {/* Icon Block */}
