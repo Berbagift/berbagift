@@ -14,6 +14,13 @@
   - **Strict Status & Error Codes Enforcement**: Audited and fixed `auth.py` to rigorously follow `RULES.md`. POST endpoints (`/nonce`, `/sign-in`) now correctly return `201 Created` on success instead of `200`. Error messages inside the `errors` dictionary now utilize standardized code strings (e.g., `IS_INVALID`) rather than unstructured text.
   - **Global Validation Override**: Overrode FastAPI's default `422 Unprocessable Entity` for request validation to emit `400 Bad Request` strictly matching Rule 1.2.2 (returning `IS_REQUIRED` for missing fields).
   - **Bugfix (Auth Signature)**: Updated signature verification logic in `auth.py` to properly hash the prefixed payload (`Stellar Signed Message:\n`) with `SHA-256` before verification, matching Freighter's internal Ed25519 payload specification. Added fallback mechanism to support raw data verification.
+  - **User Registration Update**: Refactored the `User` model to make the `email` field `nullable=True` (migrated via Alembic) and updated `auth.py`/`databases/user.py` to leave the email empty (`None`) during initial wallet sign-in, preventing default dummy data insertion.
+- [x] **Phase 7**: Standardized Data Models (`TimestampMixin` & Soft Deletes).
+  - Created a universal `TimestampMixin` in `models/base.py` providing `created_at`, `updated_at`, and `deleted_at` (soft delete marker).
+  - Updated all models (`User`, `Nonce`) to inherit from the mixin, reducing boilerplate.
+  - Adapted database queries (`get_user_by_wallet`, `get_nonce`) to automatically filter out soft-deleted records (`deleted_at.is_(None)`).
+  - Replaced hard database deletions with soft deletions (e.g. `existing.deleted_at = datetime.utcnow()`).
+  - Follows "Clean Code" principles (SRP, reducing repetitive field declarations) and "Security Review" guidelines (preserving soft-deleted data).
 
 ## 🏗️ Architecture & Context
 - **Framework**: FastAPI (Sync logic currently, standard routing).

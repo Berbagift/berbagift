@@ -7,7 +7,10 @@ class NonceDatabase:
         self.db = db
 
     def get_nonce(self, wallet_address: str):
-        return self.db.query(Nonce).filter(Nonce.wallet_address == wallet_address).first()
+        return self.db.query(Nonce).filter(
+            Nonce.wallet_address == wallet_address,
+            Nonce.deleted_at.is_(None)
+        ).first()
 
     def upsert_nonce(self, wallet_address: str, nonce_message: str, expires_in_minutes: int = 5):
         # Check if exists
@@ -33,5 +36,5 @@ class NonceDatabase:
     def delete_nonce(self, wallet_address: str):
         existing = self.get_nonce(wallet_address)
         if existing:
-            self.db.delete(existing)
+            existing.deleted_at = datetime.utcnow()
             self.db.commit()

@@ -93,8 +93,7 @@ class AuthController:
         if not user:
             user = self.user_db.create_user(
                 wallet_address=request.wallet_address,
-                username=request.wallet_address,
-                email=request.wallet_address
+                username=request.wallet_address
             )
             status_code = 201
             message = "User registered and logged in successfully"
