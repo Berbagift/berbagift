@@ -1,0 +1,192 @@
+[
+  {
+    "id": "1",
+    "title": "Sharing is caring 😊",
+    "description": "Big rewards await the fastest community members, lets join the rush!!!!",
+    "creator": {
+      "username": "@nadifofficial",
+      "initials": "NB",
+      "role": "Room Creator"
+    },
+    "rewardPool": "10.000 XLM",
+    "winners": 5,
+    "joined": 45,
+    "maxParticipants": 100,
+    "participants": ["NE", "AF", "MH", "EC", "FH"],
+    "status": "Upcoming",
+    "statusText": "Starts in 28 May 2026",
+    "isHighReward": false,
+    "isSaved": false
+  },
+  {
+    "id": "2",
+    "title": "Midnight Reward Rush 🚀",
+    "description": "Fastest members win exclusive THR rewards before the countdown ends.",
+    "creator": {
+      "username": "@rakaofficial",
+      "initials": "NB",
+      "role": "Room Creator"
+    },
+    "rewardPool": "150 XLM",
+    "winners": 3,
+    "joined": 5,
+    "maxParticipants": 10,
+    "participants": ["NE", "AF", "MH", "EC", "FH"],
+    "status": "Upcoming",
+    "statusText": "Starts in 2 hours",
+    "isHighReward": false,
+    "isSaved": false
+  },
+  {
+    "id": "3",
+    "title": "Weekend Gift Storm 🎉",
+    "description": "A limited-time THR event packed with community rewards and fast claims.",
+    "creator": {
+      "username": "@dailydrop",
+      "initials": "NB",
+      "role": "Room Creator"
+    },
+    "rewardPool": "15.000 XLM",
+    "winners": 10,
+    "joined": 80,
+    "maxParticipants": 100,
+    "participants": ["NE", "AF", "MH", "EC", "FH"],
+    "status": "Upcoming",
+    "statusText": "Starts in 1 hours",
+    "isHighReward": true,
+    "isSaved": false
+  },
+  {
+    "id": "4",
+    "title": "Golden Hour Giveaway ✨",
+    "description": "Join before the timer ends and claim your chance at exclusive rewards.",
+    "creator": {
+      "username": "@stellarcreator",
+      "initials": "NB",
+      "role": "Room Creator"
+    },
+    "rewardPool": "100.000 XLM",
+    "winners": 15,
+    "joined": 89,
+    "maxParticipants": 100,
+    "participants": ["NE", "AF", "MH", "EC", "FH"],
+    "status": "Upcoming",
+    "statusText": "Starts in 01 June 2026",
+    "isHighReward": true,
+    "isSaved": false
+  },
+  {
+    "id": "5",
+    "title": "Flash Claim Arena 🚀",
+    "description": "Only the quickest participants can secure a reward slot tonight.",
+    "creator": {
+      "username": "@faizhub",
+      "initials": "NB",
+      "role": "Room Creator"
+    },
+    "rewardPool": "140 XLM",
+    "winners": 1,
+    "joined": 25,
+    "maxParticipants": 100,
+    "participants": ["NE", "AF", "MH", "EC", "FH"],
+    "status": "Upcoming",
+    "statusText": "Starts in 08 June 2026",
+    "isHighReward": false,
+    "isSaved": false
+  },
+  {
+    "id": "6",
+    "title": "Surprise Drop Session 🎊",
+    "description": "Nobody knows the final reward amount until the claiming session starts.",
+    "creator": {
+      "username": "@cryptowave",
+      "initials": "NB",
+      "role": "Room Creator"
+    },
+    "rewardPool": "1.000 XLM",
+    "winners": 5,
+    "joined": 45,
+    "maxParticipants": 100,
+    "participants": ["NE", "AF", "MH", "EC", "FH"],
+    "status": "Upcoming",
+    "statusText": "Starts in 29 May 2026",
+    "isHighReward": false,
+    "isSaved": false
+  },
+  {
+    "id": "7",
+    "title": "Fast Fingers Challenge ⚔️",
+    "description": "Test your speed against the community and compete for limited reward slots.",
+    "creator": {
+      "username": "@rewardspace",
+      "initials": "NB",
+      "role": "Room Creator"
+    },
+    "rewardPool": "250 XLM",
+    "winners": 3,
+    "joined": 5,
+    "maxParticipants": 10,
+    "participants": ["NE", "AF", "MH", "EC", "FH"],
+    "status": "Upcoming",
+    "statusText": "Starts in 5 hours",
+    "isHighReward": false,
+    "isSaved": false
+  },
+  {
+    "id": "8",
+    "title": "Everyday Celebration R... 🪄",
+    "description": "Share the excitement and claim digital rewards together with the community.",
+    "creator": {
+      "username": "@socialclub",
+      "initials": "NB",
+      "role": "Room Creator"
+    },
+    "rewardPool": "200 XLM",
+    "winners": 2,
+    "joined": 8,
+    "maxParticipants": 10,
+    "participants": ["NE", "AF", "MH", "EC", "FH"],
+    "status": "Upcoming",
+    "statusText": "Starts in 4 hours",
+    "isHighReward": false,
+    "isSaved": false
+  },
+  {
+    "id": "9",
+    "title": "Community Reward... 🔥",
+    "description": "BattleRealtime claiming begins soon. Prepare yourself before the room opens.",
+    "creator": {
+      "username": "@bagithrteam",
+      "initials": "NB",
+      "role": "Room Creator"
+    },
+    "rewardPool": "300 XLM",
+    "winners": 3,
+    "joined": 88,
+    "maxParticipants": 100,
+    "participants": ["NE", "AF", "MH", "EC", "FH"],
+    "status": "Upcoming",
+    "statusText": "Starts in 05 June 2026",
+    "isHighReward": false,
+    "isSaved": false
+  },
+  {
+    "id": "10",
+    "title": "Creator Celebration 💚",
+    "description": "Special rewards prepared for loyal supporters and active community...",
+    "creator": {
+      "username": "@itsjamal",
+      "initials": "NB",
+      "role": "Room Creator"
+    },
+    "rewardPool": "30 XLM",
+    "winners": 2,
+    "joined": 10,
+    "maxParticipants": 15,
+    "participants": ["NE", "AF", "MH", "EC", "FH"],
+    "status": "Upcoming",
+    "statusText": "Starts in 18 June 2026",
+    "isHighReward": false,
+    "isSaved": false
+  }
+]
