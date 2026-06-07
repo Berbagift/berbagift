@@ -14,6 +14,8 @@
 - [x] **Phase 9**: Send THR Envelope Selection (Zustand state refactoring, live envelope preview, modular preset/upload selection tabs).
 - [x] **Phase 10**: Explore Rooms Page (Component-based dashboard density layout, local search/filter state, API-ready mock service layer).
 - [x] **Phase 11**: Retractable Sidebar & Dark Theme Architecture (Coordinated layout state, native `localStorage` theme toggle, semantic neutral-1 to neutral-13 mapping).
+- [x] **Phase 12**: Web3 Wallet Connection (Integrated `@stellar/freighter-api`, created global Zustand store for connection state, implemented `ConnectWalletButton`).
+- [x] **Phase 13**: Environment Configuration (Created `.env` and `.env.example` to define `NEXT_PUBLIC_STELLAR_NETWORK` for testnet vs mainnet switching).
 
 ## 🏗️ Current Codebase Architecture & Context
 
@@ -93,3 +95,12 @@ The Room Detail page introduces dynamic routing and detailed component isolation
   - `LiveActivityCard` and `LiveActivityItem` present a scrollable feed of the latest events.
 - **State & Custom Hooks**: Created `useCountdown` hook to independently manage the `setInterval` logic, providing clean, formatted timestamps and signaling a reactive `isFinished` state which directly influences the `RoomStatusBanner` (`waiting` vs `claim_open` vs `ended`) and disables Action Buttons natively.
 - **Responsive Layout & Visual Polish**: Adopts a highly responsive `75% 25%` grid layout for optimal dashboard breathing room. Fully refined spacing, breadcrumb navigation, and scrollbars to rigorously match the Figma specification.
+
+### 10. Web3 Integration (Freighter Wallet)
+Introduced the first blockchain connection layer to the application using `@stellar/freighter-api`.
+- **Global Wallet State (`hooks/use-wallet-state.ts`)**: Built a simple, persistent Zustand store (`useWalletStore`) to manage the Freighter public key and `isConnected` state, allowing any component to react to the wallet status seamlessly.
+- **`ConnectWalletButton`**: Extracted the Connect Wallet functionality into a dedicated Client Component to cleanly separate interactive Freighter logic (`isConnected`, `requestAccess`) from Server Components like the landing page. Redirects the user directly to the `/dashboard` upon successful key retrieval. Additionally, it dynamically renders a "Dashboard" button instead of "Connect Wallet" if a persistent connection state is already established, bypassing redundant authorization flows.
+
+### 11. Environment Configuration
+- **Network Setting Layer**: Established the `.env` and `.env.example` system containing `NEXT_PUBLIC_STELLAR_NETWORK=testnet`. This provides a single source of truth for the application to toggle between Stellar's `testnet` and `public` networks, ensuring future Horizon API requests and Soroban RPC calls respect the current environment.
+- **Wallet Network Validation**: Integrated the `NEXT_PUBLIC_STELLAR_NETWORK` variable directly into the `ConnectWalletButton` client component using `@stellar/freighter-api`'s `getNetworkDetails()`. If the user's active Freighter network does not match the application's environment configuration, the UI gracefully blocks the connection request and prompts them to switch networks manually. *(Note: Programmatic auto-switching is blocked by Freighter's security model, ensuring users maintain explicit control over their network connections).*

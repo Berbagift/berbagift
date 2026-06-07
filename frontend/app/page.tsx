@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
+import { ConnectWalletButton } from '@/components/ConnectWalletButton';
 
 export default function Home() {
   return (
@@ -13,19 +14,10 @@ export default function Home() {
           <span className="font-semibold text-lg tracking-tight">BagiTHR</span>
         </div>
         <nav className="flex items-center gap-4">
-          <Link href="/dashboard">
-            <Button variant="ghost" className="text-muted-foreground hover:text-foreground hidden sm:inline-flex">
-              Log in
-            </Button>
-          </Link>
-          <Link href="/dashboard">
-            <Button className="rounded-full shadow-none font-medium px-6">
-              Go to Dashboard
-            </Button>
-          </Link>
+          <ConnectWalletButton />
         </nav>
       </header>
-      
+
       {/* Minimalist Hero */}
       <main className="flex-1 flex flex-col items-center justify-center p-6 text-center">
         <div className="max-w-2xl space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700 pt-10">
