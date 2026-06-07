@@ -1,0 +1,22 @@
+# Backend Progress Tracker
+
+## 🚀 Project Milestones
+- [x] **Phase 1**: Initialized FastAPI backend with strict architecture (`controllers/`, `routes/`, `schemas/`).
+- [x] **Phase 2**: Standardized API responses (200, 201, 400, 404, 409, 500) following `RULES.md`.
+- [x] **Phase 3**: Integrated MySQL using SQLAlchemy and PyMySQL.
+- [x] **Phase 4**: Configured database connection using `.env` and `DatabaseConnection` class logic.
+- [x] **Phase 5**: Created `User` model with strict validation limits (`username` max 50 chars, `email` max 100 chars, `wallet_address` max 56 chars).
+- [x] **Phase 6**: Refactored authentication to use the secure **Sign-In With Stellar (SIWS)** pattern (Challenge-Response).
+  - Created `Nonce` model and `/api/auth/nonce` to generate temporary challenges.
+  - Built `/api/auth/sign-in` to verify signatures mathematically against the saved nonces to prevent replay attacks.
+  - Nonces are automatically expired or deleted upon successful use.
+  - API responses strictly comply with **Rule 1.2 (Standard Format Response)**: 400 errors now correctly return field-level JSON objects (e.g. `{"wallet_address": "..."}`) instead of flat strings, mapping exactly to the `RULES.md` spec.
+  - **Strict Status & Error Codes Enforcement**: Audited and fixed `auth.py` to rigorously follow `RULES.md`. POST endpoints (`/nonce`, `/sign-in`) now correctly return `201 Created` on success instead of `200`. Error messages inside the `errors` dictionary now utilize standardized code strings (e.g., `IS_INVALID`) rather than unstructured text.
+  - **Global Validation Override**: Overrode FastAPI's default `422 Unprocessable Entity` for request validation to emit `400 Bad Request` strictly matching Rule 1.2.2 (returning `IS_REQUIRED` for missing fields).
+  - **Bugfix (Auth Signature)**: Updated signature verification logic in `auth.py` to properly hash the prefixed payload (`Stellar Signed Message:\n`) with `SHA-256` before verification, matching Freighter's internal Ed25519 payload specification. Added fallback mechanism to support raw data verification.
+
+## 🏗️ Architecture & Context
+- **Framework**: FastAPI (Sync logic currently, standard routing).
+- **Database ORM**: SQLAlchemy with PyMySQL driver.
+- **Classes**: All controllers and database connectors are wrapped in classes to strictly comply with `RULES.md` section 2.1.
+- **Auto Migrate (Alembic)**: Instead of basic `create_all()`, the backend is fully integrated with Alembic for safe database schema migrations. A programmatic auto-migration is triggered upon server startup via `command.upgrade(alembic_cfg, "head")` inside `main.py`, ensuring the database schema is always up-to-date with the models without manual intervention.

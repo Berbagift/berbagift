@@ -16,6 +16,18 @@
 - [x] **Phase 11**: Retractable Sidebar & Dark Theme Architecture (Coordinated layout state, native `localStorage` theme toggle, semantic neutral-1 to neutral-13 mapping).
 - [x] **Phase 12**: Web3 Wallet Connection (Integrated `@stellar/freighter-api`, created global Zustand store for connection state, implemented `ConnectWalletButton`).
 - [x] **Phase 13**: Environment Configuration (Created `.env` and `.env.example` to define `NEXT_PUBLIC_STELLAR_NETWORK` for testnet vs mainnet switching).
+- [x] **Phase 14**: Frontend Web3 Authentication Integration (SIWS).
+  - Integrated `ConnectWalletButton` with the backend API (`/nonce` and `/sign-in`).
+  - Added full challenge-response cryptographic signing using Freighter `signMessage`.
+  - Expanded `useWalletStore` to securely track `userId` post-authentication.
+  - Resolved cross-origin issues with dynamic `NEXT_PUBLIC_API_URL` parsing.
+  - **API Schema Compliance**: Verified the frontend cleanly consumes the strict backend standard response format. `fetch` seamlessly processes `201 Created` statuses for successful POST login flows, and correctly parses the standardized `{"key": "IS_INVALID"}` format within the `errors` JSON tree.
+  - **Bugfix**: Synchronized backend signature verification with Freighter's undocumented `Stellar Signed Message:\n` prefix constraint.
+  - **Bugfix (Auth Signature)**: Fixed `Invalid signature or message` by correctly hashing the prefixed payload with `SHA-256` before verification in `auth.py`, matching Freighter's internal Ed25519 payload specification. Added robust `Buffer` to `base64` serialization in `ConnectWalletButton.tsx` to handle cross-version Freighter API outputs.
+- [x] **Phase 15**: Profile & Disconnect Flow.
+  - Added interactive Profile Dropdown in the Dashboard Header.
+  - Dynamically displays the user's truncated Freighter public key.
+  - Implemented secure global `disconnect()` clearing Zustand store and returning user to the Landing Page.
 
 ## 🏗️ Current Codebase Architecture & Context
 
