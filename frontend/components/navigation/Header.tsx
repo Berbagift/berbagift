@@ -2,9 +2,10 @@
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import { usePathname, useParams } from "next/navigation";
+import { usePathname, useParams, useRouter } from "next/navigation";
 import { roomService } from "@/services/room.service";
 import { ThemeToggle } from "@/components/shared/ThemeToggle";
+import { useWalletStore } from "@/hooks/use-wallet-state";
 
 interface HeaderProps {
   onMenuClick?: () => void;
@@ -77,9 +78,19 @@ function BreadcrumbNav({
 export function Header({ onMenuClick, isDesktopSidebarOpen = true, onDesktopToggle }: HeaderProps) {
   const pathname = usePathname();
   const params = useParams();
+  const router = useRouter();
+  const { publicKey, disconnect } = useWalletStore();
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
+  
   const pageTitle = getPageTitle(pathname || "");
   const isEnvelopePage = pathname === "/sendthr/envelope";
   const isRoomDetailPage = pathname?.startsWith("/dashboard/rooms/join/") && params?.roomId;
+
+  const handleDisconnect = () => {
+    setIsProfileOpen(false);
+    disconnect();
+    router.push("/");
+  };
 
   const renderTitle = (isMobile: boolean = false) => {
     if (isEnvelopePage) {
@@ -172,16 +183,38 @@ export function Header({ onMenuClick, isDesktopSidebarOpen = true, onDesktopTogg
       <div className="flex items-center gap-3 lg:gap-4">
         <ThemeToggle />
         {/* Profile Section */}
-        <div className="flex items-center gap-2 lg:gap-3 cursor-pointer hover:opacity-80 transition-opacity">
-          <div className="w-8 h-8 lg:w-10 lg:h-10 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-700 font-semibold text-sm">
-            FH
+        <div className="relative">
+          <div 
+            onClick={() => setIsProfileOpen(!isProfileOpen)}
+            className="flex items-center gap-2 lg:gap-3 cursor-pointer hover:opacity-80 transition-opacity"
+          >
+            <div className="w-8 h-8 lg:w-10 lg:h-10 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-700 font-semibold text-sm">
+              {publicKey ? publicKey.substring(0, 2).toUpperCase() : "USR"}
+            </div>
+            <div className="hidden sm:block text-sm text-left">
+              <p className="font-semibold text-black dark:text-neutral-1 leading-none mb-1">My Wallet</p>
+              <p className="text-neutral-7 dark:text-neutral-6 text-xs leading-none">
+                {publicKey ? `${publicKey.substring(0, 5)}...${publicKey.substring(publicKey.length - 4)}` : "Disconnected"}
+              </p>
+            </div>
+            <i className={`fi fi-rr-angle-small-down ml-1 text-xs text-neutral-6 transition-transform ${isProfileOpen ? 'rotate-180' : ''}`} />
           </div>
-          <div className="hidden sm:block text-sm text-left">
-            <p className="font-semibold text-black dark:text-neutral-1 leading-none mb-1">Faiz</p>
-            <p className="text-neutral-7 dark:text-neutral-6 text-xs leading-none">
-              @faizhazan.creator
-            </p>
-          </div>
+
+          {/* Dropdown Menu */}
+          {isProfileOpen && (
+            <>
+              <div className="fixed inset-0 z-10" onClick={() => setIsProfileOpen(false)} />
+              <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-neutral-12 border border-neutral-5 dark:border-neutral-10 rounded-xl shadow-sm py-1.5 z-20 overflow-hidden">
+                <button
+                  onClick={handleDisconnect}
+                  className="w-full text-left px-4 py-2.5 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 flex items-center gap-2.5 transition-colors font-medium"
+                >
+                  <i className="fi fi-rr-sign-out-alt text-base" />
+                  Disconnect Wallet
+                </button>
+              </div>
+            </>
+          )}
         </div>
       </div>
     </header>

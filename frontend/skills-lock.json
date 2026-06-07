@@ -7,6 +7,12 @@
       "skillPath": "skills/clean-code/SKILL.md",
       "computedHash": "74bf6ded4f61ddcb593e7a29beb96c284f888cbe0639ad6e23710447c36ff19a"
     },
+    "dapp": {
+      "source": "stellar/stellar-dev-skill",
+      "sourceType": "github",
+      "skillPath": "skills/dapp/SKILL.md",
+      "computedHash": "88e0aadc2edefcf5ccaaae537251af354a3b13cbc670b791bafad33ab242f1e1"
+    },
     "find-skills": {
       "source": "vercel-labs/skills",
       "sourceType": "github",
@@ -42,6 +48,12 @@
       "sourceType": "github",
       "skillPath": "skills/.curated/security-best-practices/SKILL.md",
       "computedHash": "c27616fb4e27999605b90b261dc729784420c8d77bd1a98748384ffaa5b35704"
+    },
+    "web3-frontend": {
+      "source": "pluginagentmarketplace/custom-plugin-blockchain",
+      "sourceType": "github",
+      "skillPath": "skills/web3-frontend/SKILL.md",
+      "computedHash": "efe9f72a11640c7147f9aef0acea69ef661723891f6f3d8dd7d74a1b3473f124"
     }
   }
 }
