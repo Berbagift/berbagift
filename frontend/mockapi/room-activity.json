@@ -1,0 +1,72 @@
+[
+  {
+    "id": "1",
+    "username": "@bitbot13",
+    "avatar": "BT",
+    "action": "Joined",
+    "timestamp": "Just now"
+  },
+  {
+    "id": "2",
+    "username": "@minari",
+    "avatar": "MN",
+    "action": "Joined",
+    "timestamp": "30s ago"
+  },
+  {
+    "id": "3",
+    "username": "@timothy",
+    "avatar": "TM",
+    "action": "Joined",
+    "timestamp": "50s ago"
+  },
+  {
+    "id": "4",
+    "username": "@adityaasu",
+    "avatar": "AD",
+    "action": "Leave",
+    "timestamp": "1 min ago"
+  },
+  {
+    "id": "5",
+    "username": "@aynion",
+    "avatar": "AY",
+    "action": "Joined",
+    "timestamp": "15 min ago"
+  },
+  {
+    "id": "6",
+    "username": "@satoshi",
+    "avatar": "ST",
+    "action": "Joined",
+    "timestamp": "30 min ago"
+  },
+  {
+    "id": "7",
+    "username": "@sanasini",
+    "avatar": "SA",
+    "action": "Joined",
+    "timestamp": "45 min ago"
+  },
+  {
+    "id": "8",
+    "username": "@febrinina",
+    "avatar": "FB",
+    "action": "Joined",
+    "timestamp": "1 hour ago"
+  },
+  {
+    "id": "9",
+    "username": "@paratiwi",
+    "avatar": "PR",
+    "action": "Joined",
+    "timestamp": "1 day ago"
+  },
+  {
+    "id": "10",
+    "username": "@ratusari",
+    "avatar": "RA",
+    "action": "Joined",
+    "timestamp": "1 day ago"
+  }
+]
