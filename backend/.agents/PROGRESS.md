@@ -44,6 +44,22 @@
   - Enforced schema constraints (username max 50, email max 100) via backend validation to return `400` on failure.
   - Developed duplicate collision detection (`check_email_exists`) triggering `409 Conflict` compliance.
   - Successfully mapped success path to return HTTP `201 Created` returning the updated user object per standard guidelines.
+- [x] **Phase 12**: Token Prices API (`/api/tokens/prices`).
+  - Implemented `GET /api/tokens/prices` endpoint to fetch real-time XLM and USDC prices.
+  - Protected the endpoint using JWT Bearer Authorization, adhering to backend security guidelines.
+  - Migrated from `urllib.request` to `requests` to handle HTTP timeouts gracefully.
+- [x] **Phase 13**: High-Availability Token Pricing (Waterfall Fallback).
+  - Refactored `GET /api/tokens/prices` to implement a highly available Waterfall Fallback mechanism to ensure the API never fails.
+  - **Priority 1 (TransFi)**: Kept TransFi Sandbox as the primary provider, utilizing a high-amount request trick (100,000 IDR) to successfully bypass their Minimum Order constraint.
+  - **Priority 2 (Pyth Oracle)**: Integrated Pyth Network (Web3 Oracle) for native on-chain USD prices, paired dynamically with the `open.er-api.com` USD/IDR exchange rate for live conversions.
+  - **Priority 3 (CoinGecko)**: Integrated CoinGecko as a global aggregator fallback.
+  - **Priority 4 (Indodax)**: Reintroduced Indodax as the final local CEX fallback if global networks fail.
+  - Prices are strictly rounded to integers without decimals.
+  - Added a `provider` field to the JSON response so the frontend knows exactly which source supplied the prices.
+- [x] **Phase 14**: On-Chain Wallet Balances (`/api/auth/me`).
+  - Enhanced the `GET /api/auth/me` endpoint to dynamically fetch the user's real-time wallet balances from the **Stellar Blockchain (Horizon Testnet)**.
+  - Returns `balances: {"XLM": 0.0, "USDC": 0.0}` by parsing the on-chain data using `stellar_sdk`.
+  - Gracefully handles unfunded wallets (`NotFoundError`) and suppresses network errors silently to prevent API crashes.
 
 ## 🏗️ Architecture & Context
 - **Framework**: FastAPI (Sync logic currently, standard routing).

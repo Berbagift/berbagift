@@ -14,6 +14,35 @@ class AuthController:
         self.user_db = UserDatabase(db)
         self.nonce_db = NonceDatabase(db)
 
+    def _fetch_stellar_balances(self, wallet_address: str):
+        try:
+            from stellar_sdk import Server
+            from stellar_sdk.exceptions import NotFoundError
+            
+            server = Server("https://horizon-testnet.stellar.org")
+            
+            try:
+                account = server.accounts().account_id(wallet_address).call()
+            except NotFoundError:
+                # Wallet exists but is unfunded on Stellar Testnet
+                return {"XLM": 0.0, "USDC": 0.0}
+                
+            balances = account.get("balances", [])
+            xlm_balance = 0.0
+            usdc_balance = 0.0
+            
+            for b in balances:
+                if b.get("asset_type") == "native":
+                    xlm_balance = float(b.get("balance", 0.0))
+                elif b.get("asset_code") == "USDC":
+                    usdc_balance = float(b.get("balance", 0.0))
+                    
+            return {"XLM": xlm_balance, "USDC": usdc_balance}
+        except Exception as e:
+            pass # Suppress network errors silently
+            return {"XLM": 0.0, "USDC": 0.0}
+
+
     def generate_nonce(self, request: NonceRequest):
         # Generate a random 16-byte hex string
         random_nonce = secrets.token_hex(16)
@@ -160,6 +189,9 @@ class AuthController:
                 "errors": None
             }, 404
             
+        # Fetch on-chain balances dynamically
+        balances = self._fetch_stellar_balances(user.wallet_address)
+            
         return {
             "message": "Successfully retrieved user data",
             "data": {
@@ -167,7 +199,8 @@ class AuthController:
                 "username": user.username,
                 "email": user.email,
                 "wallet_address": user.wallet_address,
-                "role": user.role
+                "role": user.role,
+                "balances": balances
             },
             "errors": None
         }, 200
