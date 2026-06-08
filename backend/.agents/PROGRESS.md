@@ -60,6 +60,7 @@
   - Enhanced the `GET /api/auth/me` endpoint to dynamically fetch the user's real-time wallet balances from the **Stellar Blockchain (Horizon Testnet)**.
   - Returns `balances: {"XLM": 0.0, "USDC": 0.0}` by parsing the on-chain data using `stellar_sdk`.
   - Gracefully handles unfunded wallets (`NotFoundError`) and suppresses network errors silently to prevent API crashes.
+  - **Bugfix (USDC Balance)**: Updated the balance fetching logic to explicitly check `asset_issuer` against the specific USDC contract address (`USDC_ISSUER_ADDRESS` from `.env`) to prevent reading balances from fake/other USDC tokens on the Testnet.
 
 ## 🏗️ Architecture & Context
 - **Framework**: FastAPI (Sync logic currently, standard routing).

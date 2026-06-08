@@ -6,8 +6,12 @@ from sqlalchemy.orm import Session
 from schemas.auth import NonceRequest, SignInRequest, UpdateProfileRequest
 from databases.user import UserDatabase
 from databases.nonce import NonceDatabase
+import os
 from utils.jwt import create_access_token, verify_access_token
 import jwt
+from dotenv import load_dotenv
+
+load_dotenv()
 
 class AuthController:
     def __init__(self, db: Session):
@@ -34,9 +38,8 @@ class AuthController:
             for b in balances:
                 if b.get("asset_type") == "native":
                     xlm_balance = float(b.get("balance", 0.0))
-                elif b.get("asset_code") == "USDC":
+                elif b.get("asset_code") == "USDC" and b.get("asset_issuer") == os.getenv("USDC_ISSUER_ADDRESS", "GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5"):
                     usdc_balance = float(b.get("balance", 0.0))
-                    
             return {"XLM": xlm_balance, "USDC": usdc_balance}
         except Exception as e:
             pass # Suppress network errors silently
