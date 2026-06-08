@@ -11,6 +11,12 @@ class UserDatabase:
             User.deleted_at.is_(None)
         ).first()
 
+    def get_user_by_id(self, user_id: int):
+        return self.db.query(User).filter(
+            User.id == user_id,
+            User.deleted_at.is_(None)
+        ).first()
+
     def create_user(self, wallet_address: str, username: str, email: str | None = None):
         # Username maximum is 50 chars as per User model and rules
         new_user = User(

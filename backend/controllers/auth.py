@@ -6,6 +6,8 @@ from sqlalchemy.orm import Session
 from schemas.auth import NonceRequest, SignInRequest
 from databases.user import UserDatabase
 from databases.nonce import NonceDatabase
+from utils.jwt import create_access_token, verify_access_token
+import jwt
 
 class AuthController:
     def __init__(self, db: Session):
@@ -101,12 +103,69 @@ class AuthController:
             status_code = 201
             message = "Login successful"
             
+        # Generate JWT access token
+        access_token = create_access_token(
+            data={"sub": str(user.id), "wallet_address": user.wallet_address}
+        )
+            
         return {
             "message": message,
             "data": {
                 "user_id": user.id,
                 "username": user.username,
-                "wallet_address": user.wallet_address
+                "wallet_address": user.wallet_address,
+                "access_token": access_token
             },
             "errors": None
         }, status_code
+
+    def get_me(self, authorization: str | None):
+        if not authorization or not authorization.startswith("Bearer "):
+            return {
+                "message": "Authentication failed: Missing or invalid Authorization header",
+                "data": None,
+                "errors": None
+            }, 401
+            
+        token = authorization.split(" ")[1]
+        try:
+            payload = verify_access_token(token)
+        except jwt.ExpiredSignatureError:
+            return {
+                "message": "Token has expired",
+                "data": None,
+                "errors": None
+            }, 401
+        except jwt.InvalidTokenError:
+            return {
+                "message": "Invalid token",
+                "data": None,
+                "errors": None
+            }, 401
+            
+        user_id = payload.get("sub")
+        if not user_id:
+            return {
+                "message": "Invalid token payload",
+                "data": None,
+                "errors": None
+            }, 401
+            
+        user = self.user_db.get_user_by_id(int(user_id))
+        if not user:
+            return {
+                "message": "User not found",
+                "data": None,
+                "errors": None
+            }, 404
+            
+        return {
+            "message": "Successfully retrieved user data",
+            "data": {
+                "id": user.id,
+                "username": user.username,
+                "email": user.email,
+                "wallet_address": user.wallet_address
+            },
+            "errors": None
+        }, 200

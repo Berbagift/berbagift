@@ -6,6 +6,8 @@ import { usePathname, useParams, useRouter } from "next/navigation";
 import { roomService } from "@/services/room.service";
 import { ThemeToggle } from "@/components/shared/ThemeToggle";
 import { useWalletStore } from "@/hooks/use-wallet-state";
+import { removeAuthToken } from "@/lib/auth";
+import { useUserProfile } from "@/hooks/use-user-profile";
 
 interface HeaderProps {
   onMenuClick?: () => void;
@@ -81,6 +83,7 @@ export function Header({ onMenuClick, isDesktopSidebarOpen = true, onDesktopTogg
   const router = useRouter();
   const { publicKey, disconnect } = useWalletStore();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const { data: userProfile } = useUserProfile();
   
   const pageTitle = getPageTitle(pathname || "");
   const isEnvelopePage = pathname === "/sendthr/envelope";
@@ -88,6 +91,7 @@ export function Header({ onMenuClick, isDesktopSidebarOpen = true, onDesktopTogg
 
   const handleDisconnect = () => {
     setIsProfileOpen(false);
+    removeAuthToken();
     disconnect();
     router.push("/");
   };
@@ -189,10 +193,12 @@ export function Header({ onMenuClick, isDesktopSidebarOpen = true, onDesktopTogg
             className="flex items-center gap-2 lg:gap-3 cursor-pointer hover:opacity-80 transition-opacity"
           >
             <div className="w-8 h-8 lg:w-10 lg:h-10 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-700 font-semibold text-sm">
-              {publicKey ? publicKey.substring(0, 2).toUpperCase() : "USR"}
+              {userProfile?.username ? userProfile.username.substring(0, 2).toUpperCase() : (publicKey ? publicKey.substring(0, 2).toUpperCase() : "USR")}
             </div>
             <div className="hidden sm:block text-sm text-left">
-              <p className="font-semibold text-black dark:text-neutral-1 leading-none mb-1">My Wallet</p>
+              <p className="font-semibold text-black dark:text-neutral-1 leading-none mb-1">
+                {userProfile?.username ? userProfile.username : "My Wallet"}
+              </p>
               <p className="text-neutral-7 dark:text-neutral-6 text-xs leading-none">
                 {publicKey ? `${publicKey.substring(0, 5)}...${publicKey.substring(publicKey.length - 4)}` : "Disconnected"}
               </p>

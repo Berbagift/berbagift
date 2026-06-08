@@ -13,13 +13,14 @@ class NonceDatabase:
         ).first()
 
     def upsert_nonce(self, wallet_address: str, nonce_message: str, expires_in_minutes: int = 5):
-        # Check if exists
-        existing = self.get_nonce(wallet_address)
+        # Check if exists (including soft-deleted ones to avoid unique constraint error)
+        existing = self.db.query(Nonce).filter(Nonce.wallet_address == wallet_address).first()
         expires_at = datetime.utcnow() + timedelta(minutes=expires_in_minutes)
         
         if existing:
             existing.nonce_message = nonce_message
             existing.expires_at = expires_at
+            existing.deleted_at = None  # Restore if it was soft-deleted
             nonce_obj = existing
         else:
             nonce_obj = Nonce(
