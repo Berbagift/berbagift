@@ -7,7 +7,7 @@ import { TransferCard } from '@/components/balance/transfer-card';
 import { IdrBalanceCard } from '@/components/balance/idr-balance-card';
 import { TopUpBalanceModal } from '@/components/balance/top-up-balance-modal';
 import { TOKENS } from '@/lib/data/tokens';
-import { AdvancedRealTimeChart } from "react-ts-tradingview-widgets";
+import ChartComponent from '@/components/balance/chart-token';
 
 export default function BalancePage() {
   const [activeTokenId, setActiveTokenId] = useState('XLM');
@@ -39,20 +39,10 @@ export default function BalancePage() {
           onChangeRange={setActiveRange}
         />
         <div className="w-full h-[400px] md:h-[500px]">
-          <AdvancedRealTimeChart
-            symbol={`${activeTokenId}USD`}
-            theme="dark"
-            autosize
-            range={rangeMapping[activeRange] || "1M"}
-            hide_side_toolbar={true}
-            hide_top_toolbar={true}
-            hide_legend={true}
-            withdateranges={false}
-            allow_symbol_change={false}
-            save_image={false}
-            details={false}
-            calendar={false}
-            disabled_features={["create_volume_indicator_by_default"]}
+          <ChartComponent
+            activeTokenId={activeTokenId}
+            activeRange={activeRange}
+            rangeMapping={rangeMapping}
           />
         </div>
       </div>
