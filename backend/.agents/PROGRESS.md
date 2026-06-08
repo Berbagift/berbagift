@@ -21,6 +21,21 @@
   - Adapted database queries (`get_user_by_wallet`, `get_nonce`) to automatically filter out soft-deleted records (`deleted_at.is_(None)`).
   - Replaced hard database deletions with soft deletions (e.g. `existing.deleted_at = datetime.utcnow()`).
   - Follows "Clean Code" principles (SRP, reducing repetitive field declarations) and "Security Review" guidelines (preserving soft-deleted data).
+- [x] **Phase 8**: JWT Access Token implementation using Asymmetric Cryptography (RS256).
+  - Generated secure RSA keypairs (`private.pem`, `public.pem`) in `keys/` directory.
+  - Implemented automatic key generation fallback inside `utils/jwt.py` using the `cryptography` library. If keys are missing (e.g. fresh clone), they will be securely generated on server startup.
+  - Implemented `utils/jwt.py` utility for encoding/decoding JWTs via PyJWT using RS256 algorithm.
+  - Integrated `create_access_token` into `/api/auth/sign-in` endpoint, returning an `access_token` inside the standardized response envelope `data` field upon successful login.
+  - Adhered strictly to `RULES.md` and "Security Review" skill by avoiding symmetric/hardcoded secrets and prioritizing cryptographic keys.
+- [x] **Phase 9**: CORS & Soft Delete Bugfixes.
+  - Relaxed CORS in `main.py` to `allow_origins=["*"]` and `allow_credentials=False` to handle frontend requests dynamically without hardcoded localhost origins.
+  - **Bugfix (Nonce DB)**: Fixed unique constraint errors when a wallet address attempts to re-authenticate after its previous nonce was soft-deleted. The `upsert_nonce` method now correctly restores a soft-deleted nonce by setting `deleted_at = None`.
+- [x] **Phase 10**: User Profile API (`/api/auth/me`).
+  - Implemented the `GET /api/auth/me` endpoint to fetch the current authenticated user's details.
+  - Added `get_user_by_id` method to `UserDatabase` with built-in soft-delete filtering.
+  - Implemented manual Bearer token extraction and JWT validation in `AuthController.get_me()`.
+  - Added specific JWT exception handling for `ExpiredSignatureError` and `InvalidTokenError`.
+  - Configured invalid authentication responses to strictly return `401 Unauthorized` with an empty `errors` field (`null`), separating it from the `400 Bad Request` validation structure.
 
 ## 🏗️ Architecture & Context
 - **Framework**: FastAPI (Sync logic currently, standard routing).
