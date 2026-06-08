@@ -6,9 +6,11 @@ import { SwapIcon } from '../ui/swap-icon';
 interface ChartHeaderProps {
   token: TokenConfig;
   onToggleToken: () => void;
+  activeRange: string;
+  onChangeRange: (range: string) => void;
 }
 
-export function ChartHeader({ token, onToggleToken }: ChartHeaderProps) {
+export function ChartHeader({ token, onToggleToken, activeRange, onChangeRange }: ChartHeaderProps) {
   return (
     <div className="flex flex-col md:flex-row justify-between gap-6 w-full">
       {/* Left side: Balance Information */}
@@ -49,7 +51,7 @@ export function ChartHeader({ token, onToggleToken }: ChartHeaderProps) {
           Change token
         </button>
 
-        <ChartRangeTabs />
+        <ChartRangeTabs activeRange={activeRange} onChangeRange={onChangeRange} />
       </div>
     </div>
   );
