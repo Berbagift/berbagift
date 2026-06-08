@@ -40,7 +40,7 @@ class TokenController:
                 "errors": None
             }, 401
 
-        # 2. Fetch Prices using Waterfall Fallback Strategy
+    def get_prices_waterfall(self):
         providers = [
             ("TransFi", self._fetch_transfi),
             ("Pyth Oracle", self._fetch_pyth),
@@ -53,26 +53,65 @@ class TokenController:
                 data = fetch_func()
                 # Ensure we got valid data before returning
                 if data and data.get("XLM", 0) > 0:
-                    return {
-                        "message": f"Successfully retrieved token prices from {name}",
-                        "data": data,
-                        "provider": name,
-                        "errors": None
-                    }, 200
+                    return data, name
             except Exception as e:
                 # Log error silently and continue to the next provider
                 print(f"[!] Fallback Warning: Failed to fetch from {name}. Error: {e}")
                 continue
                 
-        # If all providers fail
-        return {
-            "message": "All pricing providers failed to return valid data.",
-            "data": None,
-            "provider": None,
-            "errors": {
-                "api_error": "Pricing Service Unavailable"
-            }
-        }, 500
+        raise Exception("All pricing providers failed to return valid data.")
+
+    def get_prices(self, authorization: str | None):
+        # 1. Authenticate user via JWT (Authorization)
+        if not authorization or not authorization.startswith("Bearer "):
+            return {
+                "message": "Authentication failed: Missing or invalid Authorization header",
+                "data": None,
+                "errors": None
+            }, 401
+            
+        token = authorization.split(" ")[1]
+        try:
+            payload = verify_access_token(token)
+        except jwt.ExpiredSignatureError:
+            return {
+                "message": "Token has expired",
+                "data": None,
+                "errors": None
+            }, 401
+        except jwt.InvalidTokenError:
+            return {
+                "message": "Invalid token",
+                "data": None,
+                "errors": None
+            }, 401
+            
+        user_id_str = payload.get("sub")
+        if not user_id_str:
+            return {
+                "message": "Invalid token payload",
+                "data": None,
+                "errors": None
+            }, 401
+
+        # 2. Fetch Prices using Waterfall Fallback Strategy
+        try:
+            data, name = self.get_prices_waterfall()
+            return {
+                "message": f"Successfully retrieved token prices from {name}",
+                "data": data,
+                "provider": name,
+                "errors": None
+            }, 200
+        except Exception as e:
+            return {
+                "message": str(e),
+                "data": None,
+                "provider": None,
+                "errors": {
+                    "api_error": "Pricing Service Unavailable"
+                }
+            }, 500
 
     def _fetch_transfi(self):
         import os

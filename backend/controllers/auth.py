@@ -194,6 +194,22 @@ class AuthController:
             
         # Fetch on-chain balances dynamically
         balances = self._fetch_stellar_balances(user.wallet_address)
+        
+        # Fetch token prices in IDR (Rupiah) with waterfall fallback
+        balances_idr = {"XLM": 0, "USDC": 0}
+        try:
+            from controllers.token import TokenController
+            token_controller = TokenController()
+            prices, _ = token_controller.get_prices_waterfall()
+            
+            xlm_price = prices.get("XLM", 0)
+            usdc_price = prices.get("USDC", 0)
+            
+            balances_idr["XLM"] = int(round(balances.get("XLM", 0.0) * xlm_price))
+            balances_idr["USDC"] = int(round(balances.get("USDC", 0.0) * usdc_price))
+        except Exception as e:
+            # Fallback warning if pricing fails
+            print(f"[!] Warning: Failed to calculate balance in IDR. Error: {e}")
             
         return {
             "message": "Successfully retrieved user data",
@@ -203,7 +219,8 @@ class AuthController:
                 "email": user.email,
                 "wallet_address": user.wallet_address,
                 "role": user.role,
-                "balances": balances
+                "balances": balances,
+                "balances_idr": balances_idr
             },
             "errors": None
         }, 200

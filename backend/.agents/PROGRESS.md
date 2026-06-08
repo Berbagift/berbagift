@@ -61,6 +61,11 @@
   - Returns `balances: {"XLM": 0.0, "USDC": 0.0}` by parsing the on-chain data using `stellar_sdk`.
   - Gracefully handles unfunded wallets (`NotFoundError`) and suppresses network errors silently to prevent API crashes.
   - **Bugfix (USDC Balance)**: Updated the balance fetching logic to explicitly check `asset_issuer` against the specific USDC contract address (`USDC_ISSUER_ADDRESS` from `.env`) to prevent reading balances from fake/other USDC tokens on the Testnet.
+- [x] **Phase 15**: Live IDR Balance Valuation (`/api/auth/me`).
+  - Extracted the waterfall token pricing logic from `TokenController` into a reusable helper method `get_prices_waterfall()`.
+  - Upgraded the `GET /api/auth/me` endpoint to calculate and include the user's balances in Indonesian Rupiah (IDR) inside the `"balances_idr"` response key.
+  - Dynamically calculates values by multiplying on-chain XLM/USDC balances with live rates retrieved from the high-availability pricing pipeline.
+  - Gracefully falls back to 0 on valuation failures to keep the endpoint operational even if all pricing networks are down.
 
 ## 🏗️ Architecture & Context
 - **Framework**: FastAPI (Sync logic currently, standard routing).

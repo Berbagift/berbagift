@@ -54,7 +54,10 @@ export function ConnectWalletButton() {
 
           // 2. Prompt Freighter to sign the message
           try {
-            const signature = await signMessage(nonceString, { network: targetNetwork });
+            const networkPassphrase = targetNetwork === 'PUBLIC'
+              ? 'Public Global Stellar Network ; September 2015'
+              : 'Testnet Stellar Network ; September 2015';
+            const signature = await signMessage(nonceString, { networkPassphrase, address });
             if (!signature) {
               alert("Signature rejected by user.");
               return;
