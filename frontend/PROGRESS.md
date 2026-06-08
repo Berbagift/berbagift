@@ -20,14 +20,30 @@
   - Integrated `ConnectWalletButton` with the backend API (`/nonce` and `/sign-in`).
   - Added full challenge-response cryptographic signing using Freighter `signMessage`.
   - Expanded `useWalletStore` to securely track `userId` post-authentication.
-  - Resolved cross-origin issues with dynamic `NEXT_PUBLIC_API_URL` parsing.
+  - Resolved cross-origin issues with dynamic `NEXT_PUBLIC_API_URL` parsing and implementation of Next.js Rewrites API Proxy.
   - **API Schema Compliance**: Verified the frontend cleanly consumes the strict backend standard response format. `fetch` seamlessly processes `201 Created` statuses for successful POST login flows, and correctly parses the standardized `{"key": "IS_INVALID"}` format within the `errors` JSON tree.
   - **Bugfix**: Synchronized backend signature verification with Freighter's undocumented `Stellar Signed Message:\n` prefix constraint.
   - **Bugfix (Auth Signature)**: Fixed `Invalid signature or message` by correctly hashing the prefixed payload with `SHA-256` before verification in `auth.py`, matching Freighter's internal Ed25519 payload specification. Added robust `Buffer` to `base64` serialization in `ConnectWalletButton.tsx` to handle cross-version Freighter API outputs.
+  - **Bugfix (CORS/Networking)**: Resolved `TypeError: Failed to fetch` and proxy instability by implementing a robust manual proxy using Next.js API Route Handlers (`app/api/auth/[...path]/route.ts`). This guarantees JSON-formatted errors, completely bypasses browser CORS blocks, and avoids Node.js/Bun rewrite engine bugs on `127.0.0.1`.
 - [x] **Phase 15**: Profile & Disconnect Flow.
   - Added interactive Profile Dropdown in the Dashboard Header.
   - Dynamically displays the user's truncated Freighter public key.
   - Implemented secure global `disconnect()` clearing Zustand store and returning user to the Landing Page.
+- [x] **Phase 16**: JWT Token Management (Frontend).
+  - Migrated `ConnectWalletButton.tsx` to use `axios` for robust HTTP request handling.
+  - Integrated `setAuthToken` utility from `lib/auth.ts` to securely store the backend `access_token` in cookies upon successful authentication.
+  - Updated `Header.tsx` disconnect flow to call `removeAuthToken()`, completely clearing the session cookie alongside the Zustand store.
+- [x] **Phase 17**: User Profile Integration & Auto-Logout.
+  - Installed `@tanstack/react-query` to handle server state fetching and caching.
+  - Configured global `QueryClientProvider` via a new client `Providers` component in `app/layout.tsx`.
+  - Created `useUserProfile` hook to automatically fetch user data from `/api/auth/me` using the stored JWT.
+  - Implemented an **Auto-Logout Mechanism**: If the profile fetch fails (e.g. 401 Unauthorized), the hook triggers `removeAuthToken()`, disconnects the wallet store, and redirects to the landing page.
+  - Updated `Header.tsx` to display the dynamically fetched `username` instead of static text if available.
+- [x] **Phase 18**: Route Protection Proxy (Next.js 16.2+).
+  - Implemented Next.js Edge `proxy.ts` (formerly `middleware.ts`) to strictly protect authenticated routes (`/dashboard`, `/sendthr`, dll).
+  - Proxy intercepts requests at the server level, checking for the existence of the `access_token` cookie.
+  - If a user attempts to access a protected route without connecting their wallet, they are automatically redirected to the landing page (`/`).
+  - Added an auto-redirect logic: if a user is already authenticated and visits the root landing page, they are forwarded straight to `/dashboard`.
 
 ## 🏗️ Current Codebase Architecture & Context
 

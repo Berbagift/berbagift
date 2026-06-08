@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { isConnected as isFreighterConnected, requestAccess, getNetworkDetails, signMessage } from '@stellar/freighter-api';
 import { useWalletStore } from '@/hooks/use-wallet-state';
+import axios from 'axios';
+import { setAuthToken } from '@/lib/auth';
 
 export function ConnectWalletButton() {
   const router = useRouter();
@@ -38,21 +40,17 @@ export function ConnectWalletButton() {
 
         const { address, error } = await requestAccess();
         if (address) {
-          // 1. Fetch nonce from backend
-          const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-          const nonceRes = await fetch(`${apiUrl}/api/auth/nonce`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ wallet_address: address })
-          });
-          const nonceData = await nonceRes.json();
-          
-          if (!nonceRes.ok) {
-            alert(`Error getting nonce: ${nonceData.message}`);
+          // 1. Fetch nonce from backend directly
+          const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
+          let nonceString;
+          try {
+            const nonceRes = await axios.post(`${apiUrl}/api/auth/nonce`, { wallet_address: address });
+            nonceString = nonceRes.data.data.nonce;
+          } catch (err: any) {
+            const msg = err.response?.data?.message || err.message;
+            alert(`Error getting nonce: ${msg}`);
             return;
           }
-
-          const nonceString = nonceData.data.nonce;
 
           // 2. Prompt Freighter to sign the message
           try {
@@ -79,22 +77,27 @@ export function ConnectWalletButton() {
             }
             
             // 3. Send signature to backend for verification
-            const signInRes = await fetch(`${apiUrl}/api/auth/sign-in`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ wallet_address: address, signature: signatureStr })
-            });
-            const signInData = await signInRes.json();
-            
-            if (!signInRes.ok) {
-              alert(`Authentication failed: ${signInData.message}`);
+            try {
+              const signInRes = await axios.post(`${apiUrl}/api/auth/sign-in`, {
+                wallet_address: address,
+                signature: signatureStr
+              });
+              
+              // 4. Success! Store the user ID, address, and set auth cookie
+              const userId = signInRes.data.data.user_id;
+              const accessToken = signInRes.data.data.access_token;
+              
+              if (accessToken) {
+                setAuthToken(accessToken);
+              }
+              
+              connect(address, userId);
+              router.push('/dashboard');
+            } catch (err: any) {
+              const msg = err.response?.data?.message || err.message;
+              alert(`Authentication failed: ${msg}`);
               return;
             }
-
-            // 4. Success! Store the user ID and address
-            const userId = signInData.data.user_id;
-            connect(address, userId);
-            router.push('/dashboard');
             
           } catch (signErr: any) {
             console.error("Signature error:", signErr);
