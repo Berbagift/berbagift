@@ -1,0 +1,18 @@
+info:
+  name: price token
+  type: http
+  seq: 1
+
+http:
+  method: GET
+  url: http://127.0.0.1:8000/api/tokens/prices
+  headers:
+    - name: authorization
+      value: Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI0Iiwid2FsbGV0X2FkZHJlc3MiOiJHQUVJN1NHR0VGNUlETEZGUURWQUFTN1E3WUJaSE1HUlYyWUVLSE5aTFRPVkQ0QkdVV1NQRklJViIsImV4cCI6MTc4MDk3NTgzN30.idObloPM1lzVfmbXSUYamT8Kz6FFSIJQ47Qt9dvK1UqK47bwchAjgUFVlbyXpszimcRgZAis8E6_zMx1TY7_18z41DhQMVrgIK4mSz7FiTmhC_G9ut0Uf3z0_qBdEafB8ZY21743qCt-zOul7IhViLNg5QntMv10fY9qn6UEawnfznUAPvQJq9-qGImvXYgL_28kctf5qzPUsrYKeSomc1iS8JMoPMyuMtLoux67CRjMNHyvETP2t5RMS27xk4acypObTTSg3zRcKnwViPZcnZvs5CP5kdb6LLSIfvL1g7B_-z3TMgf63DuXwvGjLHQQvDy6kBKjA6YXGsiZYC2Q0g
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
