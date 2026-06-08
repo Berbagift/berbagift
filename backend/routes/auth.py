@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, Header
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 
-from schemas.auth import NonceRequest, SignInRequest
+from schemas.auth import NonceRequest, SignInRequest, UpdateProfileRequest
 from schemas.response import APIResponse
 from controllers.auth import AuthController
 from databases.connection import get_db_session
@@ -36,5 +36,19 @@ def get_me(authorization: str | None = Header(default=None), db: Session = Depen
     """
     auth_controller = AuthController(db)
     response_data, status_code = auth_controller.get_me(authorization)
+    
+    return JSONResponse(status_code=status_code, content=response_data)
+
+@router.put("/me", response_model=APIResponse)
+def update_me(
+    request: UpdateProfileRequest,
+    authorization: str | None = Header(default=None),
+    db: Session = Depends(get_db_session)
+):
+    """
+    Update current logged in user details using Bearer token.
+    """
+    auth_controller = AuthController(db)
+    response_data, status_code = auth_controller.update_me(authorization, request)
     
     return JSONResponse(status_code=status_code, content=response_data)

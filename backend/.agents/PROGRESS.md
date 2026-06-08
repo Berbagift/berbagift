@@ -36,6 +36,14 @@
   - Implemented manual Bearer token extraction and JWT validation in `AuthController.get_me()`.
   - Added specific JWT exception handling for `ExpiredSignatureError` and `InvalidTokenError`.
   - Configured invalid authentication responses to strictly return `401 Unauthorized` with an empty `errors` field (`null`), separating it from the `400 Bad Request` validation structure.
+- [x] **Phase 11**: Update Profile API (`/api/auth/me`) & Role System.
+  - Added `role` column to the `User` model using `Enum('user', 'admin')` with a default of `user`.
+  - Removed `unique=True` from the `username` column, allowing multiple users to have the same username. Wallet address and Email remain strictly unique.
+  - Configured Alembic to automatically migrate the new `role` field and index changes.
+  - Added `PUT /api/auth/me` to partially update the user's `username` and `email`.
+  - Enforced schema constraints (username max 50, email max 100) via backend validation to return `400` on failure.
+  - Developed duplicate collision detection (`check_email_exists`) triggering `409 Conflict` compliance.
+  - Successfully mapped success path to return HTTP `201 Created` returning the updated user object per standard guidelines.
 
 ## 🏗️ Architecture & Context
 - **Framework**: FastAPI (Sync logic currently, standard routing).

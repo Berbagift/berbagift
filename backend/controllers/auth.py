@@ -3,7 +3,7 @@ import secrets
 from datetime import datetime
 from stellar_sdk import Keypair
 from sqlalchemy.orm import Session
-from schemas.auth import NonceRequest, SignInRequest
+from schemas.auth import NonceRequest, SignInRequest, UpdateProfileRequest
 from databases.user import UserDatabase
 from databases.nonce import NonceDatabase
 from utils.jwt import create_access_token, verify_access_token
@@ -114,6 +114,7 @@ class AuthController:
                 "user_id": user.id,
                 "username": user.username,
                 "wallet_address": user.wallet_address,
+                "role": user.role,
                 "access_token": access_token
             },
             "errors": None
@@ -165,7 +166,98 @@ class AuthController:
                 "id": user.id,
                 "username": user.username,
                 "email": user.email,
-                "wallet_address": user.wallet_address
+                "wallet_address": user.wallet_address,
+                "role": user.role
             },
             "errors": None
         }, 200
+
+    def update_me(self, authorization: str | None, request: UpdateProfileRequest):
+        # 1. Authenticate user via JWT
+        if not authorization or not authorization.startswith("Bearer "):
+            return {
+                "message": "Authentication failed: Missing or invalid Authorization header",
+                "data": None,
+                "errors": None
+            }, 401
+            
+        token = authorization.split(" ")[1]
+        try:
+            payload = verify_access_token(token)
+        except jwt.ExpiredSignatureError:
+            return {
+                "message": "Token has expired",
+                "data": None,
+                "errors": None
+            }, 401
+        except jwt.InvalidTokenError:
+            return {
+                "message": "Invalid token",
+                "data": None,
+                "errors": None
+            }, 401
+            
+        user_id_str = payload.get("sub")
+        if not user_id_str:
+            return {
+                "message": "Invalid token payload",
+                "data": None,
+                "errors": None
+            }, 401
+            
+        user_id = int(user_id_str)
+        user = self.user_db.get_user_by_id(user_id)
+        if not user:
+            return {
+                "message": "User not found",
+                "data": None,
+                "errors": None
+            }, 404
+
+        # 2. Extract fields
+        new_username = request.username
+        new_email = request.email
+
+        # 3. Validate inputs & handle conflicts
+        errors = {}
+
+        if new_username is not None:
+            if len(new_username) > 50:
+                errors["username"] = "TOO_LONG"
+
+        if new_email is not None:
+            if len(new_email) > 100:
+                errors["email"] = "TOO_LONG"
+            elif self.user_db.check_email_exists(new_email, user_id):
+                return {
+                    "message": "Email already taken",
+                    "data": None,
+                    "errors": None
+                }, 409
+
+        if errors:
+            return {
+                "message": "Validation failed",
+                "data": None,
+                "errors": errors
+            }, 400
+
+        # 4. Update the DB
+        updated_user = self.user_db.update_user(
+            user=user,
+            username=new_username,
+            email=new_email
+        )
+
+        # 5. Return success per rules (201 for PUT success)
+        return {
+            "message": "Profile updated successfully",
+            "data": {
+                "id": updated_user.id,
+                "username": updated_user.username,
+                "email": updated_user.email,
+                "wallet_address": updated_user.wallet_address,
+                "role": updated_user.role
+            },
+            "errors": None
+        }, 201
