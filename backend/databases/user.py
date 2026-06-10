@@ -28,3 +28,20 @@ class UserDatabase:
         self.db.commit()
         self.db.refresh(new_user)
         return new_user
+
+    def check_email_exists(self, email: str, exclude_user_id: int) -> bool:
+        return self.db.query(User).filter(
+            User.email == email,
+            User.id != exclude_user_id,
+            User.deleted_at.is_(None)
+        ).first() is not None
+
+    def update_user(self, user: User, username: str | None = None, email: str | None = None) -> User:
+        if username is not None:
+            user.username = username
+        if email is not None:
+            user.email = email
+            
+        self.db.commit()
+        self.db.refresh(user)
+        return user

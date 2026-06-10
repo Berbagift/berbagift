@@ -48,3 +48,4 @@ frontend/.vercel
 *.tsbuildinfo
 next-env.d.ts
 node_modules
+backend/.env*

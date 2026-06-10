@@ -3,16 +3,48 @@ import secrets
 from datetime import datetime
 from stellar_sdk import Keypair
 from sqlalchemy.orm import Session
-from schemas.auth import NonceRequest, SignInRequest
+from schemas.auth import NonceRequest, SignInRequest, UpdateProfileRequest
 from databases.user import UserDatabase
 from databases.nonce import NonceDatabase
+import os
 from utils.jwt import create_access_token, verify_access_token
 import jwt
+from dotenv import load_dotenv
+
+load_dotenv()
 
 class AuthController:
     def __init__(self, db: Session):
         self.user_db = UserDatabase(db)
         self.nonce_db = NonceDatabase(db)
+
+    def _fetch_stellar_balances(self, wallet_address: str):
+        try:
+            from stellar_sdk import Server
+            from stellar_sdk.exceptions import NotFoundError
+            
+            server = Server("https://horizon-testnet.stellar.org")
+            
+            try:
+                account = server.accounts().account_id(wallet_address).call()
+            except NotFoundError:
+                # Wallet exists but is unfunded on Stellar Testnet
+                return {"XLM": 0.0, "USDC": 0.0}
+                
+            balances = account.get("balances", [])
+            xlm_balance = 0.0
+            usdc_balance = 0.0
+            
+            for b in balances:
+                if b.get("asset_type") == "native":
+                    xlm_balance = float(b.get("balance", 0.0))
+                elif b.get("asset_code") == "USDC" and b.get("asset_issuer") == os.getenv("USDC_ISSUER_ADDRESS", "GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5"):
+                    usdc_balance = float(b.get("balance", 0.0))
+            return {"XLM": xlm_balance, "USDC": usdc_balance}
+        except Exception as e:
+            pass # Suppress network errors silently
+            return {"XLM": 0.0, "USDC": 0.0}
+
 
     def generate_nonce(self, request: NonceRequest):
         # Generate a random 16-byte hex string
@@ -114,6 +146,7 @@ class AuthController:
                 "user_id": user.id,
                 "username": user.username,
                 "wallet_address": user.wallet_address,
+                "role": user.role,
                 "access_token": access_token
             },
             "errors": None
@@ -159,13 +192,125 @@ class AuthController:
                 "errors": None
             }, 404
             
+        # Fetch on-chain balances dynamically
+        balances = self._fetch_stellar_balances(user.wallet_address)
+        
+        # Fetch token prices in IDR (Rupiah) with waterfall fallback
+        balances_idr = {"XLM": 0, "USDC": 0}
+        try:
+            from controllers.token import TokenController
+            token_controller = TokenController()
+            prices, _ = token_controller.get_prices_waterfall()
+            
+            xlm_price = prices.get("XLM", 0)
+            usdc_price = prices.get("USDC", 0)
+            
+            balances_idr["XLM"] = int(round(balances.get("XLM", 0.0) * xlm_price))
+            balances_idr["USDC"] = int(round(balances.get("USDC", 0.0) * usdc_price))
+        except Exception as e:
+            # Fallback warning if pricing fails
+            print(f"[!] Warning: Failed to calculate balance in IDR. Error: {e}")
+            
         return {
             "message": "Successfully retrieved user data",
             "data": {
                 "id": user.id,
                 "username": user.username,
                 "email": user.email,
-                "wallet_address": user.wallet_address
+                "wallet_address": user.wallet_address,
+                "role": user.role,
+                "balances": balances,
+                "balances_idr": balances_idr
             },
             "errors": None
         }, 200
+
+    def update_me(self, authorization: str | None, request: UpdateProfileRequest):
+        # 1. Authenticate user via JWT
+        if not authorization or not authorization.startswith("Bearer "):
+            return {
+                "message": "Authentication failed: Missing or invalid Authorization header",
+                "data": None,
+                "errors": None
+            }, 401
+            
+        token = authorization.split(" ")[1]
+        try:
+            payload = verify_access_token(token)
+        except jwt.ExpiredSignatureError:
+            return {
+                "message": "Token has expired",
+                "data": None,
+                "errors": None
+            }, 401
+        except jwt.InvalidTokenError:
+            return {
+                "message": "Invalid token",
+                "data": None,
+                "errors": None
+            }, 401
+            
+        user_id_str = payload.get("sub")
+        if not user_id_str:
+            return {
+                "message": "Invalid token payload",
+                "data": None,
+                "errors": None
+            }, 401
+            
+        user_id = int(user_id_str)
+        user = self.user_db.get_user_by_id(user_id)
+        if not user:
+            return {
+                "message": "User not found",
+                "data": None,
+                "errors": None
+            }, 404
+
+        # 2. Extract fields
+        new_username = request.username
+        new_email = request.email
+
+        # 3. Validate inputs & handle conflicts
+        errors = {}
+
+        if new_username is not None:
+            if len(new_username) > 50:
+                errors["username"] = "TOO_LONG"
+
+        if new_email is not None:
+            if len(new_email) > 100:
+                errors["email"] = "TOO_LONG"
+            elif self.user_db.check_email_exists(new_email, user_id):
+                return {
+                    "message": "Email already taken",
+                    "data": None,
+                    "errors": None
+                }, 409
+
+        if errors:
+            return {
+                "message": "Validation failed",
+                "data": None,
+                "errors": errors
+            }, 400
+
+        # 4. Update the DB
+        updated_user = self.user_db.update_user(
+            user=user,
+            username=new_username,
+            email=new_email
+        )
+
+        # 5. Return success per rules (201 for PUT success)
+        return {
+            "message": "Profile updated successfully",
+            "data": {
+                "id": updated_user.id,
+                "username": updated_user.username,
+                "email": updated_user.email,
+                "wallet_address": updated_user.wallet_address,
+                "role": updated_user.role
+            },
+            "errors": None
+        }, 201

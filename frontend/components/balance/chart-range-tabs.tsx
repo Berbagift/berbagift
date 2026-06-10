@@ -4,9 +4,12 @@ import { useState } from 'react';
 
 const RANGES = ['1 Day', '1 Week', '1 Month', '1 Year', '3 Year', '5 Year'];
 
-export function ChartRangeTabs() {
-  const [activeRange, setActiveRange] = useState('1 Year');
+interface ChartRangeTabsProps {
+  activeRange: string;
+  onChangeRange: (range: string) => void;
+}
 
+export function ChartRangeTabs({ activeRange, onChangeRange }: ChartRangeTabsProps) {
   return (
     <div className="flex items-center gap-1 md:gap-2 overflow-x-auto no-scrollbar bg-neutral-2/50 p-1 rounded-md">
       {RANGES.map((range) => {
@@ -14,7 +17,7 @@ export function ChartRangeTabs() {
         return (
           <button
             key={range}
-            onClick={() => setActiveRange(range)}
+            onClick={() => onChangeRange(range)}
             className={`
               px-3 py-1.5 text-sm font-medium rounded-md whitespace-nowrap transition-colors
               ${

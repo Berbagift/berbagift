@@ -44,6 +44,11 @@
   - Proxy intercepts requests at the server level, checking for the existence of the `access_token` cookie.
   - If a user attempts to access a protected route without connecting their wallet, they are automatically redirected to the landing page (`/`).
   - Added an auto-redirect logic: if a user is already authenticated and visits the root landing page, they are forwarded straight to `/dashboard`.
+- [x] **Phase 19**: Real-time Dashboard Balances Integration.
+  - Converted the `DashboardPage` and `BalanceSection` into client-side components leveraging the `useUserProfile` hook.
+  - Replaced hardcoded mockup balances on the main dashboard with live, dynamic data (XLM, USDC, and total IDR value) fetched directly from the backend's on-chain Horizon Testnet integrations.
+  - Shortened the display name in the Greeting component to `XXXX...XXXX` if the default username is the 56-character Stellar wallet public key.
+  - **Bugfix (Type Check)**: Fixed a Next.js compilation block in `ConnectWalletButton.tsx` by correcting the option parameter passed to Freighter's `signMessage` function, passing `networkPassphrase` and `address` instead of the untyped `network` key.
 
 ## 🏗️ Current Codebase Architecture & Context
 

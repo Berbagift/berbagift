@@ -36,6 +36,36 @@
   - Implemented manual Bearer token extraction and JWT validation in `AuthController.get_me()`.
   - Added specific JWT exception handling for `ExpiredSignatureError` and `InvalidTokenError`.
   - Configured invalid authentication responses to strictly return `401 Unauthorized` with an empty `errors` field (`null`), separating it from the `400 Bad Request` validation structure.
+- [x] **Phase 11**: Update Profile API (`/api/auth/me`) & Role System.
+  - Added `role` column to the `User` model using `Enum('user', 'admin')` with a default of `user`.
+  - Removed `unique=True` from the `username` column, allowing multiple users to have the same username. Wallet address and Email remain strictly unique.
+  - Configured Alembic to automatically migrate the new `role` field and index changes.
+  - Added `PUT /api/auth/me` to partially update the user's `username` and `email`.
+  - Enforced schema constraints (username max 50, email max 100) via backend validation to return `400` on failure.
+  - Developed duplicate collision detection (`check_email_exists`) triggering `409 Conflict` compliance.
+  - Successfully mapped success path to return HTTP `201 Created` returning the updated user object per standard guidelines.
+- [x] **Phase 12**: Token Prices API (`/api/tokens/prices`).
+  - Implemented `GET /api/tokens/prices` endpoint to fetch real-time XLM and USDC prices.
+  - Protected the endpoint using JWT Bearer Authorization, adhering to backend security guidelines.
+  - Migrated from `urllib.request` to `requests` to handle HTTP timeouts gracefully.
+- [x] **Phase 13**: High-Availability Token Pricing (Waterfall Fallback).
+  - Refactored `GET /api/tokens/prices` to implement a highly available Waterfall Fallback mechanism to ensure the API never fails.
+  - **Priority 1 (TransFi)**: Kept TransFi Sandbox as the primary provider, utilizing a high-amount request trick (100,000 IDR) to successfully bypass their Minimum Order constraint.
+  - **Priority 2 (Pyth Oracle)**: Integrated Pyth Network (Web3 Oracle) for native on-chain USD prices, paired dynamically with the `open.er-api.com` USD/IDR exchange rate for live conversions.
+  - **Priority 3 (CoinGecko)**: Integrated CoinGecko as a global aggregator fallback.
+  - **Priority 4 (Indodax)**: Reintroduced Indodax as the final local CEX fallback if global networks fail.
+  - Prices are strictly rounded to integers without decimals.
+  - Added a `provider` field to the JSON response so the frontend knows exactly which source supplied the prices.
+- [x] **Phase 14**: On-Chain Wallet Balances (`/api/auth/me`).
+  - Enhanced the `GET /api/auth/me` endpoint to dynamically fetch the user's real-time wallet balances from the **Stellar Blockchain (Horizon Testnet)**.
+  - Returns `balances: {"XLM": 0.0, "USDC": 0.0}` by parsing the on-chain data using `stellar_sdk`.
+  - Gracefully handles unfunded wallets (`NotFoundError`) and suppresses network errors silently to prevent API crashes.
+  - **Bugfix (USDC Balance)**: Updated the balance fetching logic to explicitly check `asset_issuer` against the specific USDC contract address (`USDC_ISSUER_ADDRESS` from `.env`) to prevent reading balances from fake/other USDC tokens on the Testnet.
+- [x] **Phase 15**: Live IDR Balance Valuation (`/api/auth/me`).
+  - Extracted the waterfall token pricing logic from `TokenController` into a reusable helper method `get_prices_waterfall()`.
+  - Upgraded the `GET /api/auth/me` endpoint to calculate and include the user's balances in Indonesian Rupiah (IDR) inside the `"balances_idr"` response key.
+  - Dynamically calculates values by multiplying on-chain XLM/USDC balances with live rates retrieved from the high-availability pricing pipeline.
+  - Gracefully falls back to 0 on valuation failures to keep the endpoint operational even if all pricing networks are down.
 
 ## 🏗️ Architecture & Context
 - **Framework**: FastAPI (Sync logic currently, standard routing).
