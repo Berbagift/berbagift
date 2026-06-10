@@ -2,35 +2,40 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 export function proxy(request: NextRequest) {
-  // Extract token from cookies using the exact key from lib/auth.ts
-  const token = request.cookies.get('access_token')?.value;
+  // =============================================================
+  // [DEV MODE] Auth middleware disabled for UI development.
+  // Uncomment the block below to re-enable auth protection.
+  // =============================================================
 
-  // Define paths that require a connected wallet/authenticated session
-  const protectedPrefixes = [
-    '/dashboard',
-    '/sendthr',
-    '/create-room',
-    '/profile'
-  ];
-  
-  // Check if current path matches any of the protected prefixes
-  const isProtectedPath = protectedPrefixes.some((prefix) => 
-    request.nextUrl.pathname.startsWith(prefix)
-  );
+  // // Extract token from cookies using the exact key from lib/auth.ts
+  // const token = request.cookies.get('access_token')?.value;
 
-  // Auto-redirect to landing page if unauthorized
-  if (isProtectedPath && !token) {
-    const url = request.nextUrl.clone();
-    url.pathname = '/';
-    return NextResponse.redirect(url);
-  }
+  // // Define paths that require a connected wallet/authenticated session
+  // const protectedPrefixes = [
+  //   '/dashboard',
+  //   '/sendthr',
+  //   '/create-room',
+  //   '/profile'
+  // ];
 
-  // Auto-redirect to dashboard if user is already authenticated and visits the root login/landing page
-  if (request.nextUrl.pathname === '/' && token) {
-    const url = request.nextUrl.clone();
-    url.pathname = '/dashboard';
-    return NextResponse.redirect(url);
-  }
+  // // Check if current path matches any of the protected prefixes
+  // const isProtectedPath = protectedPrefixes.some((prefix) =>
+  //   request.nextUrl.pathname.startsWith(prefix)
+  // );
+
+  // // Auto-redirect to landing page if unauthorized
+  // if (isProtectedPath && !token) {
+  //   const url = request.nextUrl.clone();
+  //   url.pathname = '/';
+  //   return NextResponse.redirect(url);
+  // }
+
+  // // Auto-redirect to dashboard if user is already authenticated and visits the root login/landing page
+  // if (request.nextUrl.pathname === '/' && token) {
+  //   const url = request.nextUrl.clone();
+  //   url.pathname = '/dashboard';
+  //   return NextResponse.redirect(url);
+  // }
 
   return NextResponse.next();
 }
