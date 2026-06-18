@@ -17,22 +17,22 @@ const SIDEBAR_NAV = [
   {
     section: 'WALLET',
     items: [
-      { name: 'My Balance', href: '/dashboard/balance', icon: 'fi fi-rr-wallet' },
-      { name: 'Swap Token', href: '/dashboard/swap', icon: 'fi fi-rr-shuffle' },
+      { name: 'My Balance', href: '/wallet/balance', icon: 'fi fi-rr-wallet' },
+      { name: 'Swap Token', href: '/wallet/swap', icon: 'fi fi-rr-shuffle' },
     ],
   },
   {
     section: 'COMMUNITY',
     items: [
-      { name: 'Explore Rooms', href: '/dashboard/rooms', icon: 'fi fi-rr-grid' },
-      { name: 'Create Room', href: '/dashboard/create-room', icon: 'fi fi-rr-add-document' },
+      { name: 'Explore Rooms', href: '/community/explore', icon: 'fi fi-rr-grid' },
+      { name: 'My Rooms', href: '/community/myrooms', icon: 'fi fi-rr-folder' },
     ],
   },
   {
     section: 'ACCOUNT',
     items: [
-      { name: 'My Profile', href: '/dashboard/profile', icon: 'fi fi-rr-user' },
-      { name: 'Help Center', href: '/dashboard/help', icon: 'fi fi-rr-info' },
+      { name: 'My Profile', href: '/account/profile', icon: 'fi fi-rr-user' },
+      { name: 'Help Center', href: '/account/help', icon: 'fi fi-rr-info' },
     ],
   },
 ];
@@ -46,6 +46,11 @@ interface SidebarProps {
 
 export function Sidebar({ isOpen, onClose, isDesktopOpen = true, onDesktopToggle }: SidebarProps) {
   const pathname = usePathname();
+
+  // Find the most specific active route (longest matching prefix)
+  const activeHref = SIDEBAR_NAV.flatMap((group) => group.items)
+    .filter((item) => pathname === item.href || pathname?.startsWith(`${item.href}/`))
+    .sort((a, b) => b.href.length - a.href.length)[0]?.href;
 
   return (
     <aside
@@ -110,7 +115,7 @@ export function Sidebar({ isOpen, onClose, isDesktopOpen = true, onDesktopToggle
             </h3>
             <div className="flex flex-col gap-1 mt-1">
               {group.items.map((item, j) => {
-                const isActive = pathname === item.href || (item.href !== '/dashboard' && pathname?.startsWith(item.href));
+                const isActive = item.href === activeHref;
                 return (
                   <Link
                     key={j}

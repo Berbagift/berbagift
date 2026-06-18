@@ -55,7 +55,7 @@ export default function RoomDetailPage() {
   };
 
   const handleLeave = () => {
-    router.push('/dashboard/rooms');
+    router.push('/community/explore');
   };
 
   if (isLoading) {

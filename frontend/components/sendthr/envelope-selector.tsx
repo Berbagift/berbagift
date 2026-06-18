@@ -9,7 +9,7 @@ export function EnvelopeSelector() {
   const state = useSendThrStore();
 
   return (
-    <div className="border border-border rounded-md p-4 sm:p-5 md:p-6 bg-white dark:bg-card flex flex-col gap-4 sm:gap-6">
+    <div className="flex flex-col gap-4 sm:gap-6">
       {/* Tabs */}
       <div className="flex flex-col sm:flex-row items-center bg-white dark:bg-card border border-border rounded-md overflow-hidden">
         <button

@@ -83,7 +83,7 @@ export default function ExploreRoomsPage() {
   };
 
   const handleJoinRoom = (id: string) => {
-    router.push(`/dashboard/rooms/join/${id}`);
+    router.push(`/community/explore/join/${id}`);
   };
 
   return (
@@ -91,11 +91,11 @@ export default function ExploreRoomsPage() {
       {/* Header Section */}
       <div className="flex flex-col gap-6 p-8 border-b border-border bg-background sticky top-0 z-10">
         <div className="flex flex-col md:flex-row md:items-start justify-between gap-10">
-          <div className="flex flex-col max-w-3xl">
-            <h1 className="text-3xl font-semibold text-black dark:text-neutral-1 mb-2">
+          <div className="flex flex-col max-w-3xl xl:max-w-none">
+            <h1 className="text-3xl font-medium text-black dark:text-neutral-1 mb-2">
               Find Your Next Reward Room 🎁
             </h1>
-            <p className="text-xl font-semibold text-neutral-10 dark:text-neutral-4">
+            <p className="text-xl font-medium text-neutral-8 dark:text-neutral-4 xl:whitespace-nowrap">
               Discover live THR events, creator giveaways, and community reward rooms in realtime.
             </p>
           </div>

@@ -36,7 +36,7 @@ export function ThemeToggle() {
   }
 
   return (
-    <div className="flex items-center p-0.5 rounded-full border border-neutral-8 bg-background">
+    <div className="flex items-center p-0.5 rounded-full border border-neutral-5 bg-background">
       <button
         onClick={() => {
           setTheme('light');
@@ -45,8 +45,8 @@ export function ThemeToggle() {
         }}
         className={cn(
           "w-7 h-6 flex items-center justify-center rounded-full transition-colors",
-          theme === 'light' 
-            ? "bg-neutral-2 text-black" 
+          theme === 'light'
+            ? "bg-neutral-2 text-black"
             : "text-neutral-6 hover:text-neutral-1"
         )}
         aria-label="Light mode"
@@ -61,8 +61,8 @@ export function ThemeToggle() {
         }}
         className={cn(
           "w-7 h-6 flex items-center justify-center rounded-full transition-colors",
-          theme === 'dark' 
-            ? "bg-neutral-10 text-white" 
+          theme === 'dark'
+            ? "bg-neutral-10 text-white"
             : "text-neutral-6 hover:text-black"
         )}
         aria-label="Dark mode"

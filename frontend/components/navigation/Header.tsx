@@ -15,67 +15,7 @@ interface HeaderProps {
   onDesktopToggle?: () => void;
 }
 
-const getPageTitle = (pathname: string) => {
-  if (pathname.includes("/activity")) return "All Activity";
-  if (pathname.includes("/inbox")) return "My Inbox";
-  if (pathname.includes("/balance")) return "My Balance";
-  if (pathname.includes("/swap")) return "Swap Token";
-  if (pathname.includes("/sendthr")) return "Send THR";
-  if (pathname.includes("/rooms")) return "Explore Rooms";
-  if (pathname.includes("/create-room")) return "Create Room";
-  if (pathname.includes("/profile")) return "My Profile";
-  if (pathname.includes("/help")) return "Help Center";
-  return "Overview";
-};
-
-interface BreadcrumbItem {
-  label: string;
-  href?: string;
-}
-
-function BreadcrumbNav({
-  items,
-  isMobile = false
-}: {
-  items: BreadcrumbItem[];
-  isMobile?: boolean
-}) {
-  const textSize = isMobile ? "text-lg" : "text-xl";
-
-  return (
-    <nav aria-label="Breadcrumb" className="min-h-0 min-w-0">
-      <ol className={`flex items-center gap-2 font-semibold text-black dark:text-neutral-1 ${textSize}`}>
-        {items.map((item, index) => {
-          const isLast = index === items.length - 1;
-
-          return (
-            <React.Fragment key={index}>
-              {index > 0 && (
-                <li className="flex items-center text-neutral-6">
-                  <i aria-hidden="true" className="fi fi-rr-angle-small-right text-[0.85em] leading-none" />
-                </li>
-              )}
-              <li className={`min-w-0 ${isLast ? 'flex items-center gap-2' : ''}`}>
-                {!isLast && item.href ? (
-                  <Link
-                    href={item.href}
-                    className="block truncate text-neutral-8 dark:text-neutral-6 transition-colors hover:text-black dark:text-neutral-1 dark:hover:text-white"
-                  >
-                    {item.label}
-                  </Link>
-                ) : (
-                  <span aria-current={isLast ? "page" : undefined} className="truncate">
-                    {item.label}
-                  </span>
-                )}
-              </li>
-            </React.Fragment>
-          );
-        })}
-      </ol>
-    </nav>
-  );
-}
+import { Breadcrumbs, ROUTE_BREADCRUMBS } from "@/components/navigation/Breadcrumbs";
 
 export function Header({ onMenuClick, isDesktopSidebarOpen = true, onDesktopToggle }: HeaderProps) {
   const pathname = usePathname();
@@ -85,9 +25,8 @@ export function Header({ onMenuClick, isDesktopSidebarOpen = true, onDesktopTogg
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const { data: userProfile } = useUserProfile();
   
-  const pageTitle = getPageTitle(pathname || "");
   const isEnvelopePage = pathname === "/sendthr/envelope";
-  const isRoomDetailPage = pathname?.startsWith("/dashboard/rooms/join/") && params?.roomId;
+  const isRoomDetailPage = pathname?.startsWith("/community/explore/join/") && params?.roomId;
 
   const handleDisconnect = () => {
     setIsProfileOpen(false);
@@ -97,64 +36,53 @@ export function Header({ onMenuClick, isDesktopSidebarOpen = true, onDesktopTogg
   };
 
   const renderTitle = (isMobile: boolean = false) => {
-    if (isEnvelopePage) {
-      if (isMobile) {
-        return (
-          <Link href="/sendthr" className="flex items-center gap-2 text-lg font-semibold text-black dark:text-neutral-1 hover:opacity-80 transition-opacity">
-            <i className="fi fi-rr-arrow-left text-base mt-0.5" />
-            <span className="truncate">Envelope Design</span>
-          </Link>
-        );
-      }
+    if (isEnvelopePage && isMobile) {
       return (
-        <BreadcrumbNav
-          isMobile={isMobile}
-          items={[
-            { label: "Send THR", href: "/sendthr" },
-            { label: "Envelope Design" }
-          ]}
-        />
+        <Link href="/sendthr" className="flex items-center gap-2 text-lg font-semibold text-black dark:text-neutral-1 hover:opacity-80 transition-opacity">
+          <i className="fi fi-rr-arrow-left text-base mt-0.5" />
+          <span className="truncate">Envelope Design</span>
+        </Link>
       );
     }
 
     if (isRoomDetailPage) {
       if (isMobile) {
         return (
-          <Link href="/dashboard/rooms" className="flex items-center gap-2 text-lg font-semibold text-black dark:text-neutral-1 hover:opacity-80 transition-opacity">
+          <Link href="/community/explore" className="flex items-center gap-2 text-lg font-semibold text-black dark:text-neutral-1 hover:opacity-80 transition-opacity">
             <i className="fi fi-rr-arrow-left text-base mt-0.5" />
             <span className="truncate">Detail Room</span>
           </Link>
         );
       }
       return (
-        <BreadcrumbNav
+        <Breadcrumbs
           isMobile={isMobile}
           items={[
-            { label: "Explore Rooms", href: "/dashboard/rooms" },
+            { label: "Community" },
+            { label: "Explore Rooms", href: "/community/explore" },
             { label: "Detail Room" }
           ]}
         />
       );
     }
 
-    return (
-      <h1 className={`${isMobile ? 'text-lg' : 'text-xl'} font-semibold text-black dark:text-neutral-1`}>
-        {pageTitle}
-      </h1>
-    );
+    const defaultItems = [{ label: "Dashboard" }, { label: "Overview" }];
+    const items = ROUTE_BREADCRUMBS[pathname || ""] || defaultItems;
+
+    return <Breadcrumbs isMobile={isMobile} items={items} />;
   };
 
   return (
     <header className="h-20 border-b border-border bg-background flex items-center justify-between px-4 lg:px-8 sticky top-0 z-20">
       <div className="flex items-center gap-3">
-        {/* Logo - Mobile Only (Acts as Sidebar Toggle) */}
+        {/* Burger Icon - Mobile Only (Acts as Sidebar Toggle) */}
         <div className="lg:hidden">
-          <button onClick={onMenuClick} className="flex items-center gap-2 focus:outline-none hover:opacity-80 transition-opacity">
-            <img src="https://placehold.co/40x40/transparent/000000?text=B" alt="BagiTHR Logo" className="h-6 w-6 object-contain" />
-            <div className="text-xl font-medium flex items-center">
-              <span className="text-black dark:text-neutral-1">Bagi</span>
-              <span className="text-primary-500">THR</span>
-            </div>
+          <button 
+            onClick={onMenuClick} 
+            className="w-10 h-10 flex items-center justify-center text-neutral-8 dark:text-neutral-3 hover:text-black dark:hover:text-white hover:bg-neutral-3 dark:hover:bg-neutral-10 rounded-md transition-colors focus:outline-none"
+            aria-label="Open Sidebar"
+          >
+            <i className="fi fi-rr-menu-burger text-lg flex items-center" />
           </button>
         </div>
 
@@ -185,7 +113,9 @@ export function Header({ onMenuClick, isDesktopSidebarOpen = true, onDesktopTogg
       </div>
 
       <div className="flex items-center gap-3 lg:gap-4">
-        <ThemeToggle />
+        <div className="hidden lg:block">
+          <ThemeToggle />
+        </div>
         {/* Profile Section */}
         <div className="relative">
           <div 
@@ -210,7 +140,14 @@ export function Header({ onMenuClick, isDesktopSidebarOpen = true, onDesktopTogg
           {isProfileOpen && (
             <>
               <div className="fixed inset-0 z-10" onClick={() => setIsProfileOpen(false)} />
-              <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-neutral-12 border border-neutral-5 dark:border-neutral-10 rounded-xl shadow-sm py-1.5 z-20 overflow-hidden">
+              <div className="absolute right-0 mt-2 w-52 bg-white dark:bg-neutral-12 border border-neutral-5 dark:border-neutral-10 rounded-xl shadow-sm py-1.5 z-20 overflow-hidden">
+                {/* Mobile-only Theme Toggle inside Dropdown */}
+                <div className="lg:hidden flex items-center justify-between px-4 py-2 border-b border-neutral-5 dark:border-neutral-10 mb-1.5">
+                  <span className="text-sm font-medium text-neutral-8 dark:text-neutral-3">Theme Mode</span>
+                  <div className="scale-90 origin-right">
+                    <ThemeToggle />
+                  </div>
+                </div>
                 <button
                   onClick={handleDisconnect}
                   className="w-full text-left px-4 py-2.5 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 flex items-center gap-2.5 transition-colors font-medium"

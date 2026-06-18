@@ -22,10 +22,10 @@ export function TransferCard() {
       </div>
 
       {/* Bottom Row */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between gap-5 sm:gap-4 mt-auto border-t border-transparent">
+      <div className="flex flex-wrap items-center justify-between gap-4 mt-auto border-t border-transparent">
         {/* Security Badge */}
-        <div className="flex items-center gap-2.5 bg-[#fffbeb] text-[#d97706] px-3.5 py-1.5 rounded-md text-[14px] md:text-[15px] font-medium w-max shrink-0">
-          <i className="fi fi-rr-shield-check mt-0.5 text-base"></i>
+        <div className="flex items-start sm:items-center gap-2.5 bg-[#fffbeb] text-[#d97706] px-3.5 py-1.5 rounded-md text-[14px] md:text-[15px] font-medium w-fit">
+          <i className="fi fi-rr-shield-check mt-0.5 text-base shrink-0"></i>
           <span>Transfer mechanism using secure blockchain protocol</span>
         </div>
 
