@@ -3,39 +3,43 @@ import type { NextRequest } from 'next/server';
 
 export function proxy(request: NextRequest) {
   // =============================================================
-  // [DEV MODE] Auth middleware disabled for UI development.
-  // Uncomment the block below to re-enable auth protection.
+  // Auth middleware controlled by environment variable toggle.
+  // Set NEXT_PUBLIC_ENABLE_AUTH_MIDDLEWARE=true to enable route protection.
   // =============================================================
+  const isAuthMiddlewareEnabled = process.env.NEXT_PUBLIC_ENABLE_AUTH_MIDDLEWARE === 'true';
 
-  // // Extract token from cookies using the exact key from lib/auth.ts
-  // const token = request.cookies.get('access_token')?.value;
+  if (isAuthMiddlewareEnabled) {
+    // Extract token from cookies using the exact key from lib/auth.ts
+    const token = request.cookies.get('access_token')?.value;
 
-  // // Define paths that require a connected wallet/authenticated session
-  // const protectedPrefixes = [
-  //   '/dashboard',
-  //   '/sendthr',
-  //   '/create-room',
-  //   '/profile'
-  // ];
+    // Define paths that require a connected wallet/authenticated session
+    const protectedPrefixes = [
+      '/dashboard',
+      '/sendthr',
+      '/community',
+      '/create-room',
+      '/profile'
+    ];
 
-  // // Check if current path matches any of the protected prefixes
-  // const isProtectedPath = protectedPrefixes.some((prefix) =>
-  //   request.nextUrl.pathname.startsWith(prefix)
-  // );
+    // Check if current path matches any of the protected prefixes
+    const isProtectedPath = protectedPrefixes.some((prefix) =>
+      request.nextUrl.pathname.startsWith(prefix)
+    );
 
-  // // Auto-redirect to landing page if unauthorized
-  // if (isProtectedPath && !token) {
-  //   const url = request.nextUrl.clone();
-  //   url.pathname = '/';
-  //   return NextResponse.redirect(url);
-  // }
+    // Auto-redirect to landing page if unauthorized
+    if (isProtectedPath && !token) {
+      const url = request.nextUrl.clone();
+      url.pathname = '/';
+      return NextResponse.redirect(url);
+    }
 
-  // // Auto-redirect to dashboard if user is already authenticated and visits the root login/landing page
-  // if (request.nextUrl.pathname === '/' && token) {
-  //   const url = request.nextUrl.clone();
-  //   url.pathname = '/dashboard';
-  //   return NextResponse.redirect(url);
-  // }
+    // Auto-redirect to dashboard if user is already authenticated and visits the root login/landing page
+    if (request.nextUrl.pathname === '/' && token) {
+      const url = request.nextUrl.clone();
+      url.pathname = '/dashboard';
+      return NextResponse.redirect(url);
+    }
+  }
 
   return NextResponse.next();
 }

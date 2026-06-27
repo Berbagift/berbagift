@@ -1,12 +1,40 @@
 "use client";
 import { useState, useEffect } from 'react';
+
+// Define allowed range values for the TradingView widget
+type Range = "1M" | "1D" | "5D" | "3M" | "6M" | "YTD" | "12M" | "60M" | "ALL" | undefined;
 import { AdvancedRealTimeChart } from 'react-ts-tradingview-widgets'; // Sesuaikan import kamu
 
-export default function ChartComponent({ activeTokenId, activeRange, rangeMapping }) {
+
+
+interface ChartComponentProps {
+  activeTokenId: string;
+  activeRange: string;
+  // Mapping from any activeRange key to a valid Range value
+  rangeMapping: Record<string, Range>;
+}
+
+export default function ChartComponent({ activeTokenId, activeRange, rangeMapping }: ChartComponentProps) {
     const [isMounted, setIsMounted] = useState(false);
+    const [theme, setTheme] = useState<'light' | 'dark'>('dark');
 
     useEffect(() => {
         setIsMounted(true);
+
+        const isDark = document.documentElement.classList.contains('dark');
+        setTheme(isDark ? 'dark' : 'light');
+
+        const observer = new MutationObserver(() => {
+            const isDarkNow = document.documentElement.classList.contains('dark');
+            setTheme(isDarkNow ? 'dark' : 'light');
+        });
+
+        observer.observe(document.documentElement, {
+            attributes: true,
+            attributeFilter: ['class'],
+        });
+
+        return () => observer.disconnect();
     }, []);
 
     if (!isMounted) {
@@ -18,9 +46,9 @@ export default function ChartComponent({ activeTokenId, activeRange, rangeMappin
         <div className="w-full h-[400px] md:h-[500px]">
             <AdvancedRealTimeChart
                 symbol={`${activeTokenId}USD`}
-                theme="dark"
+                theme={theme}
                 autosize
-                range={rangeMapping[activeRange] || "1M"}
+                range={(rangeMapping[activeRange] ?? "1M") as Range}
                 // Tambahkan baris di bawah ini untuk mengunci interval ke harian
                 interval={activeRange === "1M" ? "D" : undefined}
                 hide_side_toolbar={true}

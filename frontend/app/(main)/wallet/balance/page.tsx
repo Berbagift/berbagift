@@ -8,10 +8,12 @@ import { IdrBalanceCard } from '@/components/balance/idr-balance-card';
 import { TopUpBalanceModal } from '@/components/balance/top-up-balance-modal';
 import { TOKENS } from '@/lib/data/tokens';
 import ChartComponent from '@/components/balance/chart-token';
+import { LightweightChart } from '@/components/balance/lightweight-chart';
 
 export default function BalancePage() {
   const [activeTokenId, setActiveTokenId] = useState('XLM');
   const [activeRange, setActiveRange] = useState('1 Month');
+  const [chartMode, setChartMode] = useState<'pro' | 'area'>('area');
   const [isTopUpOpen, setIsTopUpOpen] = useState(false);
   const token = TOKENS[activeTokenId];
 
@@ -37,13 +39,19 @@ export default function BalancePage() {
           onToggleToken={toggleToken}
           activeRange={activeRange}
           onChangeRange={setActiveRange}
+          chartMode={chartMode}
+          onChangeChartMode={setChartMode}
         />
         <div className="w-full h-[400px] md:h-[500px]">
-          <ChartComponent
-            activeTokenId={activeTokenId}
-            activeRange={activeRange}
-            rangeMapping={rangeMapping}
-          />
+          {chartMode === 'pro' ? (
+            <ChartComponent
+              activeTokenId={activeTokenId}
+              activeRange={activeRange}
+              rangeMapping={rangeMapping}
+            />
+          ) : (
+            <LightweightChart activeTokenId={activeTokenId} activeRange={activeRange} />
+          )}
         </div>
       </div>
 

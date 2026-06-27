@@ -2,15 +2,18 @@ import Image from 'next/image';
 import { ChartRangeTabs } from '@/components/balance/chart-range-tabs';
 import { TokenConfig } from '@/lib/data/tokens';
 import { SwapIcon } from '../ui/swap-icon';
+import { CandlestickChart, AreaChart } from 'lucide-react';
 
 interface ChartHeaderProps {
   token: TokenConfig;
   onToggleToken: () => void;
   activeRange: string;
   onChangeRange: (range: string) => void;
+  chartMode?: 'pro' | 'area';
+  onChangeChartMode?: (mode: 'pro' | 'area') => void;
 }
 
-export function ChartHeader({ token, onToggleToken, activeRange, onChangeRange }: ChartHeaderProps) {
+export function ChartHeader({ token, onToggleToken, activeRange, onChangeRange, chartMode = 'pro', onChangeChartMode }: ChartHeaderProps) {
   return (
     <div className="flex flex-col md:flex-row justify-between gap-6 w-full">
       {/* Left side: Balance Information */}
@@ -43,13 +46,42 @@ export function ChartHeader({ token, onToggleToken, activeRange, onChangeRange }
 
       {/* Right side: Controls */}
       <div className="flex flex-col items-start md:items-end justify-between gap-6">
-        <button
-          onClick={onToggleToken}
-          className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-black dark:text-neutral-1 border border-border rounded-md hover:bg-neutral-2 transition-colors"
-        >
-          <SwapIcon></SwapIcon>
-          Change token
-        </button>
+        <div className="flex items-center gap-3 w-full md:w-auto justify-between md:justify-end">
+          {onChangeChartMode && (
+            <div className="flex p-1 bg-neutral-2 dark:bg-neutral-900 rounded-lg">
+              <button
+                onClick={() => onChangeChartMode('pro')}
+                className={`p-1.5 rounded-md transition-colors ${
+                  chartMode === 'pro'
+                    ? 'bg-white dark:bg-neutral-800 text-black dark:text-white shadow-sm'
+                    : 'text-neutral-6 hover:text-black dark:hover:text-white'
+                }`}
+                title="Pro View (Candlestick)"
+              >
+                <CandlestickChart size={18} />
+              </button>
+              <button
+                onClick={() => onChangeChartMode('area')}
+                className={`p-1.5 rounded-md transition-colors ${
+                  chartMode === 'area'
+                    ? 'bg-white dark:bg-neutral-800 text-black dark:text-white shadow-sm'
+                    : 'text-neutral-6 hover:text-black dark:hover:text-white'
+                }`}
+                title="Simple View (Area)"
+              >
+                <AreaChart size={18} />
+              </button>
+            </div>
+          )}
+          
+          <button
+            onClick={onToggleToken}
+            className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-black dark:text-neutral-1 border border-border rounded-md hover:bg-neutral-2 transition-colors shrink-0"
+          >
+            <SwapIcon></SwapIcon>
+            Change token
+          </button>
+        </div>
 
         <ChartRangeTabs activeRange={activeRange} onChangeRange={onChangeRange} />
       </div>
