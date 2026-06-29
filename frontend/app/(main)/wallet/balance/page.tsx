@@ -1,21 +1,26 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { ChartHeader } from '@/components/balance/chart-header';
-import { BalanceChart } from '@/components/balance/balance-chart';
 import { TransferCard } from '@/components/balance/transfer-card';
 import { IdrBalanceCard } from '@/components/balance/idr-balance-card';
 import { TopUpBalanceModal } from '@/components/balance/top-up-balance-modal';
 import { TOKENS } from '@/lib/data/tokens';
 import ChartComponent from '@/components/balance/chart-token';
 import { LightweightChart } from '@/components/balance/lightweight-chart';
+import { useTokens } from '@/lib/api/queries';
 
 export default function BalancePage() {
   const [activeTokenId, setActiveTokenId] = useState('XLM');
   const [activeRange, setActiveRange] = useState('1 Month');
   const [chartMode, setChartMode] = useState<'pro' | 'area'>('area');
   const [isTopUpOpen, setIsTopUpOpen] = useState(false);
-  const token = TOKENS[activeTokenId];
+  const { data: tokenList } = useTokens();
+  const tokenMap = useMemo(
+    () => Object.fromEntries((tokenList ?? Object.values(TOKENS)).map((token) => [token.id, token])),
+    [tokenList]
+  );
+  const token = tokenMap[activeTokenId] ?? TOKENS[activeTokenId];
 
   const toggleToken = () => {
     setActiveTokenId((prev) => (prev === 'XLM' ? 'USDC' : 'XLM'));

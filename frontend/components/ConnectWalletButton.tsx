@@ -7,6 +7,36 @@ import { isConnected as isFreighterConnected, requestAccess, getNetworkDetails, 
 import { useWalletStore } from '@/hooks/use-wallet-state';
 import axios from 'axios';
 import { setAuthToken } from '@/lib/auth';
+import { getErrorMessage } from '@/lib/api/client';
+
+type SignaturePayload = {
+  signedMessage?: unknown;
+  signature?: unknown;
+  type?: string;
+  data?: number[];
+};
+
+function signatureToString(signature: unknown): string {
+  const payload =
+    signature && typeof signature === 'object'
+      ? (signature as SignaturePayload).signedMessage ?? (signature as SignaturePayload).signature ?? signature
+      : signature;
+
+  if (payload instanceof Uint8Array) {
+    return Buffer.from(payload).toString('base64');
+  }
+
+  if (
+    payload &&
+    typeof payload === 'object' &&
+    (payload as SignaturePayload).type === 'Buffer' &&
+    Array.isArray((payload as SignaturePayload).data)
+  ) {
+    return Buffer.from((payload as SignaturePayload).data ?? []).toString('base64');
+  }
+
+  return String(payload);
+}
 
 export function ConnectWalletButton() {
   const router = useRouter();
@@ -15,7 +45,8 @@ export function ConnectWalletButton() {
   const { connect, isConnected: isWalletConnected } = useWalletStore();
 
   useEffect(() => {
-    setMounted(true);
+    const timeoutId = window.setTimeout(() => setMounted(true), 0);
+    return () => window.clearTimeout(timeoutId);
   }, []);
 
   const handleConnect = async () => {
@@ -46,9 +77,8 @@ export function ConnectWalletButton() {
           try {
             const nonceRes = await axios.post(`${apiUrl}/api/auth/nonce`, { wallet_address: address });
             nonceString = nonceRes.data.data.nonce;
-          } catch (err: any) {
-            const msg = err.response?.data?.message || err.message;
-            alert(`Error getting nonce: ${msg}`);
+          } catch (err) {
+            alert(`Error getting nonce: ${getErrorMessage(err)}`);
             return;
           }
 
@@ -63,21 +93,7 @@ export function ConnectWalletButton() {
               return;
             }
 
-            // Extract string safely across different Freighter API versions
-            let signatureStr = typeof signature === 'object' 
-              ? (signature as any).signedMessage || (signature as any).signature 
-              : signature;
-              
-            if (typeof signatureStr === 'object' && signatureStr !== null) {
-              // Convert Buffer/Uint8Array to base64 string
-              if (signatureStr instanceof Uint8Array) {
-                signatureStr = Buffer.from(signatureStr).toString('base64');
-              } else if (signatureStr.type === 'Buffer' && Array.isArray(signatureStr.data)) {
-                signatureStr = Buffer.from(signatureStr.data).toString('base64');
-              } else {
-                signatureStr = String(signatureStr);
-              }
-            }
+            const signatureStr = signatureToString(signature);
             
             // 3. Send signature to backend for verification
             try {
@@ -96,15 +112,14 @@ export function ConnectWalletButton() {
               
               connect(address, userId);
               router.push('/dashboard');
-            } catch (err: any) {
-              const msg = err.response?.data?.message || err.message;
-              alert(`Authentication failed: ${msg}`);
+            } catch (err) {
+              alert(`Authentication failed: ${getErrorMessage(err)}`);
               return;
             }
             
-          } catch (signErr: any) {
+          } catch (signErr) {
             console.error("Signature error:", signErr);
-            alert("Failed to sign message: " + (signErr.message || signErr));
+            alert("Failed to sign message: " + getErrorMessage(signErr));
           }
         } else {
           console.error("Freighter error:", error);

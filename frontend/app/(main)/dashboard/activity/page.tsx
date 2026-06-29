@@ -1,83 +1,35 @@
-import React from 'react';
+'use client';
+
+import React, { useState, useMemo } from 'react';
 import { ActivityTable } from '@/components/dashboard/activity-table';
-import { ActivityRowProps } from '@/components/dashboard/activity-row';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-
-const ALL_ACTIVITY_DATA: ActivityRowProps[] = [
-  {
-    icon: 'fi fi-rr-download',
-    iconBgClass: 'bg-[#fffbeb]',
-    iconColorClass: 'text-[#f59e0b]',
-    type: 'Received token',
-    details: 'From @raka',
-    amount: '120 XLM',
-    status: 'success',
-    time: '2 minutes ago',
-  },
-  {
-    icon: 'fi fi-rr-shuffle',
-    iconBgClass: 'bg-[#eff6ff]',
-    iconColorClass: 'text-[#3b82f6]',
-    type: 'Swap token',
-    details: 'XLM to USDC',
-    amount: '200 XLM',
-    status: 'success',
-    time: '3 days ago',
-  },
-  {
-    icon: 'fi fi-rr-paper-plane',
-    iconBgClass: 'bg-[#eafdf0]',
-    iconColorClass: 'text-[#16a34a]',
-    type: 'Sent token',
-    details: 'To @erikghafari',
-    amount: '180 XLM',
-    status: 'processing',
-    time: '6 days ago',
-  },
-  {
-    icon: 'fi fi-rr-gift',
-    iconBgClass: 'bg-[#f6eefe]',
-    iconColorClass: 'text-[#a855f7]',
-    type: 'Gift claim',
-    details: 'Ramadhan Berkah Room',
-    amount: '1,254 XLM',
-    status: 'expired',
-    time: '2 weeks ago',
-  },
-  {
-    icon: 'fi fi-rr-download',
-    iconBgClass: 'bg-[#fffbeb]',
-    iconColorClass: 'text-[#f59e0b]',
-    type: 'Received token',
-    details: 'From @johndoe',
-    amount: '50 XLM',
-    status: 'success',
-    time: '3 weeks ago',
-  },
-  {
-    icon: 'fi fi-rr-paper-plane',
-    iconBgClass: 'bg-[#eafdf0]',
-    iconColorClass: 'text-[#16a34a]',
-    type: 'Sent token',
-    details: 'To @sarah',
-    amount: '10 USDC',
-    status: 'success',
-    time: '1 month ago',
-  },
-  {
-    icon: 'fi fi-rr-apps-add',
-    iconBgClass: 'bg-[#eff6ff]',
-    iconColorClass: 'text-[#3b82f6]',
-    type: 'Created Room',
-    details: 'Weekly Giveaway',
-    amount: '0 XLM',
-    status: 'success',
-    time: '1 month ago',
-  },
-];
+import { useActivities } from '@/lib/api/queries';
 
 export default function AllActivityPage() {
+  const [searchQuery, setSearchQuery] = useState('');
+  const { data: activities = [], isLoading } = useActivities();
+
+  // Local filter for search query
+  const filteredActivities = useMemo(() => {
+    if (!searchQuery.trim()) return activities;
+    const query = searchQuery.toLowerCase();
+    return activities.filter(
+      (act) =>
+        act.type.toLowerCase().includes(query) ||
+        act.details.toLowerCase().includes(query) ||
+        act.amount.toLowerCase().includes(query)
+    );
+  }, [activities, searchQuery]);
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-secondary-500"></div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6 md:space-y-8 pb-6 md:pb-8">
       {/* Top Action Row */}
@@ -87,6 +39,8 @@ export default function AllActivityPage() {
           <Input 
             type="text" 
             placeholder="Search activity..." 
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-10 h-10 rounded-md border-border bg-white dark:bg-card"
           />
         </div>
@@ -98,7 +52,7 @@ export default function AllActivityPage() {
 
       {/* Table Container */}
       <div className="border border-border rounded-md p-5 bg-white dark:bg-card">
-        <ActivityTable data={ALL_ACTIVITY_DATA} />
+        <ActivityTable data={filteredActivities} />
       </div>
     </div>
   );

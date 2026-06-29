@@ -2,14 +2,9 @@
 
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
-import { getAuthToken, removeAuthToken } from '@/lib/auth';
-import { useWalletStore } from '@/hooks/use-wallet-state';
-import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { getAuthToken } from '@/lib/auth';
 
 export function useUserProfile() {
-  const router = useRouter();
-  
   const query = useQuery({
     queryKey: ['userProfile'],
     queryFn: async () => {

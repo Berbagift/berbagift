@@ -1,85 +1,38 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
-import { Room, roomService } from '@/services/room.service';
+import { useState, useMemo } from 'react';
 import { RoomFilterTabs } from '@/components/rooms/RoomFilterTabs';
 import { RoomSearch } from '@/components/rooms/RoomSearch';
 import { RoomGrid } from '@/components/rooms/RoomGrid';
 import { RoomCard } from '@/components/rooms/RoomCard';
 import { EmptyState } from '@/components/rooms/EmptyState';
 import { useRouter } from 'next/navigation';
+import { useRooms } from '@/lib/api/queries';
 
 export default function ExploreRoomsPage() {
   const router = useRouter();
-  const [allRooms, setAllRooms] = useState<Room[]>([]);
   const [activeFilter, setActiveFilter] = useState('All Rooms');
   const [searchQuery, setSearchQuery] = useState('');
-  const [isLoading, setIsLoading] = useState(true);
+  const [savedRoomIds, setSavedRoomIds] = useState<string[]>([]);
 
-  // Fetch all rooms initially
-  useEffect(() => {
-    let isMounted = true;
-    const fetchRooms = async () => {
-      setIsLoading(true);
-      try {
-        const data = await roomService.getRooms();
-        if (isMounted) {
-          setAllRooms(data);
-        }
-      } catch (error) {
-        console.error("Failed to fetch rooms:", error);
-      } finally {
-        if (isMounted) {
-          setIsLoading(false);
-        }
-      }
-    };
+  // Fetch rooms reactively via TanStack Query
+  const { data: rooms = [], isLoading } = useRooms({
+    status: activeFilter,
+    search: searchQuery,
+  });
 
-    fetchRooms();
-
-    return () => {
-      isMounted = false;
-    };
-  }, []);
-
-  // Filter and search logic
-  const filteredRooms = useMemo(() => {
-    let result = allRooms;
-
-    // Apply Filter Tab
-    switch (activeFilter) {
-      case 'Upcoming':
-        result = result.filter(r => r.status === 'Upcoming');
-        break;
-      case 'High Rewards':
-        result = result.filter(r => r.isHighReward);
-        break;
-      case 'Saved Rooms':
-        result = result.filter(r => r.isSaved);
-        break;
-      case 'All Rooms':
-      default:
-        break;
-    }
-
-    // Apply Search Query
-    if (searchQuery.trim() !== '') {
-      const lowerQuery = searchQuery.toLowerCase();
-      result = result.filter(
-        (room) =>
-          room.title.toLowerCase().includes(lowerQuery) ||
-          room.description.toLowerCase().includes(lowerQuery) ||
-          room.creator.username.toLowerCase().includes(lowerQuery)
-      );
-    }
-
-    return result;
-  }, [allRooms, activeFilter, searchQuery]);
+  // Calculate local client saved state changes overlaying query results
+  const processedRooms = useMemo(() => {
+    return rooms.map((room) => ({
+      ...room,
+      isSaved: savedRoomIds.includes(room.id) ? !room.isSaved : room.isSaved,
+    }));
+  }, [rooms, savedRoomIds]);
 
   const handleSaveRoom = (id: string) => {
-    setAllRooms(prev => prev.map(room =>
-      room.id === id ? { ...room, isSaved: !room.isSaved } : room
-    ));
+    setSavedRoomIds((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+    );
   };
 
   const handleJoinRoom = (id: string) => {
@@ -119,9 +72,9 @@ export default function ExploreRoomsPage() {
           <div className="flex justify-center items-center h-64">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-secondary-500"></div>
           </div>
-        ) : filteredRooms.length > 0 ? (
+        ) : processedRooms.length > 0 ? (
           <RoomGrid>
-            {filteredRooms.map((room) => (
+            {processedRooms.map((room) => (
               <RoomCard
                 key={room.id}
                 room={room}

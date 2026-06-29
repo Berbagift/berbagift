@@ -5,15 +5,18 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useSendThrStore } from "@/hooks/use-send-thr-state";
 import { PRESET_ENVELOPES } from "@/lib/data/envelopes";
+import { useEnvelopes } from "@/lib/api/queries";
 
 export function EnvelopePreview() {
   const router = useRouter();
   const state = useSendThrStore();
+  const { data: envelopes } = useEnvelopes();
+  const presetEnvelopes = envelopes?.length ? envelopes : PRESET_ENVELOPES;
 
   // Determine active background image
-  let bgUrl = PRESET_ENVELOPES[0].imageUrl;
+  let bgUrl = presetEnvelopes[0].imageUrl;
   if (state.uploadMode === "preset" && state.selectedTemplateId) {
-    const preset = PRESET_ENVELOPES.find(
+    const preset = presetEnvelopes.find(
       (p) => p.id === state.selectedTemplateId,
     );
     if (preset) bgUrl = preset.imageUrl;

@@ -2,7 +2,6 @@
 
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
-import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 
 const SIDEBAR_NAV = [
@@ -67,6 +66,7 @@ export function Sidebar({ isOpen, onClose, isDesktopOpen = true, onDesktopToggle
       )}>
         {/* Mobile Logo */}
         <Link href="/dashboard" className="flex lg:hidden items-center gap-2" onClick={onClose}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="https://placehold.co/40x40/transparent/000000?text=B" alt="Berbagift Logo" className="h-8 w-8 object-contain" />
           <div className="text-2xl font-medium flex items-center">
             <span className="text-primary-500">Berbagift</span>
@@ -84,6 +84,7 @@ export function Sidebar({ isOpen, onClose, isDesktopOpen = true, onDesktopToggle
           {isDesktopOpen ? (
             <>
               <Link href="/dashboard" className="flex items-center gap-2">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src="https://placehold.co/40x40/transparent/000000?text=B" alt="Berbagift Logo" className="h-8 w-8 object-contain" />
                 <div className="text-2xl font-medium flex items-center">
                   <span className="text-primary-500">Berbagift</span>

@@ -1,7 +1,5 @@
 'use client';
 
-import { useState } from 'react';
-
 const RANGES = ['1 Day', '1 Week', '1 Month', '1 Year', '3 Year', '5 Year'];
 
 interface ChartRangeTabsProps {

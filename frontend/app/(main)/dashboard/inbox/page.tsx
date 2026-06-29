@@ -54,7 +54,7 @@ export default function InboxPage() {
         <div className="w-16 h-16 rounded-full bg-neutral-2 dark:bg-neutral-10 flex items-center justify-center mb-4">
           <i className="fi fi-rr-envelope-open text-3xl text-neutral-5 mt-[2px]" />
         </div>
-        <h3 className="text-lg font-medium text-black dark:text-neutral-1 mb-1">You're all caught up</h3>
+        <h3 className="text-lg font-medium text-black dark:text-neutral-1 mb-1">You&apos;re all caught up</h3>
         <p className="text-neutral-7 dark:text-neutral-6 text-sm">No new notifications right now</p>
       </div>
     </div>

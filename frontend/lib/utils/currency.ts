@@ -36,8 +36,12 @@ export const formatAmount = (numStr: string): string => {
  */
 export const calculateConversion = (amount: number, fromTokenId: string, toTokenId: string): string => {
   if (isNaN(amount) || amount <= 0) return '';
+  if (fromTokenId === toTokenId) return formatAmount(amount.toFixed(2));
   
-  const rate = fromTokenId === 'XLM' ? EXCHANGE_RATES.XLM_TO_USDC : EXCHANGE_RATES.USDC_TO_XLM;
+  const rate =
+    fromTokenId === 'XLM' && toTokenId === 'USDC'
+      ? EXCHANGE_RATES.XLM_TO_USDC
+      : EXCHANGE_RATES.USDC_TO_XLM;
   const converted = (amount * rate).toFixed(2);
   
   return formatAmount(converted);

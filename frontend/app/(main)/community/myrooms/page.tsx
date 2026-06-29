@@ -2,51 +2,44 @@
 
 import React, { useState, useMemo } from 'react';
 import Link from 'next/link';
-import { MyRoom, MyRoomCard } from '@/components/rooms/MyRoomCard';
+import { MyRoomCard } from '@/components/rooms/MyRoomCard';
 import { RoomSearch } from '@/components/rooms/RoomSearch';
 import { RoomGrid } from '@/components/rooms/RoomGrid';
-
-const MOCK_MY_ROOMS: MyRoom[] = [
-  {
-    id: 'myroom-1',
-    title: 'Mau Bagi Hadiah 😊',
-    description: 'Buat 3 orang yang paling cepet mencet tombol claim bisa menang, oke gas!',
-    rewardPool: '100 XLM',
-    winners: 3,
-    participants: ['NB', 'AF', 'MH', 'EG', 'FH'],
-    joined: 0,
-    maxParticipants: 10,
-    status: 'Active',
-    dateText: '1 June 2026',
-  },
-  {
-    id: 'myroom-2',
-    title: 'Share More, Give More',
-    description: '150 XLM for 5 fastest user, lets gowww!!!! make sure your ready',
-    rewardPool: '150 XLM',
-    winners: 5,
-    participants: ['NB', 'AF', 'MH', 'EG', 'FH'],
-    joined: 15,
-    maxParticipants: 15,
-    status: 'Completed',
-    dateText: '31 May 2026',
-  },
-  {
-    id: 'myroom-3',
-    title: 'Lorem ipsum',
-    description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit,',
-    rewardPool: '150 XLM',
-    winners: 5,
-    participants: ['NB', 'AF', 'MH', 'EG', 'FH'],
-    joined: 15,
-    maxParticipants: 15,
-    status: 'Draft',
-    dateText: '31 May 2026',
-  },
-];
+import { useRooms } from '@/lib/api/queries';
 
 export default function MyRoomsPage() {
   const [searchQuery, setSearchQuery] = useState('');
+  
+  const { data: rooms = [], isLoading: isRoomsLoading } = useRooms();
+
+  const myRooms = useMemo(() => {
+    // Filter rooms belonging to user (starting with mock myroom prefix ID)
+    return rooms
+      .filter((room) => room.id.toString().startsWith('myroom'))
+      .map((room) => {
+        let mappedStatus: 'Active' | 'Completed' | 'Draft' = 'Active';
+        if (room.status === 'Completed') {
+          mappedStatus = 'Completed';
+        } else if (room.status === 'Draft') {
+          mappedStatus = 'Draft';
+        }
+
+        return {
+          id: room.id,
+          title: room.title,
+          description: room.description,
+          rewardPool: room.rewardPool,
+          winners: room.winners,
+          participants: room.participants || [],
+          joined: room.joined,
+          maxParticipants: room.maxParticipants,
+          status: mappedStatus,
+          dateText: room.statusText || 'N/A',
+        };
+      });
+  }, [rooms]);
+
+  const isLoading = isRoomsLoading;
 
   const handleEdit = (id: string) => {
     alert(`Editing room ${id}`);
@@ -66,14 +59,22 @@ export default function MyRoomsPage() {
 
   // Filter list of rooms based on search query
   const filteredRooms = useMemo(() => {
-    if (!searchQuery.trim()) return MOCK_MY_ROOMS;
+    if (!searchQuery.trim()) return myRooms;
     const query = searchQuery.toLowerCase();
-    return MOCK_MY_ROOMS.filter(
+    return myRooms.filter(
       (room) =>
         room.title.toLowerCase().includes(query) ||
         room.description.toLowerCase().includes(query)
     );
-  }, [searchQuery]);
+  }, [myRooms, searchQuery]);
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-secondary-500"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col bg-background pb-10 animate-in fade-in slide-in-from-bottom-4 duration-500">

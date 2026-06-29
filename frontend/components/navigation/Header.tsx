@@ -1,9 +1,8 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import { usePathname, useParams, useRouter } from "next/navigation";
-import { roomService } from "@/services/room.service";
 import { ThemeToggle } from "@/components/shared/ThemeToggle";
 import { useWalletStore } from "@/hooks/use-wallet-state";
 import { removeAuthToken } from "@/lib/auth";
@@ -17,7 +16,7 @@ interface HeaderProps {
 
 import { Breadcrumbs, ROUTE_BREADCRUMBS } from "@/components/navigation/Breadcrumbs";
 
-export function Header({ onMenuClick, isDesktopSidebarOpen = true, onDesktopToggle }: HeaderProps) {
+export function Header({ onMenuClick, isDesktopSidebarOpen = true }: HeaderProps) {
   const pathname = usePathname();
   const params = useParams();
   const router = useRouter();
@@ -91,6 +90,7 @@ export function Header({ onMenuClick, isDesktopSidebarOpen = true, onDesktopTogg
           <div className="hidden lg:flex items-center gap-3 mr-2">
 
             <Link href="/dashboard" className="flex items-center gap-2">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="https://placehold.co/40x40/transparent/000000?text=B" alt="Berbagift Logo" className="h-6 w-6 object-contain" />
               <div className="text-xl font-medium flex items-center">
                 <span className="text-primary-500">Berbagift</span>

@@ -19,10 +19,11 @@ export default function ChartComponent({ activeTokenId, activeRange, rangeMappin
     const [theme, setTheme] = useState<'light' | 'dark'>('dark');
 
     useEffect(() => {
-        setIsMounted(true);
-
         const isDark = document.documentElement.classList.contains('dark');
-        setTheme(isDark ? 'dark' : 'light');
+        const timeoutId = window.setTimeout(() => {
+            setIsMounted(true);
+            setTheme(isDark ? 'dark' : 'light');
+        }, 0);
 
         const observer = new MutationObserver(() => {
             const isDarkNow = document.documentElement.classList.contains('dark');
@@ -34,7 +35,10 @@ export default function ChartComponent({ activeTokenId, activeRange, rangeMappin
             attributeFilter: ['class'],
         });
 
-        return () => observer.disconnect();
+        return () => {
+            window.clearTimeout(timeoutId);
+            observer.disconnect();
+        };
     }, []);
 
     if (!isMounted) {

@@ -1,4 +1,4 @@
-import { Room } from '@/services/room.service';
+import { Room } from '@/lib/api/types';
 import { RoomStats } from './RoomStats';
 import { ParticipantStack } from './ParticipantStack';
 import { RoomActions } from './RoomActions';

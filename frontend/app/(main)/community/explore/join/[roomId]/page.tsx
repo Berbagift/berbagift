@@ -1,62 +1,40 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { roomService } from '@/services/room.service';
 import { RoomStatsCard } from '@/components/rooms/detail/RoomStatsCard';
 import { ClaimInstructionSection } from '@/components/rooms/detail/ClaimInstructionSection';
 import { LiveActivityCard } from '@/components/rooms/detail/LiveActivityCard';
+import { useRoomDetail, useRoomActivities, useClaimReward } from '@/lib/api/queries';
+import { getErrorMessage } from '@/lib/api/client';
 
 export default function RoomDetailPage() {
   const params = useParams();
   const roomId = params.roomId as string;
-
-  const [roomData, setRoomData] = useState<any>(null);
-  const [activities, setActivities] = useState<any[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-
   const router = useRouter();
 
-  useEffect(() => {
-    let isMounted = true;
-    const fetchData = async () => {
-      setIsLoading(true);
-      try {
-        const [detail, activity] = await Promise.all([
-          roomService.getRoomDetail(roomId),
-          roomService.getRoomActivity(roomId)
-        ]);
-        
-        if (isMounted) {
-          setRoomData(detail);
-          setActivities(activity);
-        }
-      } catch (error) {
-        console.error("Failed to fetch room detail:", error);
-      } finally {
-        if (isMounted) {
-          setIsLoading(false);
-        }
-      }
-    };
-
-    if (roomId) {
-      fetchData();
-    }
-
-    return () => {
-      isMounted = false;
-    };
-  }, [roomId]);
+  // Fetch detail and activities via TanStack Query
+  const { data: roomData, isLoading: isDetailLoading } = useRoomDetail(roomId);
+  const { data: activities = [], isLoading: isActivitiesLoading } = useRoomActivities(roomId);
+  
+  const claimMutation = useClaimReward();
 
   const handleClaim = () => {
-    console.log("Claim button clicked for room:", roomId);
-    // Add real API interaction later
+    console.log("Claiming reward for room:", roomId);
+    claimMutation.mutate(roomId, {
+      onSuccess: (res) => {
+        alert(res.txHash ? `Claim successful! Tx Hash: ${res.txHash}` : "Claim successful!");
+      },
+      onError: (err) => {
+        alert(getErrorMessage(err, "Claim failed. Please try again."));
+      }
+    });
   };
 
   const handleLeave = () => {
     router.push('/community/explore');
   };
+
+  const isLoading = isDetailLoading || isActivitiesLoading;
 
   if (isLoading) {
     return (

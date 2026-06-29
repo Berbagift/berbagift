@@ -1,4 +1,3 @@
-import Image from 'next/image';
 import { ChartRangeTabs } from '@/components/balance/chart-range-tabs';
 import { TokenConfig } from '@/lib/data/tokens';
 import { SwapIcon } from '../ui/swap-icon';

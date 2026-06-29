@@ -8,28 +8,23 @@ export function ThemeToggle() {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    setMounted(true);
     const stored = localStorage.getItem('theme');
     if (stored === 'dark' || (!stored && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-      setTheme('dark');
       document.documentElement.classList.add('dark');
+      const timeoutId = window.setTimeout(() => {
+        setTheme('dark');
+        setMounted(true);
+      }, 0);
+      return () => window.clearTimeout(timeoutId);
     } else {
-      setTheme('light');
       document.documentElement.classList.remove('dark');
+      const timeoutId = window.setTimeout(() => {
+        setTheme('light');
+        setMounted(true);
+      }, 0);
+      return () => window.clearTimeout(timeoutId);
     }
   }, []);
-
-  const toggleTheme = () => {
-    const newTheme = theme === 'light' ? 'dark' : 'light';
-    setTheme(newTheme);
-    localStorage.setItem('theme', newTheme);
-
-    if (newTheme === 'dark') {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-  };
 
   if (!mounted) {
     return <div className="w-8 h-8" />; // Placeholder to prevent layout shift

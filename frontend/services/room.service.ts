@@ -61,14 +61,16 @@ export const roomService = {
     return filtered;
   },
 
-  getRoomDetail: async (roomId: string) => {
+  getRoomDetail: async (_roomId: string) => {
+    void _roomId;
     // Dynamically import the detail mock data. We return it regardless of ID since it's a mock.
     await new Promise((resolve) => setTimeout(resolve, 300));
     const detailData = await import('../mockapi/room-detail.json');
     return detailData.default;
   },
 
-  getRoomActivity: async (roomId: string) => {
+  getRoomActivity: async (_roomId: string) => {
+    void _roomId;
     // Dynamically import activity mock data
     await new Promise((resolve) => setTimeout(resolve, 300));
     const activityData = await import('../mockapi/room-activity.json');

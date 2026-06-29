@@ -14,6 +14,21 @@ export interface BinanceKline {
   close: number;
 }
 
+type BinanceKlineResponse = [
+  number,
+  string,
+  string,
+  string,
+  string,
+  string,
+  number,
+  string,
+  number,
+  string,
+  string,
+  string
+];
+
 export const fetchBinanceKlines = async (
   symbol: string,
   interval: string,
@@ -26,7 +41,7 @@ export const fetchBinanceKlines = async (
   if (symbol === 'USDC') binanceSymbol = 'USDCUSDT';
   if (symbol === 'XLM') binanceSymbol = 'XLMUSDT';
 
-  const { data } = await binanceClient.get<any[][]>('/klines', {
+  const { data } = await binanceClient.get<BinanceKlineResponse[]>('/klines', {
     params: {
       symbol: binanceSymbol,
       interval,

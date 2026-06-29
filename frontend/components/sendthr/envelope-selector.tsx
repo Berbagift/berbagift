@@ -4,9 +4,12 @@ import { PRESET_ENVELOPES } from '@/lib/data/envelopes';
 import { EnvelopeTemplateCard } from './envelope-template-card';
 import { UploadSection } from './upload-section';
 import { cn } from '@/lib/utils';
+import { useEnvelopes } from '@/lib/api/queries';
 
 export function EnvelopeSelector() {
   const state = useSendThrStore();
+  const { data: envelopes } = useEnvelopes();
+  const presetEnvelopes = envelopes?.length ? envelopes : PRESET_ENVELOPES;
 
   return (
     <div className="flex flex-col gap-4 sm:gap-6">
@@ -46,7 +49,7 @@ export function EnvelopeSelector() {
       <div className="pt-2">
         {state.uploadMode === 'preset' ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {PRESET_ENVELOPES.map((template) => (
+            {presetEnvelopes.map((template) => (
               <EnvelopeTemplateCard
                 key={template.id}
                 template={template}

@@ -1,3 +1,5 @@
+import tokensData from '@/mockapi/tokens.json';
+
 export interface ChartDataPoint {
   date: string;
   balance: number;
@@ -15,53 +17,10 @@ export interface TokenConfig {
   chartData: ChartDataPoint[];
 }
 
-export const TOKENS: Record<string, TokenConfig> = {
-  XLM: {
-    id: 'XLM',
-    symbol: 'XLM',
-    name: 'Stellar Lumens',
-    logoIcon: 'fi-rr-rocket',
-    logoBg: 'bg-black',
-    balance: 565.76,
-    equivalentIdr: 1565999,
-    percentageChange: 10,
-    chartData: [
-      { date: 'Jan', balance: 105 },
-      { date: 'Feb', balance: 270 },
-      { date: 'Mar', balance: 240 },
-      { date: 'Apr', balance: 310 },
-      { date: 'May', balance: 150 },
-      { date: 'Jun', balance: 210 },
-      { date: 'Jul', balance: 375 },
-      { date: 'Aug', balance: 265 },
-      { date: 'Sep', balance: 380 },
-      { date: 'Oct', balance: 340 },
-      { date: 'Nov', balance: 255 },
-      { date: 'Des', balance: 405 },
-    ],
+export const TOKENS: Record<string, TokenConfig> = (tokensData as TokenConfig[]).reduce(
+  (acc, token) => {
+    acc[token.id] = token;
+    return acc;
   },
-  USDC: {
-    id: 'USDC',
-    symbol: 'USDC',
-    name: 'USD Coin',
-    logoIcon: 'fi-rr-dollar',
-    logoBg: 'bg-blue-600',
-    balance: 895.76,
-    equivalentIdr: 2565999,
-    percentageChange: 13,
-    chartData: [
-      { date: 'Jan', balance: 200 },
-      { date: 'Feb', balance: 220 },
-      { date: 'Mar', balance: 190 },
-      { date: 'Apr', balance: 250 },
-      { date: 'May', balance: 280 },
-      { date: 'Jun', balance: 260 },
-      { date: 'Jul', balance: 310 },
-      { date: 'Aug', balance: 350 },
-      { date: 'Sep', balance: 330 },
-      { date: 'Oct', balance: 410 },
-      { date: 'Nov', balance: 390 },
-      { date: 'Des', balance: 450 },
-    ],
-  },
-};
+  {} as Record<string, TokenConfig>
+);

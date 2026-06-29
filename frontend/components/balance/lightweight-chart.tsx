@@ -1,8 +1,8 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import { createChart, ColorType, IChartApi, ISeriesApi, AreaSeries, LineType, Time } from 'lightweight-charts';
-import { useBinanceKlinesInfinite } from '@/lib/api/hooks/useBinanceKlinesInfinite';
+import { createChart, ColorType, IChartApi, ISeriesApi, AreaSeries, LineType, Time, LogicalRange } from 'lightweight-charts';
+import { useBinanceKlinesInfinite } from '@/lib/api/queries';
 
 interface LightweightChartProps {
   activeTokenId: string;
@@ -79,7 +79,7 @@ export function LightweightChart({ activeTokenId, activeRange }: LightweightChar
     seriesRef.current = newSeries;
 
     // Set up Infinite Scroll Listener
-    const handleVisibleLogicalRangeChange = (newRange: any) => {
+    const handleVisibleLogicalRangeChange = (newRange: LogicalRange | null) => {
       if (!newRange) return;
 
       // Only trigger if the initial visible range has been set to avoid race conditions on mount
