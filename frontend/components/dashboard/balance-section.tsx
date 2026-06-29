@@ -50,25 +50,25 @@ export function BalanceSection() {
       title: 'XLM Balance',
       amount: `${xlmAmount.toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 5 })} XLM`,
       subtitle: `Equal to Rp ${xlmIdr.toLocaleString('id-ID')}`,
-      logoSrc: 'https://placehold.co/80x80/000000/FFFFFF?text=XLM',
+      symbol: 'XLM',
     },
     {
       title: 'USDC Balance',
       amount: `${usdcAmount.toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USDC`,
       subtitle: `Equal to Rp ${usdcIdr.toLocaleString('id-ID')}`,
-      logoSrc: 'https://placehold.co/80x80/2563EB/FFFFFF?text=USDC',
+      symbol: 'USDC',
     },
     {
       title: 'IDR Balance',
       amount: `Rp ${totalIdr.toLocaleString('id-ID')}`,
       subtitle: `Equal to ${totalXlm.toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} XLM`,
-      logoSrc: 'https://placehold.co/80x80/F59E0B/FFFFFF?text=IDR',
+      symbol: 'IDR',
     },
     {
       title: 'Total THR Received',
       amount: 'Rp 4.500.000', // Mocked or calculated later
       subtitle: `Equal to ${(4500000 / xlmPriceIdr).toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} XLM`,
-      logoSrc: 'https://placehold.co/80x80/A855F7/FFFFFF?text=THR',
+      symbol: 'THR',
     },
   ];
 

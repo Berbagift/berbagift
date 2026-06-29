@@ -2,6 +2,7 @@ import { ChartRangeTabs } from '@/components/balance/chart-range-tabs';
 import { TokenConfig } from '@/lib/data/tokens';
 import { SwapIcon } from '../ui/swap-icon';
 import { CandlestickChart, AreaChart } from 'lucide-react';
+import { TokenLogo } from '../ui/token-logo';
 
 interface ChartHeaderProps {
   token: TokenConfig;
@@ -23,9 +24,7 @@ export function ChartHeader({ token, onToggleToken, activeRange, onChangeRange, 
 
         <div className="flex items-start gap-4">
           {/* Logo */}
-          <div className={`${token.logoBg} rounded-full flex items-center justify-center w-16 h-16 shrink-0 text-white mt-1`}>
-            <i className={`fi ${token.logoIcon} text-2xl`}></i>
-          </div>
+          <TokenLogo symbol={token.symbol} size="xl" className="mt-1" />
 
           <div className="flex flex-col">
             <span className="text-2xl sm:text-3xl md:text-[44px] font-semibold text-black dark:text-neutral-1 tracking-tight leading-none mb-3">

@@ -57,7 +57,7 @@ export function EnvelopePreview() {
       {/* Preview Card Container (Container 2a with border) */}
       <div className="border border-border rounded-lg p-6 bg-white dark:bg-card flex flex-col flex-1">
         <div className="flex items-center gap-2 mb-6 text-[#16a34a] shrink-0">
-          <i className="fi fi-rr-eye text-base mt-0.5 animate-pulse"></i>
+          <i className="fi fi-rr-eye text-base mt-0.5"></i>
           <span className="text-base font-medium">Live Preview</span>
         </div>
 

@@ -20,7 +20,7 @@ export default function Home() {
 
       {/* Minimalist Hero */}
       <main className="flex-1 flex flex-col items-center justify-center p-6 text-center">
-        <div className="max-w-2xl space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700 pt-10">
+        <div className="max-w-2xl space-y-6 pt-10">
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-semibold tracking-tight leading-[1.15]">
             Reward communities <br className="hidden md:block" />
             <span className="text-primary">beautifully.</span>
@@ -30,7 +30,7 @@ export default function Home() {
           </p>
           <div className="pt-6">
             <Link href="/dashboard">
-              <Button size="lg" className="rounded-full px-8 h-12 text-[15px] font-medium shadow-sm transition-all hover:-translate-y-0.5">
+              <Button size="lg" className="rounded-full px-8 h-12 text-[15px] font-medium shadow-sm">
                 Get Started
                 <i className="fi fi-rr-arrow-right ml-2 mt-[1px]"></i>
               </Button>

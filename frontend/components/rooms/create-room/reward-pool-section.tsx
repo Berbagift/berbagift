@@ -4,6 +4,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { TOKENS } from '@/lib/data/tokens';
 import { isValidDecimalInput } from '@/lib/utils/currency';
+import { TokenLogo } from '@/components/ui/token-logo';
 
 interface RewardPoolSectionProps {
   tokenId: string;
@@ -40,7 +41,7 @@ export function RewardPoolSection({
 
   return (
     <div className="border border-border rounded-md p-4 sm:p-5 flex flex-col gap-3 bg-white dark:bg-card mt-2">
-      <span className="text-neutral-8 dark:text-neutral-3 font-medium text-[14px]">
+      <span className="text-black dark:text-neutral-1 font-medium text-base">
         Set Reward Pool
       </span>
       <div className="flex gap-3">
@@ -53,10 +54,8 @@ export function RewardPoolSection({
             className="flex items-center justify-between gap-2 px-3 py-2.5 border border-border rounded-md bg-white dark:bg-card hover:bg-neutral-2 dark:hover:bg-neutral-10 cursor-pointer shrink-0 w-[115px] sm:w-[130px] transition-colors"
           >
             <div className="flex items-center gap-2">
-              <div className={cn("w-6 h-6 rounded-full flex items-center justify-center text-white shrink-0", activeToken.logoBg)}>
-                <i className={cn(activeToken.logoIcon, "text-[11px] mt-0.5")}></i>
-              </div>
-              <span className="font-semibold text-black dark:text-neutral-1 text-sm">{activeToken.symbol}</span>
+              <TokenLogo symbol={activeToken.symbol} size="sm" />
+              <span className="font-semibold text-neutral-9 dark:text-neutral-2 text-base">{activeToken.symbol}</span>
             </div>
             <i className="fi fi-rr-angle-small-down text-neutral-7 dark:text-neutral-6 mt-0.5"></i>
           </button>
@@ -75,10 +74,8 @@ export function RewardPoolSection({
                   className="w-full flex items-center justify-between px-3 py-2 hover:bg-neutral-2 dark:hover:bg-neutral-10 transition-colors text-left"
                 >
                   <div className="flex items-center gap-2">
-                    <div className={cn("w-6 h-6 rounded-full flex items-center justify-center text-white shrink-0", t.logoBg)}>
-                      <i className={cn(t.logoIcon, "text-[11px] mt-0.5")}></i>
-                    </div>
-                    <span className="font-medium text-black dark:text-neutral-1 text-sm">{t.symbol}</span>
+                    <TokenLogo symbol={t.symbol} size="sm" />
+                    <span className="font-medium text-neutral-9 dark:text-neutral-2 text-base">{t.symbol}</span>
                   </div>
                   {t.id === tokenId && (
                     <i className="fi fi-rr-check text-[#16a34a] text-xs"></i>
@@ -102,7 +99,7 @@ export function RewardPoolSection({
               }
             }}
             placeholder="0"
-            className="w-full bg-transparent border-none outline-none font-medium text-black dark:text-neutral-1 placeholder:text-neutral-6 text-sm"
+            className="w-full bg-transparent border-none outline-none font-medium text-neutral-9 dark:text-neutral-2 placeholder:text-neutral-6 text-base"
           />
         </div>
       </div>

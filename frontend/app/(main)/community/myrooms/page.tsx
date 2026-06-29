@@ -77,7 +77,7 @@ export default function MyRoomsPage() {
   }
 
   return (
-    <div className="flex flex-col bg-background pb-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <div className="flex flex-col bg-background pb-10">
       {/* Header Section (Matching style of Explore Rooms, but without filter chips) */}
       <div className="flex flex-col gap-6 pb-6 border-b border-border bg-background mb-8">
         <div className="flex flex-col md:flex-row md:items-start justify-between gap-6">

@@ -33,7 +33,7 @@ export function ActivityRow({
         <div className="flex flex-row items-center justify-between w-full">
           <div className="flex items-center gap-3">
             <div className={cn("w-8 h-8 rounded-md flex items-center justify-center flex-shrink-0", iconBgClass, iconColorClass)}>
-              <i className={icon} />
+              <i className={cn(icon, "mt-1")} />
             </div>
             <span className="font-medium text-black dark:text-neutral-1">{type}</span>
           </div>
@@ -58,7 +58,7 @@ export function ActivityRow({
       <div className={cn("hidden md:grid grid-cols-5 items-center gap-4 py-4 px-6 text-sm", !isLast && "border-b border-border")}>
         <div className="col-span-1 flex items-center gap-3">
           <div className={cn("w-8 h-8 rounded-md flex items-center justify-center flex-shrink-0", iconBgClass, iconColorClass)}>
-            <i className={icon} />
+            <i className={cn(icon, "mt-1")} />
           </div>
           <span className="font-medium text-black dark:text-neutral-1">{type}</span>
         </div>

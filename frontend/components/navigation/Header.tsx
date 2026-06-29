@@ -91,7 +91,7 @@ export function Header({ onMenuClick, isDesktopSidebarOpen = true }: HeaderProps
 
             <Link href="/dashboard" className="flex items-center gap-2">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="https://placehold.co/40x40/transparent/000000?text=B" alt="Berbagift Logo" className="h-6 w-6 object-contain" />
+              <img src="/logo/Brandlogo.svg" alt="Berbagift Logo" className="h-6 w-6 object-contain" />
               <div className="text-xl font-medium flex items-center">
                 <span className="text-primary-500">Berbagift</span>
               </div>

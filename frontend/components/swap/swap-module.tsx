@@ -83,7 +83,7 @@ export function SwapModule() {
           <button
             type="button"
             onClick={state.handleSwapDirection}
-            className="w-12 h-12 bg-white dark:bg-card border border-border rounded-full flex items-center justify-center text-[#16a34a] hover:bg-neutral-2 hover:scale-105 transition-all shadow-md"
+            className="w-12 h-12 bg-white dark:bg-card border border-border rounded-full flex items-center justify-center text-[#16a34a] hover:bg-neutral-2 shadow-md"
           >
             <SwapIcon className="w-[18px] h-[18px]" />
           </button>

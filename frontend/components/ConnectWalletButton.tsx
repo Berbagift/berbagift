@@ -137,7 +137,7 @@ export function ConnectWalletButton() {
 
   if (!mounted) {
     return (
-      <Button disabled className="rounded-full shadow-none font-medium px-6 transition-all hover:-translate-y-0.5">
+      <Button disabled className="rounded-full shadow-none font-medium px-6">
         Connect Wallet
       </Button>
     );
@@ -147,7 +147,7 @@ export function ConnectWalletButton() {
     return (
       <Button 
         onClick={() => router.push('/dashboard')}
-        className="rounded-full shadow-none font-medium px-6 transition-all hover:-translate-y-0.5"
+        className="rounded-full shadow-none font-medium px-6"
       >
         Dashboard
       </Button>
@@ -158,7 +158,7 @@ export function ConnectWalletButton() {
     <Button 
       onClick={handleConnect}
       disabled={isConnecting}
-      className="rounded-full shadow-none font-medium px-6 transition-all hover:-translate-y-0.5"
+      className="rounded-full shadow-none font-medium px-6"
     >
       {isConnecting ? "Connecting..." : "Connect Wallet"}
     </Button>

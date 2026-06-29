@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { TokenConfig } from '@/lib/data/tokens';
 import { isValidDecimalInput } from '@/lib/utils/currency';
+import { TokenLogo } from '@/components/ui/token-logo';
 
 interface TokenAmountFieldProps {
   label?: string;
@@ -80,9 +81,7 @@ export function TokenAmountField({
             )}
           >
             <div className="flex items-center gap-2">
-              <div className={cn("w-6 h-6 rounded-full flex items-center justify-center text-white shrink-0", token.logoBg)}>
-                <i className={cn(token.logoIcon, "text-[11px] mt-0.5")}></i>
-              </div>
+              <TokenLogo symbol={token.symbol} size="sm" />
               <span className="font-semibold text-black dark:text-neutral-1 text-sm">{token.symbol}</span>
             </div>
             {showDropdown && (onTokenClick || availableTokens) && (
@@ -104,9 +103,7 @@ export function TokenAmountField({
                   className="w-full flex items-center justify-between px-3 py-2 hover:bg-neutral-2 transition-colors text-left"
                 >
                   <div className="flex items-center gap-2">
-                    <div className={cn("w-6 h-6 rounded-full flex items-center justify-center text-white shrink-0", t.logoBg)}>
-                      <i className={cn(t.logoIcon, "text-[11px] mt-0.5")}></i>
-                    </div>
+                    <TokenLogo symbol={t.symbol} size="sm" />
                     <span className="font-medium text-black dark:text-neutral-1 text-sm">{t.symbol}</span>
                   </div>
                   {t.id === token.id && (

@@ -14,7 +14,7 @@ export function useUserProfile() {
         return null;
         // throw new Error('No authentication token found');
       }
-      
+
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
       const res = await axios.get(`${apiUrl}/api/auth/me`, {
         headers: {

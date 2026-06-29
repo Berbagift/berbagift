@@ -15,7 +15,7 @@ export function LiveActivityCard({ activities }: LiveActivityCardProps) {
   const [isExpanded, setIsExpanded] = useState(false);
 
   return (
-    <div className="bg-white dark:bg-card border border-border rounded-md p-4 lg:p-6 shadow-sm flex flex-col h-full lg:max-h-[800px]">
+    <div className="bg-white dark:bg-card border border-border rounded-md p-4 lg:p-6 shadow-none flex flex-col h-full lg:max-h-[800px]">
       <div 
         className="flex items-center justify-between cursor-pointer lg:cursor-default mb-2 lg:mb-4"
         onClick={() => setIsExpanded(!isExpanded)}

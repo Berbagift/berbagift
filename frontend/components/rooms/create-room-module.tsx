@@ -12,36 +12,26 @@ export function CreateRoomModule() {
 
   return (
     <div className="w-full max-w-[740px] mx-auto bg-white dark:bg-card border border-border rounded-md p-6 md:p-8 flex flex-col shadow-[0_2px_8px_-2px_rgba(0,0,0,0.02)]">
-      
-      {/* Logo Section */}
-      <div className="flex justify-center mb-8">
-        <div className="flex items-center gap-2.5">
-          <div className="w-10 h-10 rounded-xl bg-emerald-100 dark:bg-emerald-950/50 flex items-center justify-center text-[#16a34a] dark:text-[#22c55e] shrink-0">
-            <i className="fi fi-rr-gift text-xl" />
-          </div>
-          <div className="text-2xl font-bold flex items-center tracking-tight">
-            <span className="text-primary-500">Berbagift</span>
-          </div>
-        </div>
-      </div>
+
+
 
       {/* Form */}
       <form onSubmit={state.handleSubmit} className="flex flex-col gap-5">
-        
+
         {/* Room Identity Field */}
-        <RoomIdentityField 
-          value={state.roomIdentity} 
-          onChange={state.setRoomIdentity} 
+        <RoomIdentityField
+          value={state.roomIdentity}
+          onChange={state.setRoomIdentity}
         />
 
         {/* Room Description Field */}
-        <RoomDescriptionField 
-          value={state.roomDescription} 
-          onChange={state.setRoomDescription} 
+        <RoomDescriptionField
+          value={state.roomDescription}
+          onChange={state.setRoomDescription}
         />
 
         {/* Capacity, Winners and Start Date Section */}
-        <CapacityWinnersStartsSection 
+        <CapacityWinnersStartsSection
           roomCapacity={state.roomCapacity}
           setRoomCapacity={state.setRoomCapacity}
           totalWinners={state.totalWinners}
@@ -51,7 +41,7 @@ export function CreateRoomModule() {
         />
 
         {/* Reward Pool Field Block */}
-        <RewardPoolSection 
+        <RewardPoolSection
           tokenId={state.tokenId}
           setTokenId={state.setTokenId}
           rewardAmount={state.rewardAmount}

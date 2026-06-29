@@ -1,38 +1,74 @@
 [
   {
     "id": "preset-1",
-    "title": "Nature Green",
-    "imageUrl": "https://placehold.co/600x400/e8f5e9/2e7d32?text=Nature+Green",
-    "category": "nature"
+    "title": "Ketupat Lebaran",
+    "imageUrl": "/thumbnail/thumb_envelope1.webp",
+    "category": "culture"
   },
   {
     "id": "preset-2",
-    "title": "Cheerful Purple",
-    "imageUrl": "https://placehold.co/600x400/f3e5f5/7b1fa2?text=Cheerful+Purple",
-    "category": "modern"
+    "title": "Golden Lantern",
+    "imageUrl": "/thumbnail/thumb_envelope2.webp",
+    "category": "culture"
   },
   {
     "id": "preset-3",
-    "title": "Calm Blue",
-    "imageUrl": "https://placehold.co/600x400/e3f2fd/1565c0?text=Calm+Blue",
-    "category": "classic"
+    "title": "Floral Blossom",
+    "imageUrl": "/thumbnail/thumb_envelope3.webp",
+    "category": "nature"
   },
   {
     "id": "preset-4",
-    "title": "Made for Couple",
-    "imageUrl": "https://placehold.co/600x400/ffebee/c62828?text=Couple",
-    "category": "family"
+    "title": "Cheerful Purple",
+    "imageUrl": "/thumbnail/thumb_envelope4.webp",
+    "category": "modern"
   },
   {
     "id": "preset-5",
-    "title": "Made for Family",
-    "imageUrl": "https://placehold.co/600x400/f1f8e9/558b2f?text=Family",
-    "category": "family"
+    "title": "Abstract Wave",
+    "imageUrl": "/thumbnail/thumb_envelope5.webp",
+    "category": "modern"
   },
   {
     "id": "preset-6",
-    "title": "Sunshine Yellow",
-    "imageUrl": "https://placehold.co/600x400/fff8e1/ff8f00?text=Sunshine",
+    "title": "Calm Blue",
+    "imageUrl": "/thumbnail/thumb_envelope6.webp",
+    "category": "classic"
+  },
+  {
+    "id": "preset-7",
+    "title": "Couple Hearts",
+    "imageUrl": "/thumbnail/thumb_envelope7.webp",
+    "category": "family"
+  },
+  {
+    "id": "preset-8",
+    "title": "Cute Kids",
+    "imageUrl": "/thumbnail/thumb_envelope8.webp",
+    "category": "family"
+  },
+  {
+    "id": "preset-9",
+    "title": "Nature Leaves",
+    "imageUrl": "/thumbnail/thumb_envelope9.webp",
+    "category": "nature"
+  },
+  {
+    "id": "preset-10",
+    "title": "Neon Future",
+    "imageUrl": "/thumbnail/thumb_envelope10.webp",
     "category": "modern"
+  },
+  {
+    "id": "preset-11",
+    "title": "Classic Navy",
+    "imageUrl": "/thumbnail/thumb_envelope11.webp",
+    "category": "classic"
+  },
+  {
+    "id": "preset-12",
+    "title": "Gold Foil",
+    "imageUrl": "/thumbnail/thumb_envelope12.webp",
+    "category": "classic"
   }
 ]
