@@ -33,8 +33,20 @@ export function EnvelopePreview() {
     ? `${primaryRecipient.username}${additionalCount > 0 ? ` +${additionalCount}` : ""}`
     : "Recipient Name";
 
+  // =========================================================================
+  // DEV MOCK CONFIGURATION
+  // - Set IS_DEV_MODE to true to auto-simulate transitions (Processing -> Success)
+  // - Set IS_DEV_MODE to false for testing real API endpoints/backend status integration
+  // =========================================================================
+  const IS_DEV_MODE = true;
+
   const handleConfirm = () => {
-    alert("Transfer Confirmed! Initiating blockchain transaction...");
+    state.setStatus('processing');
+    if (IS_DEV_MODE) {
+      setTimeout(() => {
+        state.setStatus('success');
+      }, 2000);
+    }
   };
 
   return (

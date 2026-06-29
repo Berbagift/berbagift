@@ -49,6 +49,11 @@
   - Replaced hardcoded mockup balances on the main dashboard with live, dynamic data (XLM, USDC, and total IDR value) fetched directly from the backend's on-chain Horizon Testnet integrations.
   - Shortened the display name in the Greeting component to `XXXX...XXXX` if the default username is the 56-character Stellar wallet public key.
   - **Bugfix (Type Check)**: Fixed a Next.js compilation block in `ConnectWalletButton.tsx` by correcting the option parameter passed to Freighter's `signMessage` function, passing `networkPassphrase` and `address` instead of the untyped `network` key.
+- [x] **Phase 20**: Brand Identity Rebranding & Reusable Status Component.
+  - **Rebranding (Berbagift)**: Rebranded the platform name from **BagiTHR** to **Berbagift** across all frontend UI components, templates, metadata titles, layouts, headers, and form logos. Standardized the brand text as a single cohesive unit in `text-primary-500`.
+  - **Universal Status State (`components/shared/status-state.tsx`)**: Designed a highly flexible, reusable visual component to display empty states, warnings, processing states, successes, and failed transfers. Supports custom icons, background circle styling, text, and clean built-in button actions (`buttonText`, `onButtonClick`).
+  - **Interactive Swap & Send THR Simulation**: Integrated status state pages into Swap Token and Send THR flows. Clicking Swap/Confirm triggers state flows (Processing -> Success) backed by a code constant `IS_DEV_MODE = true` for easy offline review or API transition testing. When active, these render cleanly as pure, un-bordered status pages.
+  - **Activity Table Polish**: Redesigned borders and padding. Removed outer table container borders, removed header backgrounds to keep it white (`bg-white`), and made the column header box rounded at the top corners (`rounded-t-md`). Restored `border-b` dividers between table body rows and added an empty state handler using `StatusState` when there are no activity records.
 
 ## 🏗️ Current Codebase Architecture & Context
 
@@ -130,11 +135,23 @@ The Room Detail page introduces dynamic routing and detailed component isolation
 - **State & Custom Hooks**: Created `useCountdown` hook to independently manage the `setInterval` logic, providing clean, formatted timestamps and signaling a reactive `isFinished` state which directly influences the `RoomStatusBanner` (`waiting` vs `claim_open` vs `ended`) and disables Action Buttons natively.
 - **Responsive Layout & Visual Polish**: Adopts a highly responsive `75% 25%` grid layout for optimal dashboard breathing room. Fully refined spacing, breadcrumb navigation, and scrollbars to rigorously match the Figma specification.
 
-### 10. Web3 Integration (Freighter Wallet)
+### 10. Create Room Module & State Config (`components/rooms/create-room-module.tsx`)
+The Create Room interface provides creator campaign controls:
+- **`CreateRoomModule`**: Root form component containing isolated sub-field components (`RoomIdentityField`, `RoomDescriptionField`, `CapacityWinnersStartsSection`, and `RewardPoolSection`).
+- **State Management (`hooks/use-create-room-state.ts`)**: Manages input states for room identity, capacity, winner limitations, session timing, and reward pool token configuration.
+- **Draft Persistence**: Implements `handleSaveDraft` and standard form submission `handleSubmit` callbacks to register new campaign rooms.
+
+### 11. Web3 Integration (Freighter Wallet)
 Introduced the first blockchain connection layer to the application using `@stellar/freighter-api`.
 - **Global Wallet State (`hooks/use-wallet-state.ts`)**: Built a simple, persistent Zustand store (`useWalletStore`) to manage the Freighter public key and `isConnected` state, allowing any component to react to the wallet status seamlessly.
 - **`ConnectWalletButton`**: Extracted the Connect Wallet functionality into a dedicated Client Component to cleanly separate interactive Freighter logic (`isConnected`, `requestAccess`) from Server Components like the landing page. Redirects the user directly to the `/dashboard` upon successful key retrieval. Additionally, it dynamically renders a "Dashboard" button instead of "Connect Wallet" if a persistent connection state is already established, bypassing redundant authorization flows.
 
-### 11. Environment Configuration
+### 12. Environment Configuration
 - **Network Setting Layer**: Established the `.env` and `.env.example` system containing `NEXT_PUBLIC_STELLAR_NETWORK=testnet`. This provides a single source of truth for the application to toggle between Stellar's `testnet` and `public` networks, ensuring future Horizon API requests and Soroban RPC calls respect the current environment.
 - **Wallet Network Validation**: Integrated the `NEXT_PUBLIC_STELLAR_NETWORK` variable directly into the `ConnectWalletButton` client component using `@stellar/freighter-api`'s `getNetworkDetails()`. If the user's active Freighter network does not match the application's environment configuration, the UI gracefully blocks the connection request and prompts them to switch networks manually. *(Note: Programmatic auto-switching is blocked by Freighter's security model, ensuring users maintain explicit control over their network connections).*
+
+### 13. Frontend API Integrations & Real-Time Charting
+- **Binance Klines API & Hooks (`lib/api/binance.ts`, `hooks/useBinanceKlinesInfinite.ts`)**: Integrates the public Binance API to retrieve historical pricing candlesticks. Implements backward infinite scroll (lazy loading past data points) using a customized TanStack Query hook, preventing visual layout jumps or scroll shifts.
+- **LightweightChart Wrapper (`components/balance/lightweight-chart.tsx`)**: Replaces old widgets with TradingView's high-performance `lightweight-charts` v5. Binds to `activeTokenId` (XLM vs USDC) and renders real-time scrollable area series.
+- **SSR/Hydration Safety (`components/balance/chart-token.tsx`)**: Bypasses Server-Side Rendering (SSR) hydration crashes for dynamic third-party widgets by leveraging a client-mounted state check (`isMounted`) inside `useEffect`.
+- **Axios API Client & Hooks (`lib/api/client.ts`)**: Configures the base HTTP client settings, handling authorization headers for token verification and querying backend routes like `/me` to update testnet Horizon balances dynamically on the client dashboard.

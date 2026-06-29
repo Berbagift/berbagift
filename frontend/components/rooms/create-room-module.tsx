@@ -20,8 +20,7 @@ export function CreateRoomModule() {
             <i className="fi fi-rr-gift text-xl" />
           </div>
           <div className="text-2xl font-bold flex items-center tracking-tight">
-            <span className="text-black dark:text-neutral-1">Bagi</span>
-            <span className="text-primary-500">THR</span>
+            <span className="text-primary-500">Berbagift</span>
           </div>
         </div>
       </div>

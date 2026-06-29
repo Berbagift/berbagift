@@ -11,7 +11,7 @@ export default function Home() {
           <div className="w-8 h-8 rounded bg-primary text-primary-foreground flex items-center justify-center">
             <i className="fi fi-rr-gift mt-[2px]"></i>
           </div>
-          <span className="font-semibold text-lg tracking-tight">BagiTHR</span>
+          <span className="font-semibold text-lg tracking-tight text-primary-500">Berbagift</span>
         </div>
         <nav className="flex items-center gap-4">
           <ConnectWalletButton />

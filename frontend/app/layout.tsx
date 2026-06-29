@@ -10,8 +10,8 @@ const interTight = Inter_Tight({
 });
 
 export const metadata: Metadata = {
-  title: "BagiTHR - Reward Communities Beautifully",
-  description: "BagiTHR is a platform to send digital rewards, run creator campaigns, and celebrate together — transparently and securely.",
+  title: "Berbagift - Reward Communities Beautifully",
+  description: "Berbagift is a platform to send digital rewards, run creator campaigns, and celebrate together — transparently and securely.",
 };
 
 export default function RootLayout({

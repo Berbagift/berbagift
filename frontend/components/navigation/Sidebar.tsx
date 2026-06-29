@@ -67,10 +67,9 @@ export function Sidebar({ isOpen, onClose, isDesktopOpen = true, onDesktopToggle
       )}>
         {/* Mobile Logo */}
         <Link href="/dashboard" className="flex lg:hidden items-center gap-2" onClick={onClose}>
-          <img src="https://placehold.co/40x40/transparent/000000?text=B" alt="BagiTHR Logo" className="h-8 w-8 object-contain" />
+          <img src="https://placehold.co/40x40/transparent/000000?text=B" alt="Berbagift Logo" className="h-8 w-8 object-contain" />
           <div className="text-2xl font-medium flex items-center">
-            <span className="text-black dark:text-neutral-1">Bagi</span>
-            <span className="text-primary-500">THR</span>
+            <span className="text-primary-500">Berbagift</span>
           </div>
         </Link>
         <button
@@ -85,10 +84,9 @@ export function Sidebar({ isOpen, onClose, isDesktopOpen = true, onDesktopToggle
           {isDesktopOpen ? (
             <>
               <Link href="/dashboard" className="flex items-center gap-2">
-                <img src="https://placehold.co/40x40/transparent/000000?text=B" alt="BagiTHR Logo" className="h-8 w-8 object-contain" />
+                <img src="https://placehold.co/40x40/transparent/000000?text=B" alt="Berbagift Logo" className="h-8 w-8 object-contain" />
                 <div className="text-2xl font-medium flex items-center">
-                  <span className="text-black dark:text-neutral-1">Bagi</span>
-                  <span className="text-primary-500">THR</span>
+                  <span className="text-primary-500">Berbagift</span>
                 </div>
               </Link>
               <button onClick={onDesktopToggle} className="w-8 h-8 flex items-center justify-center text-neutral-7 dark:text-neutral-6 hover:text-black dark:text-neutral-1 dark:hover:text-white hover:bg-neutral-5 dark:hover:bg-neutral-10 rounded-md transition-colors cursor-pointer">
