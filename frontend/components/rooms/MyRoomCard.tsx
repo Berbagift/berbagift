@@ -1,4 +1,5 @@
 import React from 'react';
+import { Participant } from '@/lib/api/types';
 import { ParticipantStack } from './ParticipantStack';
 import { RoomStats } from './RoomStats';
 
@@ -8,7 +9,7 @@ export interface MyRoom {
   description: string;
   rewardPool: string;
   winners: number;
-  participants: string[];
+  participants: Participant[];
   joined: number;
   maxParticipants: number;
   status: 'Active' | 'Completed' | 'Draft';

@@ -4,7 +4,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { RoomStatsCard } from '@/components/rooms/detail/RoomStatsCard';
 import { ClaimInstructionSection } from '@/components/rooms/detail/ClaimInstructionSection';
 import { LiveActivityCard } from '@/components/rooms/detail/LiveActivityCard';
-import { useRoomDetail, useRoomActivities, useClaimReward } from '@/lib/api/queries';
+import { useRoomDetail, useClaimReward } from '@/lib/api/queries';
 import { getErrorMessage } from '@/lib/api/client';
 
 export default function RoomDetailPage() {
@@ -12,14 +12,10 @@ export default function RoomDetailPage() {
   const roomId = params.roomId as string;
   const router = useRouter();
 
-  // Fetch detail and activities via TanStack Query
-  const { data: roomData, isLoading: isDetailLoading } = useRoomDetail(roomId);
-  const { data: activities = [], isLoading: isActivitiesLoading } = useRoomActivities(roomId);
-  
+  const { data: roomData, isLoading } = useRoomDetail(roomId);
   const claimMutation = useClaimReward();
 
   const handleClaim = () => {
-    console.log("Claiming reward for room:", roomId);
     claimMutation.mutate(roomId, {
       onSuccess: (res) => {
         alert(res.txHash ? `Claim successful! Tx Hash: ${res.txHash}` : "Claim successful!");
@@ -33,8 +29,6 @@ export default function RoomDetailPage() {
   const handleLeave = () => {
     router.push('/community/explore');
   };
-
-  const isLoading = isDetailLoading || isActivitiesLoading;
 
   if (isLoading) {
     return (
@@ -83,7 +77,7 @@ export default function RoomDetailPage() {
           {/* Sidebar (Right) */}
           <div className="w-full h-full relative">
             <div className="sticky top-24 h-[calc(100vh-140px)]">
-              <LiveActivityCard activities={activities} />
+              <LiveActivityCard activities={roomData.activities} />
             </div>
           </div>
 

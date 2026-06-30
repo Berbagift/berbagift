@@ -1,168 +1,121 @@
 import { apiClient, unwrapApiData } from '../client';
-import { Room, RoomActivity } from '../types';
+import { Room, RoomActivity, Participant } from '../types';
 
 import roomsData from '@/mockapi/rooms.json';
 import myroomsData from '@/mockapi/myrooms.json';
-import roomDetailData from '@/mockapi/room-detail.json';
-import roomActivityData from '@/mockapi/room-activity.json';
 
 const isLocalMode = process.env.NEXT_PUBLIC_API_MODE === 'local';
 
-type RawRoom = Partial<Room> & {
-  dateText?: string;
-  totalWinners?: number;
-  totalParticipants?: number;
-  joinedParticipants?: number;
-};
+// --- Normalizers (handle both legacy mock format and new API format) ---
 
-type RawRoomActivity = Omit<Partial<RoomActivity>, 'action'> & {
-  action?: string;
-};
+function normalizeParticipant(entry: string | { username?: string; initials?: string }): Participant {
+  if (typeof entry === 'string') return { username: '', initials: entry };
+  return { username: entry.username ?? '', initials: entry.initials ?? '??' };
+}
 
-const defaultCreator = {
-  username: '@berbagift',
-  initials: 'BG',
-  role: 'Room Creator',
-};
-
-function normalizeRoom(room: RawRoom): Room {
+function normalizeActivity(a: Record<string, unknown>): RoomActivity {
+  const action = String(a.action ?? 'joined').toLowerCase();
   return {
-    id: String(room.id ?? `room-${Date.now()}`),
-    title: room.title ?? 'Untitled Room',
-    description: room.description ?? '',
-    creator: room.creator ?? defaultCreator,
-    rewardPool: room.rewardPool ?? '0 XLM',
-    rewardPoolIdr: room.rewardPoolIdr,
-    winners: room.winners ?? room.totalWinners ?? 0,
-    joined: room.joined ?? room.joinedParticipants ?? 0,
-    maxParticipants: room.maxParticipants ?? room.totalParticipants ?? 0,
-    participants: room.participants ?? [],
-    status: room.status ?? 'Upcoming',
-    statusText: room.statusText ?? (room.dateText ? `Starts in ${room.dateText}` : ''),
-    isHighReward: room.isHighReward ?? false,
-    isSaved: room.isSaved ?? false,
-    claimCountdown: room.claimCountdown ?? null,
-    createdAt: room.createdAt ?? null,
+    username: String(a.username ?? '@anonymous'),
+    initials: String(a.initials ?? a.avatar ?? 'AN'),
+    action: action === 'left' || action === 'leave' ? 'left' : 'joined',
+    timestamp: String(a.timestamp ?? new Date().toISOString()),
   };
 }
 
-function applyRoomFilters(rooms: Room[], params?: { status?: string; search?: string }): Room[] {
+function normalizeStatus(status: string): string {
+  if (!status) return 'Upcoming';
+  return status.charAt(0).toUpperCase() + status.slice(1);
+}
+
+function normalizeRoom(raw: Record<string, unknown>): Room {
+  const participants = Array.isArray(raw.participants) ? raw.participants : [];
+  const activities = Array.isArray(raw.activities) ? raw.activities : [];
+
+  return {
+    id: String(raw.id ?? `room-${Date.now()}`),
+    title: String(raw.title ?? 'Untitled Room'),
+    description: String(raw.description ?? ''),
+    creator: (raw.creator as Room['creator']) ?? { username: '@unknown', initials: '??', role: 'Room Creator' },
+    rewardPool: String(raw.rewardPool ?? '0 XLM'),
+    rewardPoolIdr: raw.rewardPoolIdr as string | undefined,
+    winners: Number(raw.winners ?? raw.totalWinners ?? 0),
+    joined: Number(raw.joined ?? raw.joinedParticipants ?? 0),
+    maxParticipants: Number(raw.maxParticipants ?? raw.totalParticipants ?? 0),
+    participants: participants.map(normalizeParticipant),
+    activities: activities.map(normalizeActivity),
+    status: normalizeStatus(String(raw.status ?? '')),
+    statusText: String(raw.statusText ?? (raw.dateText ? `Starts in ${raw.dateText}` : '')),
+    isHighReward: Boolean(raw.isHighReward),
+    isSaved: Boolean(raw.isSaved),
+    claimCountdown: (raw.claimCountdown as number) ?? null,
+    startsAt: (raw.startsAt as string) ?? null,
+    createdAt: (raw.createdAt as string) ?? null,
+  };
+}
+
+// --- Service ---
+
+export const roomsService = {
+  getRooms: async (params?: { status?: string; search?: string }): Promise<Room[]> => {
+    if (isLocalMode) {
+      await new Promise((r) => setTimeout(r, 300));
+      return filterRooms([...roomsData, ...myroomsData].map(normalizeRoom), params);
+    }
+
+    const res = await apiClient.get<unknown>('/rooms');
+    return filterRooms((unwrapApiData(res.data) as Record<string, unknown>[]).map(normalizeRoom), params);
+  },
+
+  getRoomDetail: async (id: string): Promise<Room> => {
+    if (isLocalMode) {
+      await new Promise((r) => setTimeout(r, 300));
+      const all = [...roomsData, ...myroomsData].map(normalizeRoom);
+      return all.find((r) => r.id === id) ?? normalizeRoom({ id });
+    }
+
+    const res = await apiClient.get<unknown>(`/rooms/${id}`);
+    return normalizeRoom(unwrapApiData(res.data) as Record<string, unknown>);
+  },
+
+  createRoom: async (roomData: Omit<Room, 'id'>): Promise<Room> => {
+    if (isLocalMode) {
+      await new Promise((r) => setTimeout(r, 500));
+      return normalizeRoom({ id: `myroom-${Date.now()}`, ...roomData });
+    }
+
+    const res = await apiClient.post<unknown>('/rooms', roomData);
+    return normalizeRoom(unwrapApiData(res.data) as Record<string, unknown>);
+  },
+
+  claimReward: async (roomId: string): Promise<{ success: boolean; txHash?: string }> => {
+    if (isLocalMode) {
+      await new Promise((r) => setTimeout(r, 1000));
+      return { success: true, txHash: 'GC...MOCK_TX_HASH' };
+    }
+
+    const res = await apiClient.post<unknown>(`/rooms/${roomId}/claim`);
+    return unwrapApiData(res.data) as { success: boolean; txHash?: string };
+  },
+};
+
+// --- Helpers ---
+
+function filterRooms(rooms: Room[], params?: { status?: string; search?: string }): Room[] {
   let data = rooms;
 
   if (params?.status && params.status !== 'All Rooms') {
-    if (params.status === 'Upcoming') {
-      data = data.filter((room) => room.status === 'Upcoming');
-    } else if (params.status === 'High Rewards') {
-      data = data.filter((room) => room.isHighReward);
-    } else if (params.status === 'Saved Rooms') {
-      data = data.filter((room) => room.isSaved);
-    } else {
-      data = data.filter((room) => room.status === params.status);
-    }
+    if (params.status === 'High Rewards') data = data.filter((r) => r.isHighReward);
+    else if (params.status === 'Saved Rooms') data = data.filter((r) => r.isSaved);
+    else data = data.filter((r) => r.status === params.status);
   }
 
   if (params?.search?.trim()) {
-    const query = params.search.toLowerCase();
+    const q = params.search.toLowerCase();
     data = data.filter(
-      (room) =>
-        room.title.toLowerCase().includes(query) ||
-        room.description.toLowerCase().includes(query) ||
-        room.creator.username.toLowerCase().includes(query)
+      (r) => r.title.toLowerCase().includes(q) || r.description.toLowerCase().includes(q) || r.creator.username.toLowerCase().includes(q)
     );
   }
 
   return data;
 }
-
-function normalizeRoomActivity(activity: RawRoomActivity, roomId: string): RoomActivity {
-  return {
-    id: String(activity.id ?? `${roomId}-${Date.now()}`),
-    roomId: String(activity.roomId ?? roomId),
-    username: activity.username ?? '@anonymous',
-    avatar: activity.avatar ?? 'AN',
-    action: activity.action === 'Leave' ? 'Leave' : 'Joined',
-    timestamp: activity.timestamp ?? 'Just now',
-  };
-}
-
-export const roomsService = {
-  /**
-   * Retrieve list of all rooms (both explore public and user rooms).
-   */
-  getRooms: async (params?: { status?: string; search?: string }): Promise<Room[]> => {
-    if (isLocalMode) {
-      await new Promise((resolve) => setTimeout(resolve, 300)); // Simulating delay
-      const data = [...roomsData, ...myroomsData].map((room) => normalizeRoom(room));
-      return applyRoomFilters(data, params);
-    }
-
-    const res = await apiClient.get<Room[] | { data: RawRoom[] }>('/rooms');
-    const data = unwrapApiData<RawRoom[]>(res.data).map((room) => normalizeRoom(room));
-    return applyRoomFilters(data, params);
-  },
-
-  /**
-   * Retrieve details of a specific room.
-   */
-  getRoomDetail: async (id: string): Promise<Room> => {
-    if (isLocalMode) {
-      await new Promise((resolve) => setTimeout(resolve, 300));
-      const allRooms = [...roomsData, ...myroomsData].map((room) => normalizeRoom(room));
-      const foundRoom = allRooms.find((room) => room.id === id);
-      const hasDedicatedDetail = String(roomDetailData.id) === id;
-      return normalizeRoom(hasDedicatedDetail ? { ...foundRoom, ...roomDetailData } : foundRoom ?? roomDetailData);
-    }
-
-    const res = await apiClient.get<Room | { data: RawRoom }>(`/rooms/${id}`);
-    return normalizeRoom(unwrapApiData<RawRoom>(res.data));
-  },
-
-  /**
-   * Retrieve participants activity logs for a specific room.
-   */
-  getRoomActivities: async (roomId: string): Promise<RoomActivity[]> => {
-    if (isLocalMode) {
-      await new Promise((resolve) => setTimeout(resolve, 300));
-      return roomActivityData.map((activity) => normalizeRoomActivity(activity, roomId));
-    }
-
-    const res = await apiClient.get<RoomActivity[] | { data: RawRoomActivity[] }>('/room-activities', {
-      params: { roomId },
-    });
-    return unwrapApiData<RawRoomActivity[]>(res.data).map((activity) =>
-      normalizeRoomActivity(activity, roomId)
-    );
-  },
-
-  /**
-   * Create a new campaign room.
-   */
-  createRoom: async (roomData: Omit<Room, 'id'>): Promise<Room> => {
-    if (isLocalMode) {
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      return normalizeRoom({
-        id: `myroom-${Date.now()}`,
-        ...roomData,
-        createdAt: roomData.createdAt ?? new Date().toISOString(),
-      });
-    }
-
-    const res = await apiClient.post<Room | { data: RawRoom }>('/rooms', roomData);
-    return normalizeRoom(unwrapApiData<RawRoom>(res.data));
-  },
-
-  /**
-   * Claim dynamic rewards from a room.
-   */
-  claimReward: async (roomId: string): Promise<{ success: boolean; txHash?: string }> => {
-    if (isLocalMode) {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      return { success: true, txHash: 'GC...CLAIMED_TX_HASH_PLACEHOLDER' };
-    }
-
-    const res = await apiClient.post<{ success: boolean; txHash?: string } | { data: { success: boolean; txHash?: string } }>(
-      `/rooms/${roomId}/claim`
-    );
-    return unwrapApiData<{ success: boolean; txHash?: string }>(res.data);
-  },
-};

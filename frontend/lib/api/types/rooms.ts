@@ -4,6 +4,18 @@ export interface Creator {
   role: string;
 }
 
+export interface Participant {
+  username: string;
+  initials: string;
+}
+
+export interface RoomActivity {
+  username: string;
+  initials: string;
+  action: 'joined' | 'left';
+  timestamp: string;
+}
+
 export interface Room {
   id: string;
   title: string;
@@ -14,20 +26,13 @@ export interface Room {
   winners: number;
   joined: number;
   maxParticipants: number;
-  participants: string[];
+  participants: Participant[];
+  activities: RoomActivity[];
   status: string;
   statusText: string;
   isHighReward: boolean;
   isSaved: boolean;
   claimCountdown?: number | null;
+  startsAt?: string | null;
   createdAt?: string | null;
-}
-
-export interface RoomActivity {
-  id: string;
-  roomId: string;
-  username: string;
-  avatar: string;
-  action: 'Joined' | 'Leave';
-  timestamp: string;
 }

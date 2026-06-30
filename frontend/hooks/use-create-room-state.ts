@@ -77,6 +77,7 @@ export function useCreateRoomState() {
       joined: 0,
       maxParticipants: capacity,
       participants: [],
+      activities: [],
       status,
       statusText: claimSession ? `Starts in ${claimSession}` : 'Draft room',
       isHighReward: amount >= 1000,

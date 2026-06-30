@@ -3,9 +3,8 @@ import { LiveActivityItem } from './LiveActivityItem';
 
 interface LiveActivityCardProps {
   activities: Array<{
-    id: string;
     username: string;
-    avatar: string;
+    initials: string;
     action: string;
     timestamp: string;
   }>;
@@ -28,8 +27,8 @@ export function LiveActivityCard({ activities }: LiveActivityCardProps) {
         </button>
       </div>
       <div className={`flex-1 overflow-y-auto pr-2 lg:pr-4 ${isExpanded ? 'block' : 'hidden lg:block'} lg:custom-scrollbar`}>
-        {activities.map((activity) => (
-          <LiveActivityItem key={activity.id} activity={activity} />
+        {activities.map((activity, i) => (
+          <LiveActivityItem key={i} activity={activity} />
         ))}
         {activities.length === 0 && (
           <div className="text-center text-neutral-7 dark:text-neutral-6 py-8 text-sm lg:text-base">No activity yet.</div>
