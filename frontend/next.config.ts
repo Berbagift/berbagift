@@ -1,5 +1,7 @@
 import type { NextConfig } from "next";
 
+const apiUrl = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8888").replace(/\/+$/, "");
+
 const nextConfig: NextConfig = {
   images: {
     remotePatterns: [
@@ -8,6 +10,14 @@ const nextConfig: NextConfig = {
         hostname: 'placehold.co',
       },
     ],
+  },
+  async rewrites() {
+    return [
+      {
+        source: "/api/:path*",
+        destination: `${apiUrl}/:path*`,
+      },
+    ];
   },
 };
 

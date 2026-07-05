@@ -274,8 +274,8 @@
   --destructive: var(--error-500);
   --destructive-foreground: var(--neutral-1);
 
-  --border: var(--neutral-4);
-  --input: var(--neutral-4);
+  --border: var(--neutral-5);
+  --input: var(--neutral-5);
   --ring: var(--primary-500);
 
   --radius: 0.75rem;
@@ -291,7 +291,7 @@
 }
 
 .dark {
-  --background: var(--neutral-12);
+  --background: #1e1e1e;
   --foreground: var(--neutral-3);
 
   --card: var(--neutral-11);
@@ -315,8 +315,8 @@
   --destructive: var(--error-600);
   --destructive-foreground: var(--neutral-1);
 
-  --border: var(--neutral-10);
-  --input: var(--neutral-10);
+  --border: var(--neutral-8);
+  --input: var(--neutral-8);
   --ring: var(--primary-600);
 
   --sidebar: var(--neutral-12);

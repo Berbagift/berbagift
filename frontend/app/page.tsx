@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
+import { ConnectWalletButton } from '@/components/ConnectWalletButton';
 
 export default function Home() {
   return (
@@ -10,25 +11,16 @@ export default function Home() {
           <div className="w-8 h-8 rounded bg-primary text-primary-foreground flex items-center justify-center">
             <i className="fi fi-rr-gift mt-[2px]"></i>
           </div>
-          <span className="font-semibold text-lg tracking-tight">BagiTHR</span>
+          <span className="font-semibold text-lg tracking-tight text-primary-500">Berbagift</span>
         </div>
         <nav className="flex items-center gap-4">
-          <Link href="/dashboard">
-            <Button variant="ghost" className="text-muted-foreground hover:text-foreground hidden sm:inline-flex">
-              Log in
-            </Button>
-          </Link>
-          <Link href="/dashboard">
-            <Button className="rounded-full shadow-none font-medium px-6">
-              Go to Dashboard
-            </Button>
-          </Link>
+          <ConnectWalletButton />
         </nav>
       </header>
-      
+
       {/* Minimalist Hero */}
       <main className="flex-1 flex flex-col items-center justify-center p-6 text-center">
-        <div className="max-w-2xl space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700 pt-10">
+        <div className="max-w-2xl space-y-6 pt-10">
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-semibold tracking-tight leading-[1.15]">
             Reward communities <br className="hidden md:block" />
             <span className="text-primary">beautifully.</span>
@@ -38,7 +30,7 @@ export default function Home() {
           </p>
           <div className="pt-6">
             <Link href="/dashboard">
-              <Button size="lg" className="rounded-full px-8 h-12 text-[15px] font-medium shadow-sm transition-all hover:-translate-y-0.5">
+              <Button size="lg" className="rounded-full px-8 h-12 text-[15px] font-medium shadow-sm">
                 Get Started
                 <i className="fi fi-rr-arrow-right ml-2 mt-[1px]"></i>
               </Button>

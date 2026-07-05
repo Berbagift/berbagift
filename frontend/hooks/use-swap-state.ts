@@ -56,6 +56,24 @@ export function useSwapState() {
     setToAmount(calculateConversion(calculatedAmountNum, fromTokenId, toTokenId));
   };
 
+  const [status, setStatus] = useState<'form' | 'error' | 'success' | 'processing'>('form');
+
+  // =========================================================================
+  // DEV MOCK CONFIGURATION
+  // - Set IS_DEV_MODE to true to auto-simulate transitions (Processing -> Success)
+  // - Set IS_DEV_MODE to false for testing real API endpoints/backend status integration
+  // =========================================================================
+  const IS_DEV_MODE = true;
+
+  const handleSwapSubmit = () => {
+    setStatus('processing');
+    if (IS_DEV_MODE) {
+      setTimeout(() => {
+        setStatus('success');
+      }, 2000);
+    }
+  };
+
   const toggleActiveBalanceToken = () => {
     setActiveBalanceTokenId(prev => prev === fromTokenId ? toTokenId : fromTokenId);
   };
@@ -67,11 +85,14 @@ export function useSwapState() {
     toAmount,
     activePercentage,
     activeBalanceToken,
+    status,
+    setStatus,
     handleSwapDirection,
     handleFromAmountChange,
     handleToAmountChange,
     handlePercentage,
     toggleActiveBalanceToken,
     getFiatEquivalent,
+    handleSwapSubmit,
   };
 }

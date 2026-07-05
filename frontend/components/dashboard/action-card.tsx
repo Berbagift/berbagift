@@ -13,8 +13,8 @@ interface ActionCardProps {
 export function ActionCard({ title, subtitle, icon, colorClass, href }: ActionCardProps) {
   const content = (
     <>
-      <div className={cn("w-14 h-14 rounded-md flex items-center justify-center flex-shrink-0 transition-transform group-hover:scale-105", colorClass)}>
-        <i className={cn(icon, "text-2xl")} />
+      <div className={cn("w-14 h-14 rounded-md flex items-center justify-center flex-shrink-0", colorClass)}>
+        <i className={cn(icon, "text-2xl mt-1")} />
       </div>
       <div className="flex flex-col gap-1">
         <h3 className="text-base font-medium text-black dark:text-neutral-1 leading-tight">{title}</h3>
@@ -25,7 +25,7 @@ export function ActionCard({ title, subtitle, icon, colorClass, href }: ActionCa
     </>
   );
 
-  const className = "flex items-center gap-4 p-4 rounded-md border border-neutral-5 bg-card shadow-none text-left transition-colors hover:border-neutral-5 hover:bg-neutral-2/50 group w-full h-full cursor-pointer";
+  const className = "flex items-center gap-4 p-4 rounded-md border border-border bg-card shadow-none text-left transition-colors hover:border-border hover:bg-neutral-2/50 group w-full h-full cursor-pointer";
 
   if (href) {
     return (

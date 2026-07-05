@@ -1,12 +1,12 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
-import Image from 'next/image';
+import { TokenLogo } from '@/components/ui/token-logo';
 
 export interface BalanceCardProps {
   title: string;
   amount: string;
   subtitle: string;
-  logoSrc: string;
+  symbol: string;
   percentage?: string;
   percentageType?: 'positive' | 'negative';
 }
@@ -15,16 +15,14 @@ export function BalanceCard({
   title,
   amount,
   subtitle,
-  logoSrc,
+  symbol,
   percentage,
   percentageType,
 }: BalanceCardProps) {
   return (
-    <div className="flex flex-col p-5 rounded-md border border-neutral-5 bg-card shadow-none">
+    <div className="flex flex-col p-5 rounded-md border border-border bg-card shadow-none">
       <div className="flex items-center gap-4">
-        {/* Logo Placeholder */}
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={logoSrc} alt={title} className="w-16 h-16 rounded-full object-contain flex-shrink-0" />
+        <TokenLogo symbol={symbol} size="xl" />
         
         <div className="flex flex-col flex-1 gap-1">
           <div className="flex items-center justify-between w-full">

@@ -14,7 +14,7 @@ const QUICK_ACTIONS = [
     subtitle: 'Swap your assets in seconds',
     icon: 'fi fi-rr-shuffle',
     colorClass: 'bg-[#f6eefe] text-[#a855f7]', // Purplish
-    href: '/dashboard/swap',
+    href: '/wallet/swap',
   },
   {
     title: 'Saved Room',
@@ -28,7 +28,7 @@ const QUICK_ACTIONS = [
     subtitle: 'Create and manage giveaway rooms easily',
     icon: 'fi fi-rr-apps-add', // or any close icon to the one in design
     colorClass: 'bg-[#fffbeb] text-[#f59e0b]', // Yellowish
-    href: '/dashboard/create-room',
+    href: '/community/create-room',
   },
 ];
 

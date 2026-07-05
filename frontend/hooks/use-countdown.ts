@@ -6,8 +6,11 @@ export function useCountdown(initialSeconds: number) {
 
   useEffect(() => {
     // Reset state if initialSeconds changes
-    setTimeLeft(initialSeconds);
-    setIsFinished(initialSeconds <= 0);
+    const timeoutId = window.setTimeout(() => {
+      setTimeLeft(initialSeconds);
+      setIsFinished(initialSeconds <= 0);
+    }, 0);
+    return () => window.clearTimeout(timeoutId);
   }, [initialSeconds]);
 
   useEffect(() => {
