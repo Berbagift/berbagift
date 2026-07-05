@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import { MyRoomCard } from '@/components/rooms/MyRoomCard';
 import { RoomSearch } from '@/components/rooms/RoomSearch';
@@ -9,35 +9,32 @@ import { useRooms } from '@/lib/api/queries';
 
 export default function MyRoomsPage() {
   const [searchQuery, setSearchQuery] = useState('');
-  
+
   const { data: rooms = [], isLoading: isRoomsLoading } = useRooms();
 
-  const myRooms = useMemo(() => {
-    // Filter rooms belonging to user (starting with mock myroom prefix ID)
-    return rooms
-      .filter((room) => room.id.toString().startsWith('myroom'))
-      .map((room) => {
-        let mappedStatus: 'Active' | 'Completed' | 'Draft' = 'Active';
-        if (room.status === 'Completed') {
-          mappedStatus = 'Completed';
-        } else if (room.status === 'Draft') {
-          mappedStatus = 'Draft';
-        }
+  const myRooms = rooms
+    .filter((room) => room.id.toString().startsWith('myroom'))
+    .map((room) => {
+      let mappedStatus: 'Active' | 'Completed' | 'Draft' = 'Active';
+      if (room.status === 'Completed') {
+        mappedStatus = 'Completed';
+      } else if (room.status === 'Draft') {
+        mappedStatus = 'Draft';
+      }
 
-        return {
-          id: room.id,
-          title: room.title,
-          description: room.description,
-          rewardPool: room.rewardPool,
-          winners: room.winners,
-          participants: room.participants || [],
-          joined: room.joined,
-          maxParticipants: room.maxParticipants,
-          status: mappedStatus,
-          dateText: room.statusText || 'N/A',
-        };
-      });
-  }, [rooms]);
+      return {
+        id: room.id,
+        title: room.title,
+        description: room.description,
+        rewardPool: room.rewardPool,
+        winners: room.winners,
+        participants: room.participants || [],
+        joined: room.joined,
+        maxParticipants: room.maxParticipants,
+        status: mappedStatus,
+        dateText: room.statusText || 'N/A',
+      };
+    });
 
   const isLoading = isRoomsLoading;
 
@@ -58,15 +55,14 @@ export default function MyRoomsPage() {
   };
 
   // Filter list of rooms based on search query
-  const filteredRooms = useMemo(() => {
-    if (!searchQuery.trim()) return myRooms;
-    const query = searchQuery.toLowerCase();
-    return myRooms.filter(
-      (room) =>
-        room.title.toLowerCase().includes(query) ||
-        room.description.toLowerCase().includes(query)
-    );
-  }, [myRooms, searchQuery]);
+  const query = searchQuery.toLowerCase();
+  const filteredRooms = !searchQuery.trim()
+    ? myRooms
+    : myRooms.filter(
+        (room) =>
+          room.title.toLowerCase().includes(query) ||
+          room.description.toLowerCase().includes(query)
+      );
 
   if (isLoading) {
     return (

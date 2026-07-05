@@ -20,8 +20,8 @@ export function CreateRoomModule() {
 
         {/* Room Identity Field */}
         <RoomIdentityField
-          value={state.roomIdentity}
-          onChange={state.setRoomIdentity}
+          value={state.roomTitle}
+          onChange={state.setRoomTitle}
         />
 
         {/* Room Description Field */}

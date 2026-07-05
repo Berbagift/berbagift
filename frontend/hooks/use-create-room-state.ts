@@ -12,7 +12,7 @@ export function useCreateRoomState() {
   const router = useRouter();
 
   // Form states
-  const [roomIdentity, setRoomIdentity] = useState('');
+  const [roomTitle, setRoomTitle] = useState('');
   const [roomDescription, setRoomDescription] = useState('');
   const [roomCapacity, setRoomCapacity] = useState<number | ''>('');
   const [totalWinners, setTotalWinners] = useState<number | ''>('');
@@ -24,7 +24,7 @@ export function useCreateRoomState() {
   const activeToken = TOKENS[tokenId] || TOKENS.XLM;
 
   const validateRequiredFields = (requireCompleteForm: boolean) => {
-    if (!roomIdentity.trim()) {
+    if (!roomTitle.trim()) {
       alert('Please fill out the Room Identity.');
       return false;
     }
@@ -64,7 +64,7 @@ export function useCreateRoomState() {
     const amount = parseFloat(rewardAmount.replace(',', '.')) || 0;
 
     return {
-      title: roomIdentity.trim(),
+      title: roomTitle.trim(),
       description: roomDescription.trim(),
       creator: {
         username: '@nadifofficial',
@@ -105,7 +105,7 @@ export function useCreateRoomState() {
     if (!validateRequiredFields(true)) {
       return;
     }
-    persistRoom('Upcoming', `Success! Room "${roomIdentity}" has been created.`);
+    persistRoom('Upcoming', `Success! Room "${roomTitle}" has been created.`);
   };
 
   // Draft save handler
@@ -113,7 +113,7 @@ export function useCreateRoomState() {
     if (!validateRequiredFields(false)) {
       return;
     }
-    persistRoom('Draft', `Room "${roomIdentity}" has been saved as draft.`);
+    persistRoom('Draft', `Room "${roomTitle}" has been saved as draft.`);
   };
 
   const getFiatEquivalentText = (amount: string) => {
@@ -121,8 +121,8 @@ export function useCreateRoomState() {
   };
 
   return {
-    roomIdentity,
-    setRoomIdentity,
+    roomTitle,
+    setRoomTitle,
     roomDescription,
     setRoomDescription,
     roomCapacity,

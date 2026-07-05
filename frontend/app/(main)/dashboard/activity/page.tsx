@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import { ActivityTable } from '@/components/dashboard/activity-table';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -11,16 +11,15 @@ export default function AllActivityPage() {
   const { data: activities = [], isLoading } = useActivities();
 
   // Local filter for search query
-  const filteredActivities = useMemo(() => {
-    if (!searchQuery.trim()) return activities;
-    const query = searchQuery.toLowerCase();
-    return activities.filter(
-      (act) =>
-        act.type.toLowerCase().includes(query) ||
-        act.details.toLowerCase().includes(query) ||
-        act.amount.toLowerCase().includes(query)
-    );
-  }, [activities, searchQuery]);
+  const query = searchQuery.toLowerCase();
+  const filteredActivities = !searchQuery.trim()
+    ? activities
+    : activities.filter(
+        (act) =>
+          act.type.toLowerCase().includes(query) ||
+          act.details.toLowerCase().includes(query) ||
+          act.amount.toLowerCase().includes(query)
+      );
 
   if (isLoading) {
     return (

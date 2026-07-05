@@ -8,18 +8,18 @@ const isLocalMode = process.env.NEXT_PUBLIC_API_MODE === 'local';
 
 // --- Normalizers (handle both legacy mock format and new API format) ---
 
-function normalizeParticipant(entry: string | { username?: string; initials?: string }): Participant {
+function normalizeParticipant(entry: any): Participant {
   if (typeof entry === 'string') return { username: '', initials: entry };
   return { username: entry.username ?? '', initials: entry.initials ?? '??' };
 }
 
-function normalizeActivity(a: Record<string, unknown>): RoomActivity {
-  const action = String(a.action ?? 'joined').toLowerCase();
+function normalizeActivity(a: any): RoomActivity {
+  const action = (a.action ?? 'joined').toLowerCase();
   return {
-    username: String(a.username ?? '@anonymous'),
-    initials: String(a.initials ?? a.avatar ?? 'AN'),
+    username: a.username ?? '@anonymous',
+    initials: a.initials ?? a.avatar ?? 'AN',
     action: action === 'left' || action === 'leave' ? 'left' : 'joined',
-    timestamp: String(a.timestamp ?? new Date().toISOString()),
+    timestamp: a.timestamp ?? new Date().toISOString(),
   };
 }
 
@@ -28,30 +28,25 @@ function normalizeStatus(status: string): string {
   return status.charAt(0).toUpperCase() + status.slice(1);
 }
 
-function normalizeRoom(raw: Record<string, unknown>): Room {
-  const participants = Array.isArray(raw.participants) ? raw.participants : [];
-  const activities = Array.isArray(raw.activities) ? raw.activities : [];
-
+function normalizeRoom(raw: any): Room {
+  // 👱 ponytail: shrink - removed defensive String/Number casting, trust API or use basic fallbacks
   return {
-    id: String(raw.id ?? `room-${Date.now()}`),
-    title: String(raw.title ?? 'Untitled Room'),
-    description: String(raw.description ?? ''),
-    creator: (raw.creator as Room['creator']) ?? { username: '@unknown', initials: '??', role: 'Room Creator' },
-    rewardPool: String(raw.rewardPool ?? '0 XLM'),
-    rewardPoolIdr: raw.rewardPoolIdr as string | undefined,
-    winners: Number(raw.winners ?? raw.totalWinners ?? 0),
-    joined: Number(raw.joined ?? raw.joinedParticipants ?? 0),
-    maxParticipants: Number(raw.maxParticipants ?? raw.totalParticipants ?? 0),
-    participants: participants.map(normalizeParticipant),
-    activities: activities.map(normalizeActivity),
-    status: normalizeStatus(String(raw.status ?? '')),
-    statusText: String(raw.statusText ?? (raw.dateText ? `Starts in ${raw.dateText}` : '')),
+    ...raw,
+    id: raw.id ?? `room-${Date.now()}`,
+    title: raw.title ?? 'Untitled Room',
+    description: raw.description ?? '',
+    creator: raw.creator ?? { username: '@unknown', initials: '??', role: 'Room Creator' },
+    rewardPool: raw.rewardPool ?? '0 XLM',
+    winners: raw.winners ?? raw.totalWinners ?? 0,
+    joined: raw.joined ?? raw.joinedParticipants ?? 0,
+    maxParticipants: raw.maxParticipants ?? raw.totalParticipants ?? 0,
+    participants: (raw.participants ?? []).map(normalizeParticipant),
+    activities: (raw.activities ?? []).map(normalizeActivity),
+    status: normalizeStatus(raw.status ?? ''),
+    statusText: raw.statusText ?? (raw.dateText ? `Starts in ${raw.dateText}` : ''),
     isHighReward: Boolean(raw.isHighReward),
     isSaved: Boolean(raw.isSaved),
-    claimCountdown: (raw.claimCountdown as number) ?? null,
-    startsAt: (raw.startsAt as string) ?? null,
-    createdAt: (raw.createdAt as string) ?? null,
-  };
+  } as Room;
 }
 
 // --- Service ---

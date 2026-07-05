@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { ChartHeader } from '@/components/balance/chart-header';
 import { TransferCard } from '@/components/balance/transfer-card';
 import { IdrBalanceCard } from '@/components/balance/idr-balance-card';
@@ -16,9 +16,8 @@ export default function BalancePage() {
   const [chartMode, setChartMode] = useState<'pro' | 'area'>('area');
   const [isTopUpOpen, setIsTopUpOpen] = useState(false);
   const { data: tokenList } = useTokens();
-  const tokenMap = useMemo(
-    () => Object.fromEntries((tokenList ?? Object.values(TOKENS)).map((token) => [token.id, token])),
-    [tokenList]
+  const tokenMap = Object.fromEntries(
+    (tokenList ?? Object.values(TOKENS)).map((token) => [token.id, token])
   );
   const token = tokenMap[activeTokenId] ?? TOKENS[activeTokenId];
 

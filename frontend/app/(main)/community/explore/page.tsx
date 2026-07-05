@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState } from 'react';
 import { RoomFilterTabs } from '@/components/rooms/RoomFilterTabs';
 import { RoomSearch } from '@/components/rooms/RoomSearch';
 import { RoomGrid } from '@/components/rooms/RoomGrid';
@@ -22,12 +22,10 @@ export default function ExploreRoomsPage() {
   });
 
   // Calculate local client saved state changes overlaying query results
-  const processedRooms = useMemo(() => {
-    return rooms.map((room) => ({
-      ...room,
-      isSaved: savedRoomIds.includes(room.id) ? !room.isSaved : room.isSaved,
-    }));
-  }, [rooms, savedRoomIds]);
+  const processedRooms = rooms.map((room) => ({
+    ...room,
+    isSaved: savedRoomIds.includes(room.id) ? !room.isSaved : room.isSaved,
+  }));
 
   const handleSaveRoom = (id: string) => {
     setSavedRoomIds((prev) =>

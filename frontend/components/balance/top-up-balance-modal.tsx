@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useMemo, useState } from 'react';
+import React, { useState } from 'react';
 
 interface TopUpBalanceModalProps {
   isOpen: boolean;
@@ -16,7 +16,7 @@ function formatIdr(amount: number) {
 export function TopUpBalanceModal({ isOpen, onClose }: TopUpBalanceModalProps) {
   const [amount, setAmount] = useState(500000);
 
-  const amountText = useMemo(() => formatIdr(amount), [amount]);
+  const amountText = formatIdr(amount); // 👱 ponytail: yagni - formatIdr is fast enough, useMemo not needed
 
   if (!isOpen) return null;
 
