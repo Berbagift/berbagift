@@ -16,6 +16,10 @@ services:
       - "${DB_PORT:-3306}:3306"
     volumes:
       - db_data_prod:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 5s
+      retries: 10
 
   backend:
     build:
@@ -30,7 +34,8 @@ services:
     ports:
       - "8000:8000"
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     restart: always
 
 volumes:

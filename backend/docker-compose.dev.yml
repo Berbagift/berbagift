@@ -16,6 +16,10 @@ services:
       - "${DB_PORT:-3306}:3306"
     volumes:
       - db_data_dev:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 5s
+      retries: 10
 
   backend:
     build:
@@ -32,7 +36,8 @@ services:
       # Bind mount for hot-reloading in development
       - .:/app
     depends_on:
-      - db
+      db:
+        condition: service_healthy
 
 volumes:
   db_data_dev:
