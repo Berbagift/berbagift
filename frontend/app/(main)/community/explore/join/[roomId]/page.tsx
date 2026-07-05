@@ -52,17 +52,17 @@ export default function RoomDetailPage() {
       <div className="p-4 sm:p-6 lg:p-0">
         
         {/* Header Section */}
-        <div className="mb-4 md:mb-8">
-          <h1 className="text-xl md:text-2xl lg:text-3xl font-semibold text-black dark:text-neutral-1 mb-2 md:mb-4">
+        <div className="flex flex-col gap-2 mb-2">
+          <h1 className="text-xl md:text-2xl lg:text-3xl font-medium text-black dark:text-neutral-1">
             {roomData.title}
           </h1>
-          <p className="text-base md:text-lg lg:text-xl text-neutral-8 dark:text-neutral-6 max-w-3xl">
+          <p className="text-base md:text-lg lg:text-xl font-medium text-neutral-8 dark:text-neutral-6 max-w-3xl">
             {roomData.description}
           </p>
         </div>
 
         {/* 2-Column Layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-[75%_25%] gap-6 lg:gap-8 items-stretch">
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_512px] gap-6 lg:gap-8 items-stretch">
           
           {/* Main Content (Left) */}
           <div className="flex flex-col gap-6 lg:gap-8">
