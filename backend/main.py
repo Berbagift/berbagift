@@ -10,6 +10,9 @@ import models.user
 import models.nonce
 from alembic import command
 from alembic.config import Config
+from fastapi.responses import PlainTextResponse
+from schemas.indodax import IndodaxCallbackPayload
+from services.indodax import validate_withdrawal_request
 
 # Auto migrate on startup
 alembic_cfg = Config("alembic.ini")
@@ -68,3 +71,18 @@ def root():
         "data": None,
         "errors": None
     }
+
+@app.post("/indodax-callback", response_class=PlainTextResponse)
+async def indodax_withdraw_callback(payload: IndodaxCallbackPayload):
+    """
+    Webhook endpoint untuk Indodax Withdrawal Callback.
+    Wajib mengembalikan plain text 'ok' jika validasi berhasil.
+    """
+    is_valid = await validate_withdrawal_request(payload)
+    
+    if is_valid:
+        # Indodax hanya akan melanjutkan proses jika menerima string "ok" (tanpa kutip) [cite: 312, 313]
+        return "ok"
+    
+    # Jika gagal validasi, kembalikan HTTP status error (misal 400 Bad Request)
+    raise HTTPException(status_code=400, detail="Validasi data withdrawal gagal")
