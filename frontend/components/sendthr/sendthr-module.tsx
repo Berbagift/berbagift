@@ -41,12 +41,12 @@ export function SendThrModule() {
       {/* Main Send Form */}
       <form
         onSubmit={handleSubmit}
-        className="w-full border border-neutral-5 rounded-md p-6 bg-white dark:bg-card flex flex-col gap-5 "
+        className="w-full border border-border rounded-md p-4 sm:p-5 md:p-6 bg-white dark:bg-card flex flex-col gap-4 sm:gap-5 "
       >
         {/* Recipient Section */}
         <div className="flex flex-col gap-2">
           <label className="text-neutral-8 font-medium text-sm">Recipient</label>
-          <div className="border border-neutral-5 rounded-md p-3 bg-white dark:bg-card flex flex-wrap gap-2 items-center min-h-[50px] focus-within:border-neutral-8 transition-colors">
+          <div className="border border-border rounded-md p-3 bg-white dark:bg-card flex flex-wrap gap-2 items-center min-h-[50px] focus-within:border-neutral-8 transition-colors">
             {state.recipients.map((rec) => (
               <RecipientChip
                 key={rec.id}
@@ -58,7 +58,7 @@ export function SendThrModule() {
             <input
               type="text"
               placeholder={state.recipients.length === 0 ? "Type username and press Enter..." : "Add username..."}
-              className="flex-grow bg-transparent border-none outline-none text-sm text-black dark:text-neutral-1 placeholder:text-neutral-6 min-w-[150px]"
+              className="flex-grow bg-transparent border-none outline-none text-sm text-black dark:text-neutral-1 placeholder:text-neutral-6 min-w-[100px] sm:min-w-[150px]"
               onKeyDown={(e) => {
                 if (e.key === 'Enter') {
                   e.preventDefault();
@@ -94,7 +94,7 @@ export function SendThrModule() {
             onChange={(e) => state.handleMessageChange(e.target.value)}
             placeholder="Type your message here..."
             rows={2}
-            className="w-full border border-neutral-5 rounded-md p-3 bg-white dark:bg-card outline-none focus:border-neutral-8 transition-colors text-sm text-black dark:text-neutral-1 placeholder:text-neutral-6 resize-none font-sans"
+            className="w-full border border-border rounded-md p-3 bg-white dark:bg-card outline-none focus:border-neutral-8 transition-colors text-sm text-black dark:text-neutral-1 placeholder:text-neutral-6 resize-none font-sans"
           />
         </div>
 

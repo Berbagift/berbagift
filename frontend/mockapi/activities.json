@@ -1,0 +1,79 @@
+[
+  {
+    "id": "activity-1",
+    "icon": "fi fi-rr-download",
+    "iconBgClass": "bg-[#fffbeb]",
+    "iconColorClass": "text-[#f59e0b]",
+    "type": "Received token",
+    "details": "From @raka",
+    "amount": "120 XLM",
+    "status": "success",
+    "time": "2 minutes ago"
+  },
+  {
+    "id": "activity-2",
+    "icon": "fi fi-rr-shuffle",
+    "iconBgClass": "bg-[#eff6ff]",
+    "iconColorClass": "text-[#3b82f6]",
+    "type": "Swap token",
+    "details": "XLM to USDC",
+    "amount": "200 XLM",
+    "status": "success",
+    "time": "3 days ago"
+  },
+  {
+    "id": "activity-3",
+    "icon": "fi fi-rr-paper-plane",
+    "iconBgClass": "bg-[#eafdf0]",
+    "iconColorClass": "text-[#16a34a]",
+    "type": "Sent token",
+    "details": "To @erikghafari",
+    "amount": "180 XLM",
+    "status": "processing",
+    "time": "6 days ago"
+  },
+  {
+    "id": "activity-4",
+    "icon": "fi fi-rr-gift",
+    "iconBgClass": "bg-[#f6eefe]",
+    "iconColorClass": "text-[#a855f7]",
+    "type": "Gift claim",
+    "details": "Ramadhan Berkah Room",
+    "amount": "1,254 XLM",
+    "status": "expired",
+    "time": "2 weeks ago"
+  },
+  {
+    "id": "activity-5",
+    "icon": "fi fi-rr-download",
+    "iconBgClass": "bg-[#fffbeb]",
+    "iconColorClass": "text-[#f59e0b]",
+    "type": "Received token",
+    "details": "From @johndoe",
+    "amount": "50 XLM",
+    "status": "success",
+    "time": "3 weeks ago"
+  },
+  {
+    "id": "activity-6",
+    "icon": "fi fi-rr-paper-plane",
+    "iconBgClass": "bg-[#eafdf0]",
+    "iconColorClass": "text-[#16a34a]",
+    "type": "Sent token",
+    "details": "To @sarah",
+    "amount": "10 USDC",
+    "status": "success",
+    "time": "1 month ago"
+  },
+  {
+    "id": "activity-7",
+    "icon": "fi fi-rr-apps-add",
+    "iconBgClass": "bg-[#eff6ff]",
+    "iconColorClass": "text-[#3b82f6]",
+    "type": "Created Room",
+    "details": "Weekly Giveaway",
+    "amount": "0 XLM",
+    "status": "success",
+    "time": "1 month ago"
+  }
+]

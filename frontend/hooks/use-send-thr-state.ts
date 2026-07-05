@@ -29,6 +29,7 @@ interface SendThrState {
   uploadMode: UploadMode;
   uploadedDesigns: UploadedDesign[];
   selectedUploadedDesignId: string | null;
+  status: 'form' | 'processing' | 'success' | 'error';
 
   // Actions
   toggleToken: () => void;
@@ -44,6 +45,7 @@ interface SendThrState {
   setSelectedUploadedDesignId: (id: string | null) => void;
   addUploadedDesign: (design: UploadedDesign) => void;
   removeUploadedDesign: (id: string) => void;
+  setStatus: (status: 'form' | 'processing' | 'success' | 'error') => void;
 }
 
 const DEFAULT_RECIPIENTS: Recipient[] = [];
@@ -59,6 +61,7 @@ export const useSendThrStore = create<SendThrState>((set, get) => ({
   uploadMode: 'preset',
   uploadedDesigns: [],
   selectedUploadedDesignId: null,
+  status: 'form',
 
   toggleToken: () => set((state) => {
     const newId = state.tokenId === 'USDC' ? 'XLM' : 'USDC';
@@ -112,6 +115,8 @@ export const useSendThrStore = create<SendThrState>((set, get) => ({
     uploadedDesigns: state.uploadedDesigns.filter((d) => d.id !== id),
     selectedUploadedDesignId: state.selectedUploadedDesignId === id ? null : state.selectedUploadedDesignId
   })),
+
+  setStatus: (status) => set({ status }),
 }));
 
 // Provide a backward-compatible hook for components that used useSendThrState

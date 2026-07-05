@@ -1,0 +1,38 @@
+[
+  {
+    "id": "myroom-1",
+    "title": "Mau Bagi Hadiah 😊",
+    "description": "Buat 3 orang yang paling cepet mencet tombol claim bisa menang, oke gas!",
+    "rewardPool": "100 XLM",
+    "winners": 3,
+    "participants": ["NB", "AF", "MH", "EG", "FH"],
+    "joined": 0,
+    "maxParticipants": 10,
+    "status": "Active",
+    "dateText": "1 June 2026"
+  },
+  {
+    "id": "myroom-2",
+    "title": "Share More, Give More",
+    "description": "150 XLM for 5 fastest user, lets gowww!!!! make sure your ready",
+    "rewardPool": "150 XLM",
+    "winners": 5,
+    "participants": ["NB", "AF", "MH", "EG", "FH"],
+    "joined": 15,
+    "maxParticipants": 15,
+    "status": "Completed",
+    "dateText": "31 May 2026"
+  },
+  {
+    "id": "myroom-3",
+    "title": "Lorem ipsum",
+    "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit,",
+    "rewardPool": "150 XLM",
+    "winners": 5,
+    "participants": ["NB", "AF", "MH", "EG", "FH"],
+    "joined": 15,
+    "maxParticipants": 15,
+    "status": "Draft",
+    "dateText": "31 May 2026"
+  }
+]

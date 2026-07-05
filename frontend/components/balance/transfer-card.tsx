@@ -2,7 +2,7 @@ import Link from 'next/link';
 
 export function TransferCard() {
   return (
-    <div className="bg-white dark:bg-card border border-neutral-5 rounded-md p-6 md:p-8 flex flex-col justify-between h-full shadow-[0_2px_8px_-2px_rgba(0,0,0,0.02)]">
+    <div className="bg-white dark:bg-card border border-border rounded-md p-6 md:p-8 flex flex-col justify-between h-full shadow-[0_2px_8px_-2px_rgba(0,0,0,0.02)]">
       {/* Top Zone */}
       <div className="flex gap-6 md:gap-8 mb-10 items-start">
         {/* Icon Block */}
@@ -22,10 +22,10 @@ export function TransferCard() {
       </div>
 
       {/* Bottom Row */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between gap-5 sm:gap-4 mt-auto border-t border-transparent">
+      <div className="flex flex-wrap items-center justify-between gap-4 mt-auto border-t border-transparent">
         {/* Security Badge */}
-        <div className="flex items-center gap-2.5 bg-[#fffbeb] text-[#d97706] px-3.5 py-1.5 rounded-md text-[14px] md:text-[15px] font-medium w-max shrink-0">
-          <i className="fi fi-rr-shield-check mt-0.5 text-base"></i>
+        <div className="flex items-start sm:items-center gap-2.5 bg-[#fffbeb] text-[#d97706] px-3.5 py-1.5 rounded-md text-[14px] md:text-[15px] font-medium w-fit">
+          <i className="fi fi-rr-shield-check mt-0.5 text-base shrink-0"></i>
           <span>Transfer mechanism using secure blockchain protocol</span>
         </div>
 

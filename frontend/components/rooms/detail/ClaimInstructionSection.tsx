@@ -3,8 +3,8 @@ import { ClaimInstructionStep } from './ClaimInstructionStep';
 
 const INSTRUCTION_STEPS = [
   {
-    icon: 'fi fi-rr-door-open',
-    title: 'Enter waiting room',
+    icon: 'fi fi-rr-apps-add',
+    title: 'How to claim reward',
     description: "Enter the waiting room and make sure you're ready",
   },
   {
@@ -13,7 +13,7 @@ const INSTRUCTION_STEPS = [
     description: 'The timer will count down until the claim session starts',
   },
   {
-    icon: 'fi fi-rr-unlock',
+    icon: 'fi fi-rr-lock',
     title: 'Claim button unlocks',
     description: 'When the timer is zero, the claim button will become active',
   },
@@ -26,13 +26,13 @@ const INSTRUCTION_STEPS = [
 
 export function ClaimInstructionSection() {
   return (
-    <div className="bg-white dark:bg-card border border-neutral-4 dark:border-border rounded-md p-6 lg:p-8 w-full shadow-sm ">
-      <div className="flex items-center gap-2 mb-8">
-        <h3 className="text-xl font-semibold text-black dark:text-neutral-1">How to claim reward</h3>
+    <div className="bg-white dark:bg-card border border-border rounded-md p-4 sm:p-6 lg:p-8 w-full shadow-none">
+      <div className="flex items-center gap-2 mb-6 md:mb-8">
+        <h3 className="text-lg md:text-xl font-semibold text-black dark:text-neutral-1">How to claim reward</h3>
         <i className="fi fi-rr-info text-neutral-6" />
       </div>
 
-      <div className="flex flex-col md:flex-row items-start justify-center gap-8 lg:gap-12 mb-12">
+      <div className="flex flex-col md:flex-row items-center md:items-start justify-center gap-8 lg:gap-12 mb-8 md:mb-12">
         {INSTRUCTION_STEPS.map((step, index) => (
           <ClaimInstructionStep
             key={index}

@@ -1,0 +1,605 @@
+{
+  "rooms": [
+    {
+      "id": "1",
+      "title": "Sharing is caring 😊",
+      "description": "Big rewards await the fastest community members, lets join the rush!!!!",
+      "creator": {
+        "username": "@nadifofficial",
+        "initials": "NB",
+        "role": "Room Creator"
+      },
+      "rewardPool": "10.000 XLM",
+      "rewardPoolIdr": "Rp54,933,000",
+      "winners": 5,
+      "joined": 45,
+      "maxParticipants": 100,
+      "participants": [
+        { "username": "@nesia", "initials": "NE" },
+        { "username": "@alfredo", "initials": "AF" },
+        { "username": "@mahira", "initials": "MH" },
+        { "username": "@echo", "initials": "EC" },
+        { "username": "@fahmi", "initials": "FH" }
+      ],
+      "activities": [],
+      "status": "upcoming",
+      "statusText": "Starts in 28 May 2026",
+      "isHighReward": false,
+      "isSaved": false,
+      "claimCountdown": null,
+      "startsAt": "2026-05-28T00:00:00Z",
+      "createdAt": "2026-05-27T00:00:00Z"
+    },
+    {
+      "id": "2",
+      "title": "Midnight Reward Rush 🚀",
+      "description": "Big rewards await the fastest community members, lets join the rush!!!!",
+      "creator": {
+        "username": "@rakaofficial",
+        "initials": "RK",
+        "role": "Room Creator"
+      },
+      "rewardPool": "10.000 XLM",
+      "rewardPoolIdr": "Rp20,565,999",
+      "winners": 5,
+      "joined": 5,
+      "maxParticipants": 10,
+      "participants": [
+        { "username": "@nesia", "initials": "NE" },
+        { "username": "@alfredo", "initials": "AF" },
+        { "username": "@mahira", "initials": "MH" },
+        { "username": "@echo", "initials": "EC" },
+        { "username": "@fahmi", "initials": "FH" }
+      ],
+      "activities": [
+        { "username": "@bitbot13", "initials": "BT", "action": "joined", "timestamp": "2026-05-30T01:59:00Z" },
+        { "username": "@minari", "initials": "MN", "action": "joined", "timestamp": "2026-05-30T01:58:30Z" },
+        { "username": "@timothy", "initials": "TM", "action": "joined", "timestamp": "2026-05-30T01:58:10Z" },
+        { "username": "@adityaasu", "initials": "AD", "action": "left", "timestamp": "2026-05-30T01:58:00Z" },
+        { "username": "@aynion", "initials": "AY", "action": "joined", "timestamp": "2026-05-30T01:44:00Z" },
+        { "username": "@satoshi", "initials": "ST", "action": "joined", "timestamp": "2026-05-30T01:29:00Z" },
+        { "username": "@sanasini", "initials": "SA", "action": "joined", "timestamp": "2026-05-30T01:14:00Z" },
+        { "username": "@febrinina", "initials": "FB", "action": "joined", "timestamp": "2026-05-30T00:59:00Z" },
+        { "username": "@paratiwi", "initials": "PR", "action": "joined", "timestamp": "2026-05-29T01:59:00Z" },
+        { "username": "@ratusari", "initials": "RA", "action": "joined", "timestamp": "2026-05-29T01:59:00Z" }
+      ],
+      "status": "waiting",
+      "statusText": "Starts in 2 hours",
+      "isHighReward": false,
+      "isSaved": false,
+      "claimCountdown": 9903,
+      "startsAt": "2026-05-30T02:00:00Z",
+      "createdAt": "2026-05-30T00:00:00Z"
+    },
+    {
+      "id": "3",
+      "title": "Weekend Gift Storm 🎉",
+      "description": "A limited-time THR event packed with community rewards and fast claims.",
+      "creator": {
+        "username": "@dailydrop",
+        "initials": "DD",
+        "role": "Room Creator"
+      },
+      "rewardPool": "15.000 XLM",
+      "rewardPoolIdr": "Rp82,399,500",
+      "winners": 10,
+      "joined": 80,
+      "maxParticipants": 100,
+      "participants": [
+        { "username": "@nesia", "initials": "NE" },
+        { "username": "@alfredo", "initials": "AF" },
+        { "username": "@mahira", "initials": "MH" },
+        { "username": "@echo", "initials": "EC" },
+        { "username": "@fahmi", "initials": "FH" }
+      ],
+      "activities": [],
+      "status": "upcoming",
+      "statusText": "Starts in 1 hours",
+      "isHighReward": true,
+      "isSaved": false,
+      "claimCountdown": null,
+      "startsAt": "2026-05-29T13:00:00Z",
+      "createdAt": "2026-05-29T12:00:00Z"
+    },
+    {
+      "id": "4",
+      "title": "Golden Hour Giveaway ✨",
+      "description": "Join before the timer ends and claim your chance at exclusive rewards.",
+      "creator": {
+        "username": "@stellarcreator",
+        "initials": "SC",
+        "role": "Room Creator"
+      },
+      "rewardPool": "100.000 XLM",
+      "rewardPoolIdr": "Rp549,330,000",
+      "winners": 15,
+      "joined": 89,
+      "maxParticipants": 100,
+      "participants": [
+        { "username": "@nesia", "initials": "NE" },
+        { "username": "@alfredo", "initials": "AF" },
+        { "username": "@mahira", "initials": "MH" },
+        { "username": "@echo", "initials": "EC" },
+        { "username": "@fahmi", "initials": "FH" }
+      ],
+      "activities": [],
+      "status": "upcoming",
+      "statusText": "Starts in 01 June 2026",
+      "isHighReward": true,
+      "isSaved": false,
+      "claimCountdown": null,
+      "startsAt": "2026-06-01T00:00:00Z",
+      "createdAt": "2026-05-25T08:00:00Z"
+    },
+    {
+      "id": "5",
+      "title": "Flash Claim Arena 🚀",
+      "description": "Only the quickest participants can secure a reward slot tonight.",
+      "creator": {
+        "username": "@faizhub",
+        "initials": "FZ",
+        "role": "Room Creator"
+      },
+      "rewardPool": "140 XLM",
+      "rewardPoolIdr": "Rp769,062",
+      "winners": 1,
+      "joined": 25,
+      "maxParticipants": 100,
+      "participants": [
+        { "username": "@nesia", "initials": "NE" },
+        { "username": "@alfredo", "initials": "AF" },
+        { "username": "@mahira", "initials": "MH" },
+        { "username": "@echo", "initials": "EC" },
+        { "username": "@fahmi", "initials": "FH" }
+      ],
+      "activities": [],
+      "status": "upcoming",
+      "statusText": "Starts in 08 June 2026",
+      "isHighReward": false,
+      "isSaved": false,
+      "claimCountdown": null,
+      "startsAt": "2026-06-08T00:00:00Z",
+      "createdAt": "2026-06-01T15:00:00Z"
+    },
+    {
+      "id": "6",
+      "title": "Surprise Drop Session 🎊",
+      "description": "Nobody knows the final reward amount until the claiming session starts.",
+      "creator": {
+        "username": "@cryptowave",
+        "initials": "CW",
+        "role": "Room Creator"
+      },
+      "rewardPool": "1.000 XLM",
+      "rewardPoolIdr": "Rp5,493,300",
+      "winners": 5,
+      "joined": 45,
+      "maxParticipants": 100,
+      "participants": [
+        { "username": "@nesia", "initials": "NE" },
+        { "username": "@alfredo", "initials": "AF" },
+        { "username": "@mahira", "initials": "MH" },
+        { "username": "@echo", "initials": "EC" },
+        { "username": "@fahmi", "initials": "FH" }
+      ],
+      "activities": [],
+      "status": "upcoming",
+      "statusText": "Starts in 29 May 2026",
+      "isHighReward": false,
+      "isSaved": false,
+      "claimCountdown": null,
+      "startsAt": "2026-05-29T00:00:00Z",
+      "createdAt": "2026-05-28T09:30:00Z"
+    },
+    {
+      "id": "7",
+      "title": "Fast Fingers Challenge ⚔️",
+      "description": "Test your speed against the community and compete for limited reward slots.",
+      "creator": {
+        "username": "@rewardspace",
+        "initials": "RS",
+        "role": "Room Creator"
+      },
+      "rewardPool": "250 XLM",
+      "rewardPoolIdr": "Rp1,373,325",
+      "winners": 3,
+      "joined": 5,
+      "maxParticipants": 10,
+      "participants": [
+        { "username": "@nesia", "initials": "NE" },
+        { "username": "@alfredo", "initials": "AF" },
+        { "username": "@mahira", "initials": "MH" },
+        { "username": "@echo", "initials": "EC" },
+        { "username": "@fahmi", "initials": "FH" }
+      ],
+      "activities": [
+        { "username": "@cryptodev", "initials": "CD", "action": "joined", "timestamp": "2026-06-01T06:55:00Z" },
+        { "username": "@stellarfan", "initials": "SF", "action": "joined", "timestamp": "2026-06-01T06:50:00Z" },
+        { "username": "@lunawalker", "initials": "LW", "action": "joined", "timestamp": "2026-06-01T06:40:00Z" },
+        { "username": "@blockrunner", "initials": "BR", "action": "left", "timestamp": "2026-06-01T06:30:00Z" },
+        { "username": "@hashking", "initials": "HK", "action": "joined", "timestamp": "2026-06-01T06:00:00Z" }
+      ],
+      "status": "waiting",
+      "statusText": "Starts in 5 hours",
+      "isHighReward": false,
+      "isSaved": false,
+      "claimCountdown": 18000,
+      "startsAt": "2026-06-01T07:00:00Z",
+      "createdAt": "2026-06-01T02:00:00Z"
+    },
+    {
+      "id": "8",
+      "title": "Everyday Celebration R... 🪄",
+      "description": "Share the excitement and claim digital rewards together with the community.",
+      "creator": {
+        "username": "@socialclub",
+        "initials": "SC",
+        "role": "Room Creator"
+      },
+      "rewardPool": "200 XLM",
+      "rewardPoolIdr": "Rp1,098,660",
+      "winners": 2,
+      "joined": 8,
+      "maxParticipants": 10,
+      "participants": [
+        { "username": "@nesia", "initials": "NE" },
+        { "username": "@alfredo", "initials": "AF" },
+        { "username": "@mahira", "initials": "MH" },
+        { "username": "@echo", "initials": "EC" },
+        { "username": "@fahmi", "initials": "FH" }
+      ],
+      "activities": [
+        { "username": "@earlybird", "initials": "EB", "action": "joined", "timestamp": "2026-06-02T13:55:00Z" },
+        { "username": "@nightowl", "initials": "NO", "action": "joined", "timestamp": "2026-06-02T13:45:00Z" },
+        { "username": "@quickclaim", "initials": "QC", "action": "joined", "timestamp": "2026-06-02T13:30:00Z" },
+        { "username": "@tokenmaster", "initials": "TM", "action": "joined", "timestamp": "2026-06-02T13:00:00Z" },
+        { "username": "@rewardseeker", "initials": "RS", "action": "left", "timestamp": "2026-06-02T12:30:00Z" },
+        { "username": "@stellarnode", "initials": "SN", "action": "joined", "timestamp": "2026-06-02T12:00:00Z" },
+        { "username": "@lumenwatcher", "initials": "LW", "action": "joined", "timestamp": "2026-06-02T11:00:00Z" },
+        { "username": "@defiking", "initials": "DK", "action": "joined", "timestamp": "2026-06-02T10:30:00Z" }
+      ],
+      "status": "waiting",
+      "statusText": "Starts in 4 hours",
+      "isHighReward": false,
+      "isSaved": false,
+      "claimCountdown": 14400,
+      "startsAt": "2026-06-02T14:00:00Z",
+      "createdAt": "2026-06-02T10:00:00Z"
+    },
+    {
+      "id": "9",
+      "title": "Community Reward... 🔥",
+      "description": "BattleRealtime claiming begins soon. Prepare yourself before the room opens.",
+      "creator": {
+        "username": "@bagithrteam",
+        "initials": "BT",
+        "role": "Room Creator"
+      },
+      "rewardPool": "300 XLM",
+      "rewardPoolIdr": "Rp1,647,990",
+      "winners": 3,
+      "joined": 88,
+      "maxParticipants": 100,
+      "participants": [
+        { "username": "@nesia", "initials": "NE" },
+        { "username": "@alfredo", "initials": "AF" },
+        { "username": "@mahira", "initials": "MH" },
+        { "username": "@echo", "initials": "EC" },
+        { "username": "@fahmi", "initials": "FH" }
+      ],
+      "activities": [],
+      "status": "upcoming",
+      "statusText": "Starts in 05 June 2026",
+      "isHighReward": false,
+      "isSaved": false,
+      "claimCountdown": null,
+      "startsAt": "2026-06-05T00:00:00Z",
+      "createdAt": "2026-06-01T12:00:00Z"
+    },
+    {
+      "id": "10",
+      "title": "Creator Celebration 💚",
+      "description": "Special rewards prepared for loyal supporters and active community...",
+      "creator": {
+        "username": "@itsjamal",
+        "initials": "IJ",
+        "role": "Room Creator"
+      },
+      "rewardPool": "30 XLM",
+      "rewardPoolIdr": "Rp164,799",
+      "winners": 2,
+      "joined": 10,
+      "maxParticipants": 15,
+      "participants": [
+        { "username": "@nesia", "initials": "NE" },
+        { "username": "@alfredo", "initials": "AF" },
+        { "username": "@mahira", "initials": "MH" },
+        { "username": "@echo", "initials": "EC" },
+        { "username": "@fahmi", "initials": "FH" }
+      ],
+      "activities": [],
+      "status": "upcoming",
+      "statusText": "Starts in 18 June 2026",
+      "isHighReward": false,
+      "isSaved": false,
+      "claimCountdown": null,
+      "startsAt": "2026-06-18T00:00:00Z",
+      "createdAt": "2026-06-15T09:00:00Z"
+    },
+    {
+      "id": "myroom-1",
+      "title": "Mau Bagi Hadiah 😊",
+      "description": "Buat 3 orang yang paling cepet mencet tombol claim bisa menang, oke gas!",
+      "creator": {
+        "username": "@nadifofficial",
+        "initials": "NB",
+        "role": "Room Creator"
+      },
+      "rewardPool": "100 XLM",
+      "rewardPoolIdr": "Rp549,330",
+      "winners": 3,
+      "joined": 0,
+      "maxParticipants": 10,
+      "participants": [
+        { "username": "@nadifofficial", "initials": "NB" },
+        { "username": "@alfredo", "initials": "AF" },
+        { "username": "@mahira", "initials": "MH" },
+        { "username": "@echo", "initials": "EG" },
+        { "username": "@fahmi", "initials": "FH" }
+      ],
+      "activities": [
+        { "username": "@alfredo", "initials": "AF", "action": "joined", "timestamp": "2026-06-01T02:00:00Z" },
+        { "username": "@mahira", "initials": "MH", "action": "joined", "timestamp": "2026-06-01T01:30:00Z" },
+        { "username": "@echo", "initials": "EG", "action": "joined", "timestamp": "2026-06-01T01:00:00Z" }
+      ],
+      "status": "active",
+      "statusText": "Created on 1 June 2026",
+      "isHighReward": false,
+      "isSaved": false,
+      "claimCountdown": null,
+      "startsAt": "2026-06-01T00:00:00Z",
+      "createdAt": "2026-06-01T00:00:00Z"
+    },
+    {
+      "id": "myroom-2",
+      "title": "Share More, Give More",
+      "description": "150 XLM for 5 fastest user, lets gowww!!!! make sure your ready",
+      "creator": {
+        "username": "@nadifofficial",
+        "initials": "NB",
+        "role": "Room Creator"
+      },
+      "rewardPool": "150 XLM",
+      "rewardPoolIdr": "Rp823,995",
+      "winners": 5,
+      "joined": 15,
+      "maxParticipants": 15,
+      "participants": [
+        { "username": "@nadifofficial", "initials": "NB" },
+        { "username": "@alfredo", "initials": "AF" },
+        { "username": "@mahira", "initials": "MH" },
+        { "username": "@echo", "initials": "EG" },
+        { "username": "@fahmi", "initials": "FH" }
+      ],
+      "activities": [],
+      "status": "completed",
+      "statusText": "Completed on 31 May 2026",
+      "isHighReward": false,
+      "isSaved": false,
+      "claimCountdown": null,
+      "startsAt": "2026-05-31T00:00:00Z",
+      "createdAt": "2026-05-31T00:00:00Z"
+    },
+    {
+      "id": "myroom-3",
+      "title": "Lorem ipsum",
+      "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit,",
+      "creator": {
+        "username": "@nadifofficial",
+        "initials": "NB",
+        "role": "Room Creator"
+      },
+      "rewardPool": "150 XLM",
+      "rewardPoolIdr": "Rp823,995",
+      "winners": 5,
+      "joined": 15,
+      "maxParticipants": 15,
+      "participants": [
+        { "username": "@nadifofficial", "initials": "NB" },
+        { "username": "@alfredo", "initials": "AF" },
+        { "username": "@mahira", "initials": "MH" },
+        { "username": "@echo", "initials": "EG" },
+        { "username": "@fahmi", "initials": "FH" }
+      ],
+      "activities": [],
+      "status": "draft",
+      "statusText": "Saved as draft on 31 May 2026",
+      "isHighReward": false,
+      "isSaved": false,
+      "claimCountdown": null,
+      "startsAt": null,
+      "createdAt": "2026-05-31T00:00:00Z"
+    }
+  ],
+  "envelopes": [
+    {
+      "id": "preset-1",
+      "title": "Nature Green",
+      "imageUrl": "https://placehold.co/600x400/e8f5e9/2e7d32?text=Nature+Green",
+      "category": "nature"
+    },
+    {
+      "id": "preset-2",
+      "title": "Cheerful Purple",
+      "imageUrl": "https://placehold.co/600x400/f3e5f5/7b1fa2?text=Cheerful+Purple",
+      "category": "modern"
+    },
+    {
+      "id": "preset-3",
+      "title": "Calm Blue",
+      "imageUrl": "https://placehold.co/600x400/e3f2fd/1565c0?text=Calm+Blue",
+      "category": "classic"
+    },
+    {
+      "id": "preset-4",
+      "title": "Made for Couple",
+      "imageUrl": "https://placehold.co/600x400/ffebee/c62828?text=Couple",
+      "category": "family"
+    },
+    {
+      "id": "preset-5",
+      "title": "Made for Family",
+      "imageUrl": "https://placehold.co/600x400/f1f8e9/558b2f?text=Family",
+      "category": "family"
+    },
+    {
+      "id": "preset-6",
+      "title": "Sunshine Yellow",
+      "imageUrl": "https://placehold.co/600x400/fff8e1/ff8f00?text=Sunshine",
+      "category": "modern"
+    }
+  ],
+  "tokens": [
+    {
+      "id": "XLM",
+      "symbol": "XLM",
+      "name": "Stellar Lumens",
+      "logoIcon": "fi-rr-rocket",
+      "logoBg": "bg-black",
+      "balance": 565.76,
+      "equivalentIdr": 1565999,
+      "percentageChange": 10,
+      "chartData": [
+        { "date": "Jan", "balance": 105 },
+        { "date": "Feb", "balance": 270 },
+        { "date": "Mar", "balance": 240 },
+        { "date": "Apr", "balance": 310 },
+        { "date": "May", "balance": 150 },
+        { "date": "Jun", "balance": 210 },
+        { "date": "Jul", "balance": 375 },
+        { "date": "Aug", "balance": 265 },
+        { "date": "Sep", "balance": 380 },
+        { "date": "Oct", "balance": 340 },
+        { "date": "Nov", "balance": 255 },
+        { "date": "Des", "balance": 405 }
+      ]
+    },
+    {
+      "id": "USDC",
+      "symbol": "USDC",
+      "name": "USD Coin",
+      "logoIcon": "fi-rr-dollar",
+      "logoBg": "bg-blue-600",
+      "balance": 895.76,
+      "equivalentIdr": 2565999,
+      "percentageChange": 13,
+      "chartData": [
+        { "date": "Jan", "balance": 200 },
+        { "date": "Feb", "balance": 220 },
+        { "date": "Mar", "balance": 190 },
+        { "date": "Apr", "balance": 250 },
+        { "date": "May", "balance": 280 },
+        { "date": "Jun", "balance": 260 },
+        { "date": "Jul", "balance": 310 },
+        { "date": "Aug", "balance": 350 },
+        { "date": "Sep", "balance": 330 },
+        { "date": "Oct", "balance": 410 },
+        { "date": "Nov", "balance": 390 },
+        { "date": "Des", "balance": 450 }
+      ]
+    }
+  ],
+  "activities": [
+    {
+      "id": "activity-1",
+      "icon": "fi fi-rr-download",
+      "iconBgClass": "bg-[#fffbeb]",
+      "iconColorClass": "text-[#f59e0b]",
+      "type": "Received token",
+      "details": "From @raka",
+      "amount": "120 XLM",
+      "status": "success",
+      "time": "2 minutes ago"
+    },
+    {
+      "id": "activity-2",
+      "icon": "fi fi-rr-shuffle",
+      "iconBgClass": "bg-[#eff6ff]",
+      "iconColorClass": "text-[#3b82f6]",
+      "type": "Swap token",
+      "details": "XLM to USDC",
+      "amount": "200 XLM",
+      "status": "success",
+      "time": "3 days ago"
+    },
+    {
+      "id": "activity-3",
+      "icon": "fi fi-rr-paper-plane",
+      "iconBgClass": "bg-[#eafdf0]",
+      "iconColorClass": "text-[#16a34a]",
+      "type": "Sent token",
+      "details": "To @erikghafari",
+      "amount": "180 XLM",
+      "status": "processing",
+      "time": "6 days ago"
+    },
+    {
+      "id": "activity-4",
+      "icon": "fi fi-rr-gift",
+      "iconBgClass": "bg-[#f6eefe]",
+      "iconColorClass": "text-[#a855f7]",
+      "type": "Gift claim",
+      "details": "Ramadhan Berkah Room",
+      "amount": "1,254 XLM",
+      "status": "expired",
+      "time": "2 weeks ago"
+    },
+    {
+      "id": "activity-5",
+      "icon": "fi fi-rr-download",
+      "iconBgClass": "bg-[#fffbeb]",
+      "iconColorClass": "text-[#f59e0b]",
+      "type": "Received token",
+      "details": "From @johndoe",
+      "amount": "50 XLM",
+      "status": "success",
+      "time": "3 weeks ago"
+    },
+    {
+      "id": "activity-6",
+      "icon": "fi fi-rr-paper-plane",
+      "iconBgClass": "bg-[#eafdf0]",
+      "iconColorClass": "text-[#16a34a]",
+      "type": "Sent token",
+      "details": "To @sarah",
+      "amount": "10 USDC",
+      "status": "success",
+      "time": "1 month ago"
+    },
+    {
+      "id": "activity-7",
+      "icon": "fi fi-rr-apps-add",
+      "iconBgClass": "bg-[#eff6ff]",
+      "iconColorClass": "text-[#3b82f6]",
+      "type": "Created Room",
+      "details": "Weekly Giveaway",
+      "amount": "0 XLM",
+      "status": "success",
+      "time": "1 month ago"
+    }
+  ],
+  "profile": {
+    "id": "me",
+    "username": "@nadifofficial",
+    "initials": "NB",
+    "role": "Room Creator",
+    "balances": {
+      "XLM": 565.76,
+      "USDC": 895.76
+    },
+    "balances_idr": {
+      "XLM": 1565999,
+      "USDC": 2565999
+    }
+  }
+}

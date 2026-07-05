@@ -18,7 +18,7 @@ export function RoomSearch({ value, onChange }: RoomSearchProps) {
       </div>
       <input
         type="text"
-        className="block w-full pl-10 pr-3 py-2 border border-neutral-5 rounded-md leading-5 bg-white dark:bg-card placeholder-neutral-500 focus:outline-none focus:ring-1 focus:ring-secondary-500 focus:border-secondary-500 sm:text-sm transition-colors"
+        className="block w-full pl-10 pr-3 py-2 border border-border rounded-md leading-5 bg-white dark:bg-card placeholder-neutral-500 focus:outline-none focus:ring-1 focus:ring-secondary-500 focus:border-secondary-500 sm:text-sm transition-colors"
         placeholder="Search for rooms or creators..."
         value={value}
         onChange={handleChange}

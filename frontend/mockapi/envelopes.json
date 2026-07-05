@@ -1,0 +1,74 @@
+[
+  {
+    "id": "preset-1",
+    "title": "Ketupat Lebaran",
+    "imageUrl": "/thumbnail/thumb_envelope1.webp",
+    "category": "culture"
+  },
+  {
+    "id": "preset-2",
+    "title": "Golden Lantern",
+    "imageUrl": "/thumbnail/thumb_envelope2.webp",
+    "category": "culture"
+  },
+  {
+    "id": "preset-3",
+    "title": "Floral Blossom",
+    "imageUrl": "/thumbnail/thumb_envelope3.webp",
+    "category": "nature"
+  },
+  {
+    "id": "preset-4",
+    "title": "Cheerful Purple",
+    "imageUrl": "/thumbnail/thumb_envelope4.webp",
+    "category": "modern"
+  },
+  {
+    "id": "preset-5",
+    "title": "Abstract Wave",
+    "imageUrl": "/thumbnail/thumb_envelope5.webp",
+    "category": "modern"
+  },
+  {
+    "id": "preset-6",
+    "title": "Calm Blue",
+    "imageUrl": "/thumbnail/thumb_envelope6.webp",
+    "category": "classic"
+  },
+  {
+    "id": "preset-7",
+    "title": "Couple Hearts",
+    "imageUrl": "/thumbnail/thumb_envelope7.webp",
+    "category": "family"
+  },
+  {
+    "id": "preset-8",
+    "title": "Cute Kids",
+    "imageUrl": "/thumbnail/thumb_envelope8.webp",
+    "category": "family"
+  },
+  {
+    "id": "preset-9",
+    "title": "Nature Leaves",
+    "imageUrl": "/thumbnail/thumb_envelope9.webp",
+    "category": "nature"
+  },
+  {
+    "id": "preset-10",
+    "title": "Neon Future",
+    "imageUrl": "/thumbnail/thumb_envelope10.webp",
+    "category": "modern"
+  },
+  {
+    "id": "preset-11",
+    "title": "Classic Navy",
+    "imageUrl": "/thumbnail/thumb_envelope11.webp",
+    "category": "classic"
+  },
+  {
+    "id": "preset-12",
+    "title": "Gold Foil",
+    "imageUrl": "/thumbnail/thumb_envelope12.webp",
+    "category": "classic"
+  }
+]

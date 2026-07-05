@@ -11,7 +11,7 @@ export function RecipientChip({ initials, username, onRemove }: RecipientChipPro
   const cleanUsername = username.startsWith('@') ? username.slice(1) : username;
 
   return (
-    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-neutral-5 bg-white dark:bg-card w-fit cursor-default hover:border-neutral-6 transition-colors">
+    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-white dark:bg-card w-fit cursor-default hover:border-neutral-6 transition-colors">
       <div className="w-6 h-6 rounded-full bg-[#f0fdf4] text-[#16a34a] flex items-center justify-center text-[10px] font-semibold shrink-0">
         {initials.toUpperCase()}
       </div>
