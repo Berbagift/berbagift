@@ -26,6 +26,7 @@ services:
       - .env
     environment:
       - APP_ENV=staging
+      - DB_HOST=db
     ports:
       - "8001:8000"
     depends_on:
