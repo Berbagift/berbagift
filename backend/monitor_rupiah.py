@@ -7,7 +7,7 @@ import logging
 import os
 from dotenv import load_dotenv
 
-# Konfigurasi Logging (Format waktu yang rapi sangat penting untuk monitoring)
+# Konfigurasi Logging
 logging.basicConfig(
     level=logging.INFO, 
     format='%(asctime)s - %(levelname)s - %(message)s',
@@ -30,7 +30,7 @@ class IndodaxClient:
         ).hexdigest()
 
     def get_transaction_history(self) -> dict:
-        """Memanggil API transHistory[cite: 464]."""
+        """Memanggil API transHistory untuk mengecek riwayat deposit."""
         payload = {
             'method': 'transHistory',
             'timestamp': int(time.time() * 1000)
@@ -51,12 +51,12 @@ class IndodaxClient:
             logger.error(f"Gagal memanggil API transHistory: {e}")
             return {"success": 0, "error": str(e)}
 
-def monitor_realtime_deposit(client: IndodaxClient, target_coin: str, interval_seconds: int = 20):
+def monitor_incoming_idr(client: IndodaxClient, interval_seconds: int = 20):
     """
-    Sistem polling untuk memantau deposit yang masuk.
-    Akan menampilkan log status meskipun tidak ada transaksi baru.
+    Fungsi polling khusus untuk memantau setoran Rupiah (IDR) yang masuk.
     """
-    logger.info(f"🚀 Memulai radar pemantauan deposit {target_coin.upper()}...")
+    target_coin = 'idr'
+    logger.info("💸 Memulai radar pemantauan deposit RUPIAH (IDR)...")
     logger.info(f"Interval pengecekan: {interval_seconds} detik.")
     
     last_processed_time = 0
@@ -66,34 +66,38 @@ def monitor_realtime_deposit(client: IndodaxClient, target_coin: str, interval_s
             history = client.get_transaction_history()
             
             if history.get("success") == 1:
+                # Mengambil data deposit IDR
                 all_deposits = history.get('return', {}).get('deposit', {})
-                target_deposits = all_deposits.get(target_coin.lower(), [])
+                idr_deposits = all_deposits.get(target_coin, [])
                 
-                if target_deposits:
-                    latest_deposit = target_deposits[0]
+                if idr_deposits:
+                    # Index 0 adalah deposit IDR paling baru
+                    latest_deposit = idr_deposits[0]
                     current_success_time = int(latest_deposit.get('success_time', 0))
                     status = latest_deposit.get('status')
                     amount = latest_deposit.get('amount')
+                    deposit_type = latest_deposit.get('type', 'unknown') # misal: 'bank' atau 'ewallet'
                     
-                    # Deteksi jika ada deposit baru
                     if current_success_time > last_processed_time:
                         if last_processed_time != 0 and status == "success":
-                            print("\n" + "💰" * 20)
-                            print(f"🚨 [DEPOSIT BARU TERDETEKSI] 🚨")
-                            print(f"Koin   : {target_coin.upper()}")
-                            print(f"Jumlah : +{amount}")
+                            print("\n" + "💵" * 25)
+                            print(f"🚨 [DANA RUPIAH MASUK!] 🚨")
+                            print(f"Jumlah : Rp {amount}")
+                            print(f"Metode : {deposit_type.upper()}")
                             print(f"Status : {status.upper()}")
-                            print("💰" * 20 + "\n")
+                            print("💵" * 25 + "\n")
                             
-                        # Perbarui memori waktu
+                            # Logika lanjutan:
+                            # 1. Update status pembayaran di database
+                            # 2. Trigger pencetakan invoice
+                            # 3. Kirim notifikasi Telegram/Discord ke tim
+                            
                         last_processed_time = current_success_time
                     else:
-                        # Log saat tidak ada transaksi baru yang masuk
-                        logger.info(f"Pengecekan selesai. Belum ada deposit {target_coin.upper()} baru.")
+                        logger.info("Pengecekan selesai. Belum ada dana Rupiah masuk.")
                         
                 else:
-                    # Log saat histori koin tersebut memang masih kosong melompong
-                    logger.info(f"Pengecekan selesai. Belum pernah ada riwayat deposit untuk {target_coin.upper()}.")
+                    logger.info("Pengecekan selesai. Belum pernah ada riwayat deposit Rupiah.")
                     
             else:
                 logger.error(f"Response Error: {history.get('error')}")
@@ -101,11 +105,10 @@ def monitor_realtime_deposit(client: IndodaxClient, target_coin: str, interval_s
         except Exception as e:
             logger.error(f"Terjadi kesalahan sistem saat polling: {e}")
             
-        # Jeda waktu (Polling interval)
         time.sleep(interval_seconds)
 
 # ==========================================
-# Alur Eksekusi Utama (Main Block)
+# Blok Eksekusi Utama
 # ==========================================
 if __name__ == "__main__":
     load_dotenv()
@@ -113,16 +116,10 @@ if __name__ == "__main__":
     SECRET_KEY = os.getenv("SECRET_KEY")
     
     if not API_KEY or not SECRET_KEY:
-        logger.error("API_KEY atau SECRET_KEY tidak ditemukan di environment/file .env!")
+        logger.error("API_KEY atau SECRET_KEY tidak ditemukan di environment!")
         exit(1)
         
     indodax = IndodaxClient(api_key=API_KEY, secret_key=SECRET_KEY)
     
-    TARGET_COIN = 'xlm'
-    
-    # Jalankan worker
-    monitor_realtime_deposit(
-        client=indodax, 
-        target_coin=TARGET_COIN, 
-        interval_seconds=30 
-    )
+    # Jalankan monitoring khusus IDR
+    monitor_incoming_idr(client=indodax, interval_seconds=30)
