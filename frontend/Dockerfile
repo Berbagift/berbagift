@@ -15,7 +15,6 @@ FROM oven/bun:1.3-alpine AS dev
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY frontend/ .
-COPY .env .
 EXPOSE 3000
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
@@ -26,9 +25,17 @@ FROM oven/bun:1.3-alpine AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY frontend/ .
-COPY .env .
 
-# Disable Next.js telemetry during build
+# Declaring build-time environment arguments needed for Next.js bundle compilation
+ARG NEXT_PUBLIC_API_URL
+ARG NEXT_PUBLIC_API_MODE
+ARG NEXT_PUBLIC_STELLAR_NETWORK
+ARG NEXT_PUBLIC_ENABLE_AUTH_MIDDLEWARE
+
+ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
+ENV NEXT_PUBLIC_API_MODE=$NEXT_PUBLIC_API_MODE
+ENV NEXT_PUBLIC_STELLAR_NETWORK=$NEXT_PUBLIC_STELLAR_NETWORK
+ENV NEXT_PUBLIC_ENABLE_AUTH_MIDDLEWARE=$NEXT_PUBLIC_ENABLE_AUTH_MIDDLEWARE
 ENV NEXT_TELEMETRY_DISABLED=1
 
 # Build the application

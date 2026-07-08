@@ -31,6 +31,12 @@
       "skillPath": "skills/frontend-design/SKILL.md",
       "computedHash": "4eabc66183767153e404b39d1b839b1c37f2d82d86f0a0d7e880a579d8d62336"
     },
+    "nginx-configuration": {
+      "source": "aj-geddes/useful-ai-prompts",
+      "sourceType": "github",
+      "skillPath": "skills/nginx-configuration/SKILL.md",
+      "computedHash": "30535fb54fb19ddcbad3697da291fbd22ea60f0c245d55be41ae9043f68bfd4a"
+    },
     "ponytail": {
       "source": "dietrichgebert/ponytail",
       "sourceType": "github",
