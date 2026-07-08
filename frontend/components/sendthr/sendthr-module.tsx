@@ -10,21 +10,46 @@ import { FeeBadge } from '@/components/finance/fee-badge';
 import { ActionSubmitButton } from '@/components/forms/action-submit-button';
 import { SecurityNote } from '@/components/finance/security-note';
 import { TOKENS } from '@/lib/data/tokens';
+import { useUserProfile } from '@/hooks/use-user-profile';
 
 export function SendThrModule() {
   const router = useRouter();
   const state = useSendThrState();
+  const { data: userProfile } = useUserProfile();
+  const [recipientInput, setRecipientInput] = React.useState('');
+
+  const activeSymbol = state.activeToken.id; // 'XLM' or 'USDC'
+  const realBalance = userProfile?.balances?.[activeSymbol] || "0.00";
+  
+  // Format the IDR dynamically. The API returns a number or string number for IDR.
+  const rawIdr = userProfile?.balances_idr?.[activeSymbol] || 0;
+  const realIdrStr = Number(rawIdr).toLocaleString('id-ID');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (state.recipients.length === 0) {
+    const pendingInput = recipientInput.trim();
+    
+    if (state.recipients.length === 0 && !pendingInput) {
       alert('Please add at least one recipient');
       return;
     }
+    
+    if (pendingInput) {
+      state.addRecipient(pendingInput);
+      setRecipientInput('');
+    }
+
     if (!state.amount || parseFloat(state.amount) <= 0) {
       alert('Please enter a valid amount');
       return;
     }
+    
+    // Check balance before proceeding
+    if (parseFloat(state.amount) > parseFloat(realBalance)) {
+      alert(`Insufficient ${activeSymbol} balance`);
+      return;
+    }
+
     router.push('/sendthr/envelope');
   };
 
@@ -32,9 +57,9 @@ export function SendThrModule() {
     <div className="w-full max-w-[740px] mx-auto flex flex-col gap-5">
       {/* Top Balance Card */}
       <BalanceHeaderCard
-        balance={state.activeToken.balance}
+        balance={realBalance}
         symbol={state.activeToken.symbol}
-        equivalentIdr={state.activeToken.equivalentIdr}
+        equivalentIdr={realIdrStr}
         onToggleToken={state.toggleToken}
       />
 
@@ -57,15 +82,17 @@ export function SendThrModule() {
             ))}
             <input
               type="text"
+              value={recipientInput}
+              onChange={(e) => setRecipientInput(e.target.value)}
               placeholder={state.recipients.length === 0 ? "Type username and press Enter..." : "Add username..."}
               className="flex-grow bg-transparent border-none outline-none text-sm text-black dark:text-neutral-1 placeholder:text-neutral-6 min-w-[100px] sm:min-w-[150px]"
               onKeyDown={(e) => {
                 if (e.key === 'Enter') {
                   e.preventDefault();
-                  const val = e.currentTarget.value.trim();
+                  const val = recipientInput.trim();
                   if (val) {
                     state.addRecipient(val);
-                    e.currentTarget.value = '';
+                    setRecipientInput('');
                   }
                 }
               }}

@@ -33,10 +33,7 @@ export default function ProfilePage() {
       email: email.trim() || undefined,
     }, {
       onSuccess: () => {
-        setSuccessMsg("Profile updated successfully! Refreshing...");
-        setTimeout(() => {
-          window.location.reload();
-        }, 1500);
+        setSuccessMsg("Profile updated successfully!");
       },
       onError: (err) => {
         setErrorMsg(getErrorMessage(err));

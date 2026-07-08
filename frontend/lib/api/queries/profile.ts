@@ -8,7 +8,16 @@ export function useUpdateProfile() {
   return useMutation({
     mutationFn: (data: { username?: string; email?: string }) => 
       profileService.updateProfile(data),
-    onSuccess: () => {
+    onSuccess: (data) => {
+      // Optimistically update the cached profile with the new data from the mutation response
+      queryClient.setQueryData(['userProfile'], (oldData: any) => {
+        if (!oldData) return data;
+        return {
+          ...oldData,
+          ...data,
+        };
+      });
+      // Also invalidate to ensure it syncs fresh in the background
       queryClient.invalidateQueries({ queryKey: ['userProfile'] });
     },
     onError: (error) => {

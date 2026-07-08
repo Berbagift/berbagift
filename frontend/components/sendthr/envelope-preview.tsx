@@ -6,6 +6,8 @@ import { useRouter } from "next/navigation";
 import { useSendThrStore } from "@/hooks/use-send-thr-state";
 import { PRESET_ENVELOPES } from "@/lib/data/envelopes";
 import { useEnvelopes } from "@/lib/api/queries";
+import { usersService } from "@/lib/api/services/users";
+import { useWalletStore } from "@/hooks/use-wallet-state";
 
 export function EnvelopePreview() {
   const router = useRouter();
@@ -36,19 +38,61 @@ export function EnvelopePreview() {
     ? `${primaryRecipient.username}${additionalCount > 0 ? ` +${additionalCount}` : ""}`
     : "Recipient Name";
 
-  // =========================================================================
-  // DEV MOCK CONFIGURATION
-  // - Set IS_DEV_MODE to true to auto-simulate transitions (Processing -> Success)
-  // - Set IS_DEV_MODE to false for testing real API endpoints/backend status integration
-  // =========================================================================
-  const IS_DEV_MODE = true;
+  const { publicKey } = useWalletStore();
 
-  const handleConfirm = () => {
+  const handleConfirm = async () => {
+    if (!publicKey) {
+      alert("Wallet not connected. Please connect your wallet first.");
+      return;
+    }
+
     state.setStatus('processing');
-    if (IS_DEV_MODE) {
-      setTimeout(() => {
-        state.setStatus('success');
-      }, 2000);
+    
+    try {
+      // 1. Resolve usernames to wallet addresses
+      const destinations: { address: string; amount: string }[] = [];
+      const totalAmount = parseFloat(state.amount);
+      const amountPerRecipient = (totalAmount / state.recipients.length).toFixed(7);
+
+      for (const rec of state.recipients) {
+        try {
+          const userData = await usersService.getUserByUsername(rec.username);
+          destinations.push({
+            address: userData.wallet_address,
+            amount: amountPerRecipient
+          });
+        } catch (err: any) {
+          throw new Error(`Username not found or invalid: @${rec.username}`);
+        }
+      }
+
+      // 2. Build Transaction
+      const { buildPaymentTx, submitTransaction, config } = await import('@/lib/stellar/transactions');
+      const xdr = await buildPaymentTx(publicKey, destinations, state.activeToken.id);
+
+      // 3. Sign Transaction via Freighter
+      const { signTransaction } = await import('@stellar/freighter-api');
+      const signResult = await signTransaction(xdr, {
+        networkPassphrase: config.networkPassphrase
+      });
+
+      if (!signResult || signResult.error) {
+        throw new Error(signResult?.error || "Transaction signing rejected by user");
+      }
+
+      // Handle raw buffer or string from Freighter
+      const signedXdrStr = typeof signResult === 'string' 
+        ? signResult 
+        : typeof signResult.signedTxXdr === 'string' ? signResult.signedTxXdr : Buffer.from(signResult as any).toString('base64');
+
+      // 4. Submit to Network
+      await submitTransaction(signedXdrStr);
+
+      state.setStatus('success');
+    } catch (err: any) {
+      console.error("Transaction failed:", err);
+      alert(err.message || "Transaction failed");
+      state.setStatus('error');
     }
   };
 

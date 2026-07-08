@@ -85,7 +85,15 @@
   - Created a dedicated Profile Settings page at `app/(main)/dashboard/profile/page.tsx`.
   - Styled using the strict fintech SaaS aesthetic (cards, restrained layout width).
   - Wired form inputs to allow updating `username` and `email` with success and error feedback.
+  - Implemented an **Optimistic UI Update** using TanStack Query's `setQueryData` combined with `invalidateQueries`. This instantly synchronizes the newly updated `username` to the global cache without waiting for the background refetch, completely eliminating Header and avatar initials flashing.
   - Updated Sidebar and Header dropdowns to map to `/dashboard/profile` correctly.
+  - Refactored the `Disconnect Wallet` flow in `Header.tsx` to use `window.location.href = "/"` instead of the Next.js router, forcing a hard browser refresh to explicitly clear React Query cache and application state for security.
+- [x] **Phase 26**: Send THR Web3 Integration (Smart Transactions).
+  - Installed `@stellar/stellar-sdk` and integrated `@stellar/freighter-api` to process real on-chain Web3 transactions.
+  - Created `lib/api/services/users.ts` to seamlessly convert usernames entered in the UI into target wallet addresses using `GET /api/users/{username}`.
+  - Developed `lib/stellar/transactions.ts` to dynamically assemble `TransactionBuilder` operations. Supports multi-send (splitting the total amount across multiple recipients evenly) and automatically resolves asset configurations (Native XLM or testnet USDC via Issuer Address).
+  - Replaced the mock timeout in `envelope-preview.tsx` with a real Web3 flow: fetches wallet addresses -> builds XDR payload -> prompts Freighter for user signature -> submits to Horizon testnet -> handles success/failure states gracefully.
+  - Upgraded the Send THR entry module (`sendthr-module.tsx`) to pull the real-time asset balance and IDR equivalent dynamically via `useUserProfile`, removing the static mock data. It also now handles inline validation and automatically processes un-submitted username text in the input field when hitting Continue.
 
 ## 🏗️ Current Codebase Architecture & Context
 
