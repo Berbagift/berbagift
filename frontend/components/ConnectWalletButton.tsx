@@ -42,7 +42,7 @@ export function ConnectWalletButton() {
   const router = useRouter();
   const [isConnecting, setIsConnecting] = useState(false);
   const [mounted, setMounted] = useState(false);
-  const { connect, isConnected: isWalletConnected } = useWalletStore();
+  const { connect, isConnected: isWalletConnected, publicKey } = useWalletStore();
 
   useEffect(() => {
     const timeoutId = window.setTimeout(() => setMounted(true), 0);
@@ -155,12 +155,16 @@ export function ConnectWalletButton() {
   }
 
   if (isWalletConnected) {
+    const displayAddress = publicKey 
+      ? `${publicKey.substring(0, 4)}....${publicKey.substring(publicKey.length - 4)}` 
+      : "Dashboard";
+      
     return (
       <Button 
         onClick={() => router.push('/dashboard')}
         className="rounded-full shadow-none font-medium px-6"
       >
-        Dashboard
+        {displayAddress}
       </Button>
     );
   }

@@ -129,7 +129,7 @@ export function Header({ onMenuClick, isDesktopSidebarOpen = true }: HeaderProps
                 {userProfile?.username ? userProfile.username : "My Wallet"}
               </p>
               <p className="text-neutral-7 dark:text-neutral-6 text-xs leading-none">
-                {publicKey ? `${publicKey.substring(0, 5)}...${publicKey.substring(publicKey.length - 4)}` : "Disconnected"}
+                {publicKey ? `${publicKey.substring(0, 4)}....${publicKey.substring(publicKey.length - 4)}` : "Disconnected"}
               </p>
             </div>
             <i className={`fi fi-rr-angle-small-down ml-1 text-xs text-neutral-6 transition-transform ${isProfileOpen ? 'rotate-180' : ''}`} />
