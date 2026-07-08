@@ -31,7 +31,7 @@ export function Header({ onMenuClick, isDesktopSidebarOpen = true }: HeaderProps
     setIsProfileOpen(false);
     removeAuthToken();
     disconnect();
-    router.push("/");
+    window.location.href = "/";
   };
 
   const renderTitle = (isMobile: boolean = false) => {
