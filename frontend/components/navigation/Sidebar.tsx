@@ -30,7 +30,7 @@ const SIDEBAR_NAV = [
   {
     section: 'ACCOUNT',
     items: [
-      { name: 'My Profile', href: '/account/profile', icon: 'fi fi-rr-user' },
+      { name: 'My Profile', href: '/dashboard/profile', icon: 'fi fi-rr-user' },
       { name: 'Help Center', href: '/account/help', icon: 'fi fi-rr-info' },
     ],
   },

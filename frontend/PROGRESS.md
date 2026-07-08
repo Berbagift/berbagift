@@ -80,7 +80,12 @@
   - **Create Room Mutation Wiring**: Connected `hooks/use-create-room-state.ts` to `useCreateRoom()` so Create Room and Save Draft now flow through the same service/query invalidation path as server mode, instead of only showing simulated alerts.
   - **Tokens & Envelopes Runtime Validation**: Wired Balance and Envelope selection/preview to `useTokens()` and `useEnvelopes()` while preserving static fallbacks from `lib/data/`. This lets endpoints be exercised without changing the visible UI or making the page blank if the mock server is unavailable.
   - **Lint & Type Safety Cleanup**: Removed high-risk `any` usage around services, chart data, activity tables, and room detail props. Verified `npm run lint` and `npx tsc --noEmit` pass cleanly after the integration fixes.
-
+- [x] **Phase 25**: Profile Settings Page.
+  - Implemented the `useUpdateProfile` mutation hook in `lib/api/queries/profile.ts` for updating the user profile via `PUT /api/auth/me`.
+  - Created a dedicated Profile Settings page at `app/(main)/dashboard/profile/page.tsx`.
+  - Styled using the strict fintech SaaS aesthetic (cards, restrained layout width).
+  - Wired form inputs to allow updating `username` and `email` with success and error feedback.
+  - Updated Sidebar and Header dropdowns to map to `/dashboard/profile` correctly.
 
 ## 🏗️ Current Codebase Architecture & Context
 

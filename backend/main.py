@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from routes.hello import router as hello_router
 from routes.auth import router as auth_router
 from routes.token import router as token_router
+from routes.user import router as user_router
 from schemas.response import APIResponse
 from databases.connection import engine
 from models.base import Base
@@ -67,6 +68,7 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
 app.include_router(hello_router)
 app.include_router(auth_router)
 app.include_router(token_router)
+app.include_router(user_router)
 
 @app.get("/", response_model=APIResponse, status_code=200)
 def root():

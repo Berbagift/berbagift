@@ -147,6 +147,14 @@ export function Header({ onMenuClick, isDesktopSidebarOpen = true }: HeaderProps
                     <ThemeToggle />
                   </div>
                 </div>
+                <Link
+                  href="/dashboard/profile"
+                  onClick={() => setIsProfileOpen(false)}
+                  className="block px-4 py-2.5 text-sm text-neutral-8 dark:text-neutral-3 hover:bg-neutral-3 dark:hover:bg-neutral-10 flex items-center gap-2.5 transition-colors font-medium"
+                >
+                  <i className="fi fi-rr-user text-base" />
+                  My Profile
+                </Link>
                 <button
                   onClick={handleDisconnect}
                   className="w-full text-left px-4 py-2.5 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 flex items-center gap-2.5 transition-colors font-medium"

@@ -28,7 +28,7 @@ export const ROUTE_BREADCRUMBS: Record<string, BreadcrumbItem[]> = {
   "/community/create-room": [{ label: "Community" }, { label: "My Rooms", href: "/community/myrooms" }, { label: "Create Room" }],
   
   // Account
-  "/account/profile": [{ label: "Account" }, { label: "My Profile" }],
+  "/dashboard/profile": [{ label: "Account" }, { label: "My Profile" }],
   "/account/help": [{ label: "Account" }, { label: "Help Center" }],
 };
 

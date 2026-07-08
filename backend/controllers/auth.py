@@ -127,11 +127,15 @@ class AuthController:
         if not user:
             user = self.user_db.create_user(
                 wallet_address=request.wallet_address,
-                username=request.wallet_address
+                username=None
             )
             status_code = 201
             message = "User registered and logged in successfully"
         else:
+            # Fix existing users who have their wallet address saved as their username
+            if user.username == user.wallet_address or user.username == user.wallet_address[:50]:
+                user = self.user_db.update_user(user, clear_username=True)
+                
             status_code = 201
             message = "Login successful"
             
@@ -191,6 +195,10 @@ class AuthController:
                 "data": None,
                 "errors": None
             }, 404
+            
+        # Fix existing users who have their wallet address saved as their username
+        if user.username == user.wallet_address or user.username == user.wallet_address[:50]:
+            user = self.user_db.update_user(user, clear_username=True)
             
         # Fetch on-chain balances dynamically
         balances = self._fetch_stellar_balances(user.wallet_address)
@@ -277,6 +285,12 @@ class AuthController:
         if new_username is not None:
             if len(new_username) > 50:
                 errors["username"] = "TOO_LONG"
+            elif self.user_db.check_username_exists(new_username, user_id):
+                return {
+                    "message": "Username already taken",
+                    "data": None,
+                    "errors": None
+                }, 409
 
         if new_email is not None:
             if len(new_email) > 100:
