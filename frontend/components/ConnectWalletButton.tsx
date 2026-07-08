@@ -52,15 +52,24 @@ export function ConnectWalletButton() {
   const handleConnect = async () => {
     setIsConnecting(true);
     try {
-      if (await isFreighterConnected()) {
+      const { isConnected } = await isFreighterConnected();
+      if (isConnected) {
         const expectedNetwork = process.env.NEXT_PUBLIC_STELLAR_NETWORK?.toUpperCase() || 'TESTNET';
-        const { network, error: networkError } = await getNetworkDetails();
+        
+        let networkDetails;
+        try {
+          networkDetails = await getNetworkDetails();
+        } catch (err) {
+          console.error("getNetworkDetails error:", err);
+        }
+        
+        const { network, error: networkError } = networkDetails || {};
         
         // Freighter typically uses 'PUBLIC' instead of 'MAINNET'
         const targetNetwork = expectedNetwork === 'MAINNET' ? 'PUBLIC' : expectedNetwork;
 
-        if (networkError) {
-          alert("Error fetching network details: " + networkError);
+        if (!network || networkError) {
+          alert("Error fetching network details: " + (networkError || "Wallet not ready"));
           return;
         }
 
@@ -84,16 +93,18 @@ export function ConnectWalletButton() {
 
           // 2. Prompt Freighter to sign the message
           try {
-            const networkPassphrase = targetNetwork === 'PUBLIC'
-              ? 'Public Global Stellar Network ; September 2015'
-              : 'Testnet Stellar Network ; September 2015';
-            const signature = await signMessage(nonceString, { networkPassphrase, address });
-            if (!signature) {
-              alert("Signature rejected by user.");
+            // Use the networkPassphrase returned from getNetworkDetails to ensure a perfect match
+            const networkPassphrase = networkDetails?.networkPassphrase;
+            
+            const signResult = await signMessage(nonceString, { networkPassphrase, address });
+            // @ts-ignore - Handle various Freighter API version return types
+            if (!signResult || signResult.error || (!signResult.signedMessage && !signResult.signature && typeof signResult === 'object' && !Buffer.isBuffer(signResult) && !(signResult instanceof Uint8Array))) {
+              // @ts-ignore
+              alert("Signature failed or rejected by user: " + (signResult?.error || ""));
               return;
             }
 
-            const signatureStr = signatureToString(signature);
+            const signatureStr = signatureToString(signResult);
             
             // 3. Send signature to backend for verification
             try {
@@ -123,7 +134,7 @@ export function ConnectWalletButton() {
           }
         } else {
           console.error("Freighter error:", error);
-          alert(error || "Failed to connect Freighter.");
+          alert(getErrorMessage(error) || "Failed to connect Freighter.");
         }
       } else {
         alert("Please install the Freighter wallet extension to continue.");
