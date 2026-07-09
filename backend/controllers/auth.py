@@ -19,6 +19,10 @@ class AuthController:
         self.nonce_db = NonceDatabase(db)
 
     def _fetch_stellar_balances(self, wallet_address: str):
+        xlm_balance = 0.0
+        rpk_balance = 0.0
+        
+        # 1. Fetch XLM Balance
         try:
             from stellar_sdk import Server
             from stellar_sdk.exceptions import NotFoundError
@@ -27,23 +31,56 @@ class AuthController:
             
             try:
                 account = server.accounts().account_id(wallet_address).call()
+                for b in account.get("balances", []):
+                    if b.get("asset_type") == "native":
+                        xlm_balance = float(b.get("balance", 0.0))
             except NotFoundError:
-                # Wallet exists but is unfunded on Stellar Testnet
-                return {"XLM": 0.0, "USDC": 0.0}
-                
-            balances = account.get("balances", [])
-            xlm_balance = 0.0
-            usdc_balance = 0.0
+                pass
+        except Exception:
+            pass
             
-            for b in balances:
-                if b.get("asset_type") == "native":
-                    xlm_balance = float(b.get("balance", 0.0))
-                elif b.get("asset_code") == "USDC" and b.get("asset_issuer") == os.getenv("USDC_ISSUER_ADDRESS", "GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5"):
-                    usdc_balance = float(b.get("balance", 0.0))
-            return {"XLM": xlm_balance, "USDC": usdc_balance}
+        # 2. Fetch RPK Balance via Soroban RPC
+        try:
+            from stellar_sdk import SorobanServer, TransactionBuilder, Network, Account, scval
+            from stellar_sdk.xdr import SCVal
+            import os
+            
+            contract_id = os.getenv("RPK_CONTRACT", "CAXMJUKELFC7THVUKVH4NA5RYUDLORCKSZ5HTOPOMEXRMZJLFHKZJCQZ")
+            contract_id = contract_id.strip('"').strip("'")
+            
+            rpc_server = SorobanServer("https://soroban-testnet.stellar.org")
+            dummy = Account("GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5", 1)
+            
+            tx = (
+                TransactionBuilder(
+                    source_account=dummy,
+                    network_passphrase=Network.TESTNET_NETWORK_PASSPHRASE,
+                    base_fee=100,
+                )
+                .append_invoke_contract_function_op(
+                    contract_id=contract_id,
+                    function_name="balance",
+                    parameters=[scval.to_address(wallet_address)],
+                )
+                .set_timeout(30)
+                .build()
+            )
+            
+            sim = rpc_server.simulate_transaction(tx)
+            if sim and sim.results:
+                xdr_str = sim.results[0].xdr
+                sc_val = SCVal.from_xdr(xdr_str)
+                if sc_val.i128 is not None:
+                    hi = sc_val.i128.hi.int64
+                    lo = sc_val.i128.lo.uint64
+                    # Python handles arbitrarily large integers, shift and OR to get 128-bit int
+                    val = (hi << 64) | lo
+                    rpk_balance = float(val) / 10000000.0
         except Exception as e:
-            pass # Suppress network errors silently
-            return {"XLM": 0.0, "USDC": 0.0}
+            print(f"[!] Error fetching RPK via Soroban: {e}")
+            pass
+            
+        return {"XLM": xlm_balance, "RPK": rpk_balance}
 
 
     def generate_nonce(self, request: NonceRequest):
@@ -204,7 +241,7 @@ class AuthController:
         balances = self._fetch_stellar_balances(user.wallet_address)
         
         # Fetch token prices in IDR (Rupiah) with waterfall fallback
-        balances_idr = {"XLM": 0, "USDC": 0}
+        balances_idr = {"XLM": 0, "RPK": 0}
         try:
             from controllers.token import TokenController
             token_controller = TokenController()
@@ -214,7 +251,7 @@ class AuthController:
             usdc_price = prices.get("USDC", 0)
             
             balances_idr["XLM"] = int(round(balances.get("XLM", 0.0) * xlm_price))
-            balances_idr["USDC"] = int(round(balances.get("USDC", 0.0) * usdc_price))
+            balances_idr["RPK"] = int(round(balances.get("RPK", 0.0) * usdc_price))
         except Exception as e:
             # Fallback warning if pricing fails
             print(f"[!] Warning: Failed to calculate balance in IDR. Error: {e}")

@@ -4,14 +4,12 @@ import React from 'react';
 import { BalanceCard } from './balance-card';
 import { useCryptoPrices } from '@/lib/api/queries/prices';
 import { useUserProfile } from '@/hooks/use-user-profile';
-import { useRpkBalance } from '@/hooks/use-rpk-balance';
 
 export function BalanceSection() {
   const { data: userProfile, isLoading: isProfileLoading } = useUserProfile();
   const { data: prices, isLoading: isPricesLoading } = useCryptoPrices();
-  const { data: rpkBalance, isLoading: isRpkLoading } = useRpkBalance();
 
-  if (isProfileLoading || isPricesLoading || isRpkLoading) {
+  if (isProfileLoading || isPricesLoading) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
         {[...Array(4)].map((_, idx) => (
@@ -38,7 +36,7 @@ export function BalanceSection() {
 
   // Real balances
   const xlmAmount = userProfile?.balances?.XLM || 0;
-  const rpkAmount = rpkBalance || 0;
+  const rpkAmount = userProfile?.balances?.RPK || 0;
   
   // Real-time prices from CoinGecko (fallback to 1600/16000 if network fails)
   const xlmPriceIdr = prices?.stellar?.idr || 1600;
