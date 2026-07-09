@@ -18,7 +18,8 @@ export function proxy(request: NextRequest) {
       '/sendthr',
       '/community',
       '/create-room',
-      '/profile'
+      '/profile',
+      '/wallet'
     ];
 
     // Check if current path matches any of the protected prefixes

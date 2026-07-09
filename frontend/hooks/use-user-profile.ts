@@ -1,8 +1,8 @@
 "use client";
 
 import { useQuery } from '@tanstack/react-query';
-import axios from 'axios';
 import { getAuthToken } from '@/lib/auth';
+import { apiClient } from '@/lib/api/client';
 
 export function useUserProfile() {
   const query = useQuery({
@@ -15,12 +15,7 @@ export function useUserProfile() {
         // throw new Error('No authentication token found');
       }
 
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
-      const res = await axios.get(`${apiUrl}/api/auth/me`, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
+      const res = await apiClient.get('/auth/me');
       return res.data.data;
     },
     retry: false, // Do not retry on 401 Unauthorized

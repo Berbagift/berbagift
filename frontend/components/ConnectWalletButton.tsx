@@ -5,9 +5,8 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { isConnected as isFreighterConnected, requestAccess, getNetworkDetails, signMessage } from '@stellar/freighter-api';
 import { useWalletStore } from '@/hooks/use-wallet-state';
-import axios from 'axios';
 import { setAuthToken } from '@/lib/auth';
-import { getErrorMessage } from '@/lib/api/client';
+import { apiClient, getErrorMessage } from '@/lib/api/client';
 
 type SignaturePayload = {
   signedMessage?: unknown;
@@ -55,16 +54,16 @@ export function ConnectWalletButton() {
       const { isConnected } = await isFreighterConnected();
       if (isConnected) {
         const expectedNetwork = process.env.NEXT_PUBLIC_STELLAR_NETWORK?.toUpperCase() || 'TESTNET';
-        
+
         let networkDetails;
         try {
           networkDetails = await getNetworkDetails();
         } catch (err) {
           console.error("getNetworkDetails error:", err);
         }
-        
+
         const { network, error: networkError } = networkDetails || {};
-        
+
         // Freighter typically uses 'PUBLIC' instead of 'MAINNET'
         const targetNetwork = expectedNetwork === 'MAINNET' ? 'PUBLIC' : expectedNetwork;
 
@@ -80,11 +79,10 @@ export function ConnectWalletButton() {
 
         const { address, error } = await requestAccess();
         if (address) {
-          // 1. Fetch nonce from backend directly
-          const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
+          // 1. Fetch nonce from backend via centralized apiClient
           let nonceString;
           try {
-            const nonceRes = await axios.post(`${apiUrl}/api/auth/nonce`, { wallet_address: address });
+            const nonceRes = await apiClient.post('/auth/nonce', { wallet_address: address });
             nonceString = nonceRes.data.data.nonce;
           } catch (err) {
             alert(`Error getting nonce: ${getErrorMessage(err)}`);
@@ -95,7 +93,7 @@ export function ConnectWalletButton() {
           try {
             // Use the networkPassphrase returned from getNetworkDetails to ensure a perfect match
             const networkPassphrase = networkDetails?.networkPassphrase;
-            
+
             const signResult = await signMessage(nonceString, { networkPassphrase, address });
             // @ts-ignore - Handle various Freighter API version return types
             if (!signResult || signResult.error || (!signResult.signedMessage && !signResult.signature && typeof signResult === 'object' && !Buffer.isBuffer(signResult) && !(signResult instanceof Uint8Array))) {
@@ -105,29 +103,29 @@ export function ConnectWalletButton() {
             }
 
             const signatureStr = signatureToString(signResult);
-            
+
             // 3. Send signature to backend for verification
             try {
-              const signInRes = await axios.post(`${apiUrl}/api/auth/sign-in`, {
+              const signInRes = await apiClient.post('/auth/sign-in', {
                 wallet_address: address,
                 signature: signatureStr
               });
-              
+
               // 4. Success! Store the user ID, address, and set auth cookie
               const userId = signInRes.data.data.user_id;
               const accessToken = signInRes.data.data.access_token;
-              
+
               if (accessToken) {
                 setAuthToken(accessToken);
               }
-              
+
               connect(address, userId);
-              router.push('/dashboard');
+              window.location.href = '/dashboard';
             } catch (err) {
               alert(`Authentication failed: ${getErrorMessage(err)}`);
               return;
             }
-            
+
           } catch (signErr) {
             console.error("Signature error:", signErr);
             alert("Failed to sign message: " + getErrorMessage(signErr));
@@ -155,12 +153,12 @@ export function ConnectWalletButton() {
   }
 
   if (isWalletConnected) {
-    const displayAddress = publicKey 
-      ? `${publicKey.substring(0, 4)}....${publicKey.substring(publicKey.length - 4)}` 
+    const displayAddress = publicKey
+      ? `${publicKey.substring(0, 4)}....${publicKey.substring(publicKey.length - 4)}`
       : "Dashboard";
-      
+
     return (
-      <Button 
+      <Button
         onClick={() => router.push('/dashboard')}
         className="rounded-full shadow-none font-medium px-6"
       >
@@ -170,7 +168,7 @@ export function ConnectWalletButton() {
   }
 
   return (
-    <Button 
+    <Button
       onClick={handleConnect}
       disabled={isConnecting}
       className="rounded-full shadow-none font-medium px-6"

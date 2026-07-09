@@ -19,11 +19,10 @@ export function SendThrModule() {
   const [recipientInput, setRecipientInput] = React.useState('');
 
   const activeSymbol = state.activeToken.id; // 'XLM' or 'USDC'
-  const realBalance = userProfile?.balances?.[activeSymbol] || "0.00";
+  const realBalance = Number(userProfile?.balances?.[activeSymbol] ?? 0);
   
   // Format the IDR dynamically. The API returns a number or string number for IDR.
-  const rawIdr = userProfile?.balances_idr?.[activeSymbol] || 0;
-  const realIdrStr = Number(rawIdr).toLocaleString('id-ID');
+  const realIdr = Number(userProfile?.balances_idr?.[activeSymbol] ?? 0);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -45,7 +44,7 @@ export function SendThrModule() {
     }
     
     // Check balance before proceeding
-    if (parseFloat(state.amount) > parseFloat(realBalance)) {
+    if (parseFloat(state.amount) > realBalance) {
       alert(`Insufficient ${activeSymbol} balance`);
       return;
     }
@@ -59,7 +58,7 @@ export function SendThrModule() {
       <BalanceHeaderCard
         balance={realBalance}
         symbol={state.activeToken.symbol}
-        equivalentIdr={realIdrStr}
+        equivalentIdr={realIdr}
         onToggleToken={state.toggleToken}
       />
 
