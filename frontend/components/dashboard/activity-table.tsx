@@ -6,6 +6,29 @@ import { StatusState } from '@/components/shared/status-state';
 import { useActivities } from '@/lib/api/queries';
 import { Activity } from '@/lib/api/types';
 
+export const ActivityTableSkeleton = () => (
+  <div className="w-full">
+    <div className="hidden md:grid grid-cols-5 gap-4 px-6 py-3 border border-border rounded-t-md bg-emerald-50/50 dark:bg-emerald-900/10 animate-pulse">
+       <div className="h-4 bg-emerald-100/80 dark:bg-emerald-800/30 rounded w-20"></div>
+       <div className="h-4 bg-emerald-100/80 dark:bg-emerald-800/30 rounded w-24"></div>
+       <div className="h-4 bg-emerald-100/80 dark:bg-emerald-800/30 rounded w-16"></div>
+       <div className="h-4 bg-emerald-100/80 dark:bg-emerald-800/30 rounded w-16"></div>
+       <div className="h-4 bg-emerald-100/80 dark:bg-emerald-800/30 rounded w-20 justify-self-end"></div>
+    </div>
+    <div className="flex flex-col bg-white dark:bg-card">
+      {[...Array(5)].map((_, i) => (
+        <div key={i} className={`flex flex-col md:grid md:grid-cols-5 gap-3 md:gap-4 px-6 py-4 bg-emerald-50/30 dark:bg-emerald-900/5 animate-pulse ${i !== 4 ? 'border-b border-border' : ''}`}>
+          <div className="h-6 w-3/4 bg-emerald-100/80 dark:bg-emerald-800/30 rounded" />
+          <div className="h-6 w-full bg-emerald-100/80 dark:bg-emerald-800/30 rounded hidden md:block" />
+          <div className="h-6 w-1/2 bg-emerald-100/80 dark:bg-emerald-800/30 rounded hidden md:block" />
+          <div className="h-6 w-24 bg-emerald-100/80 dark:bg-emerald-800/30 rounded hidden md:block" />
+          <div className="h-6 w-1/3 bg-emerald-100/80 dark:bg-emerald-800/30 rounded md:justify-self-end hidden md:block" />
+        </div>
+      ))}
+    </div>
+  </div>
+);
+
 export interface ActivityTableProps {
   data?: Activity[];
 }
@@ -16,11 +39,7 @@ export function ActivityTable({ data }: ActivityTableProps) {
   const displayData = data !== undefined ? data : fetchedActivities.slice(0, 4);
 
   if (isLoading && data === undefined) {
-    return (
-      <div className="flex justify-center items-center py-10">
-        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-secondary-500"></div>
-      </div>
-    );
+    return <ActivityTableSkeleton />;
   }
   return (
     <div className="w-full">
