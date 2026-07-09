@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { isConnected as isFreighterConnected, requestAccess, getNetworkDetails, signMessage } from '@stellar/freighter-api';
@@ -40,6 +40,7 @@ function signatureToString(signature: unknown): string {
 export function ConnectWalletButton() {
   const router = useRouter();
   const [isConnecting, setIsConnecting] = useState(false);
+  const isConnectingRef = React.useRef(false);
   const [mounted, setMounted] = useState(false);
   const { connect, isConnected: isWalletConnected, publicKey } = useWalletStore();
 
@@ -49,6 +50,8 @@ export function ConnectWalletButton() {
   }, []);
 
   const handleConnect = async () => {
+    if (isConnectingRef.current) return;
+    isConnectingRef.current = true;
     setIsConnecting(true);
     try {
       const { isConnected } = await isFreighterConnected();
@@ -140,6 +143,7 @@ export function ConnectWalletButton() {
     } catch (error) {
       console.error("Error connecting wallet:", error);
     } finally {
+      isConnectingRef.current = false;
       setIsConnecting(false);
     }
   };

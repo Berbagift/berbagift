@@ -3,11 +3,15 @@
 import React from 'react';
 import { BalanceCard } from './balance-card';
 import { useCryptoPrices } from '@/lib/api/queries/prices';
+import { useUserProfile } from '@/hooks/use-user-profile';
+import { useRpkBalance } from '@/hooks/use-rpk-balance';
 
 export function BalanceSection() {
-  const { data: prices, isLoading } = useCryptoPrices();
+  const { data: userProfile, isLoading: isProfileLoading } = useUserProfile();
+  const { data: prices, isLoading: isPricesLoading } = useCryptoPrices();
+  const { data: rpkBalance, isLoading: isRpkLoading } = useRpkBalance();
 
-  if (isLoading) {
+  if (isProfileLoading || isPricesLoading || isRpkLoading) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
         {[...Array(4)].map((_, idx) => (
@@ -32,22 +36,23 @@ export function BalanceSection() {
     );
   }
 
-  // Dummy balances for display
-  const xlmAmount = 2550.75;
-  const usdcAmount = 150.00;
+  // Real balances
+  const xlmAmount = userProfile?.balances?.XLM || 0;
+  const rpkAmount = rpkBalance || 0;
   
   // Real-time prices from CoinGecko (fallback to 1600/16000 if network fails)
   const xlmPriceIdr = prices?.stellar?.idr || 1600;
-  const usdcPriceIdr = prices?.['usd-coin']?.idr || 16000;
+  // Assume RPK is pegged or just use 0 if unknown (fallback to dummy 16000 for display)
+  const rpkPriceIdr = prices?.['usd-coin']?.idr || 16000;
   
   // 24-hour price change percentage
   const xlm24hChange = prices?.stellar?.idr_24h_change || 0;
-  const usdc24hChange = prices?.['usd-coin']?.idr_24h_change || 0;
+  const rpk24hChange = prices?.['usd-coin']?.idr_24h_change || 0;
 
   // Calculate Equal To IDR dynamically
   const xlmIdr = xlmAmount * xlmPriceIdr;
-  const usdcIdr = usdcAmount * usdcPriceIdr;
-  const totalIdr = xlmIdr + usdcIdr;
+  const rpkIdr = rpkAmount * rpkPriceIdr;
+  const totalIdr = xlmIdr + rpkIdr;
   const totalXlmEquivalent = xlmPriceIdr > 0 ? (totalIdr / xlmPriceIdr) : 0;
   
   // Total THR Received (Dummy IDR amount converted back to XLM based on current price)
@@ -70,12 +75,12 @@ export function BalanceSection() {
       percentageType: xlm24hChange >= 0 ? 'positive' as const : 'negative' as const,
     },
     {
-      title: 'USDC Balance',
-      amount: `${usdcAmount.toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USDC`,
-      subtitle: `Equal to Rp ${usdcIdr.toLocaleString('id-ID', { maximumFractionDigits: 0 })}`,
-      symbol: 'USDC',
-      percentage: formatPercentage(usdc24hChange),
-      percentageType: usdc24hChange >= 0 ? 'positive' as const : 'negative' as const,
+      title: 'RPK Balance',
+      amount: `${rpkAmount.toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} RPK`,
+      subtitle: `Equal to Rp ${rpkIdr.toLocaleString('id-ID', { maximumFractionDigits: 0 })}`,
+      symbol: 'RPK',
+      percentage: formatPercentage(rpk24hChange),
+      percentageType: rpk24hChange >= 0 ? 'positive' as const : 'negative' as const,
     },
     {
       title: 'IDR Balance',
