@@ -202,8 +202,19 @@ class AuthController:
             prices, _ = token_controller.get_prices_waterfall()
             xlm_price = prices.get("XLM", 0)
             usdc_price = prices.get("USDC", 0)
-            balances_idr["XLM"] = int(round(balances.get("XLM", 0.0) * xlm_price))
-            balances_idr["RPK"] = int(round(balances.get("RPK", 0.0) * usdc_price))
+            
+            xlm_idr = int(round(balances.get("XLM", 0.0) * xlm_price))
+            rpk_idr = int(round(balances.get("RPK", 0.0)))
+            
+            balances_idr["XLM"] = xlm_idr
+            balances_idr["RPK"] = rpk_idr
+            balances_idr["total"] = xlm_idr + rpk_idr
+            
+            if xlm_price > 0:
+                balances["total_xlm"] = balances.get("XLM", 0.0) + (rpk_idr / xlm_price)
+            else:
+                balances["total_xlm"] = balances.get("XLM", 0.0)
+                
         except Exception as e:
             print(f"[!] Warning: Failed to calculate balance in IDR. Error: {e}")
         return {
