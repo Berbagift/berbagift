@@ -102,7 +102,7 @@ export async function getReserves(): Promise<{ reserveA: number, reserveB: numbe
       .build();
 
     const simResult = await rpc.simulateTransaction(tx);
-    if (StellarSdk.rpc.Api.isSimulationSuccess(simResult)) {
+    if (StellarSdk.rpc.Api.isSimulationSuccess(simResult) && simResult.result) {
       const resultVal = simResult.result.retval;
       const arr = StellarSdk.scValToNative(resultVal) as [bigint, bigint];
       return {

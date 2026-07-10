@@ -29,9 +29,11 @@ export function TokenLogo({ symbol, className, size = 'md' }: TokenLogoProps) {
 
   if (sym === 'RPK') {
     return (
-      <div className={cn("rounded-full flex items-center justify-center flex-shrink-0 bg-green-600 text-white select-none", sizeClasses[size], className)}>
-        <i className="fi fi-rr-money-bill-wave text-lg" />
-      </div>
+      <img 
+        src="/logo/rpk.webp" 
+        alt="RPK" 
+        className={cn("object-contain rounded-full select-none flex-shrink-0", sizeClasses[size], className)} 
+      />
     );
   }
 

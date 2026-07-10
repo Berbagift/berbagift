@@ -147,23 +147,24 @@ export function Sidebar({ isOpen, onClose, isDesktopOpen = true, onDesktopToggle
         ))}
       </div>
 
-      {/* Bottom Invite Card Placeholder */}
       <div className={cn("px-8 pb-8 transition-opacity duration-300 flex-shrink-0", isDesktopOpen ? "opacity-100 delay-150" : "lg:opacity-0 lg:pointer-events-none")}>
-        <div className="w-[216px] bg-emerald-50 dark:bg-emerald-950/50 rounded-md p-4 border border-border flex flex-col gap-3 relative overflow-hidden">
-          <p className="text-sm font-semibold text-emerald-900 dark:text-emerald-50 leading-tight z-10 w-2/3">
+        <div className="w-[216px] rounded-xl p-4 border border-slate-200/65 dark:border-neutral-800 flex flex-col gap-3 relative overflow-hidden group shadow-[0_1px_3px_rgba(0,0,0,0.02)] bg-emerald-50/10 dark:bg-neutral-900">
+          
+          {/* Background Image covering the entire card */}
+          <img
+            src="/invite.webp"
+            alt="Invite Background"
+            className="absolute inset-0 w-full h-full object-cover opacity-25 dark:opacity-15 group-hover:scale-105 transition-transform duration-500 pointer-events-none"
+          />
+          {/* Soft overlay gradient for contrast */}
+          <div className="absolute inset-0 bg-gradient-to-tr from-emerald-50/40 via-emerald-50/20 to-transparent dark:from-neutral-900 dark:via-neutral-900/60 pointer-events-none" />
+
+          <p className="text-sm font-semibold text-emerald-950 dark:text-emerald-50 leading-tight z-10 w-4/5">
             Bring your friends into everyday celebrations
           </p>
-          <button className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-medium py-2 px-3 rounded-md w-fit flex items-center gap-2 z-10 transition-colors">
+          <button className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold py-2 px-3.5 rounded-md w-fit flex items-center gap-2 z-10 transition-all hover:shadow-md hover:shadow-emerald-600/10 active:scale-95">
             Invite <i className="fi fi-rr-users-add" />
           </button>
-
-          {/* Illustration placeholder */}
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src="https://placehold.co/100x100/transparent/22c55e?text=Gift"
-            alt="Gift Illustration"
-            className="absolute -right-4 -bottom-4 w-24 h-24 object-contain opacity-80"
-          />
         </div>
       </div>
     </aside>

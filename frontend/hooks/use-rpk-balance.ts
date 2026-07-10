@@ -37,7 +37,7 @@ export function useRpkBalance() {
 
         const sim = await rpcServer.simulateTransaction(tx);
         
-        if (StellarSdk.rpc.Api.isSimulationSuccess(sim)) {
+        if (StellarSdk.rpc.Api.isSimulationSuccess(sim) && sim.result) {
           const rawBalance = StellarSdk.scValToNative(sim.result.retval);
           // Token balances usually have 7 decimals on Stellar/Soroban
           return Number(rawBalance) / 10000000;

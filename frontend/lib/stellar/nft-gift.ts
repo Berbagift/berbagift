@@ -27,7 +27,7 @@ function getFunctionName(tokenId: string): string {
  */
 function toStroops(amount: string): bigint {
   const parsed = parseFloat(amount);
-  if (isNaN(parsed)) return 0n;
+  if (isNaN(parsed)) return BigInt(0);
   return BigInt(Math.round(parsed * 10_000_000));
 }
 
