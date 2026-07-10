@@ -132,6 +132,7 @@ export function useSwapState() {
 
   const { isConnected, publicKey, signTransaction } = useWalletStore();
   const [errorMessage, setErrorMessage] = useState<string>('');
+  const [txHash, setTxHash] = useState<string | null>(null);
 
   const handleSwapSubmit = async () => {
     if (!isConnected || !publicKey) {
@@ -142,6 +143,7 @@ export function useSwapState() {
     try {
       setStatus('processing');
       setErrorMessage('');
+      setTxHash(null);
 
       const toAmountNum = parseAmount(toAmount);
       const minAmountOutNum = toAmountNum * 0.95; // 5% slippage tolerance
@@ -154,7 +156,8 @@ export function useSwapState() {
       );
 
       const signedXdr = await signTransaction(txXdr, 'testnet');
-      await submitTransaction(signedXdr);
+      const result = await submitTransaction(signedXdr);
+      setTxHash(result.hash);
 
       await queryClient.invalidateQueries({ queryKey: ['userProfile'] });
 
@@ -188,6 +191,7 @@ export function useSwapState() {
     status,
     setStatus,
     errorMessage,
+    txHash,
     handleSwapDirection,
     handleFromAmountChange,
     handleToAmountChange,

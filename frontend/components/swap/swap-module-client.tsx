@@ -33,9 +33,27 @@ export function SwapModuleClient() {
         title="Your token swap was completed successfully."
         iconColorClass="text-emerald-600 dark:text-emerald-400"
         bgColorClass="bg-emerald-50 dark:bg-emerald-950/20"
-        buttonText="Done"
-        onButtonClick={() => state.setStatus('form')}
         className="py-24"
+        action={
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 w-full max-w-sm mx-auto">
+            <button
+              onClick={() => state.setStatus('form')}
+              className="w-full sm:w-auto min-w-[140px] px-6 py-2.5 bg-[#16a34a] hover:bg-[#15803d] text-white rounded-md font-medium text-sm transition-colors cursor-pointer shadow-sm focus:outline-none"
+            >
+              Done
+            </button>
+            {state.txHash && (
+              <a
+                href={`${process.env.NEXT_PUBLIC_STELLAR_EXPLORER_URL || 'https://stellar.expert/explorer/testnet'}/tx/${state.txHash}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full sm:w-auto min-w-[140px] px-6 py-2.5 border-2 border-[#16a34a] text-[#16a34a] hover:bg-[#16a34a]/5 dark:hover:bg-[#16a34a]/10 rounded-md font-medium text-sm transition-colors flex items-center justify-center gap-2 focus:outline-none"
+              >
+                View Transaction <i className="fi fi-rr-arrow-up-right text-xs mt-0.5" />
+              </a>
+            )}
+          </div>
+        }
       />
     );
   }
