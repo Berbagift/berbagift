@@ -144,6 +144,9 @@ class AuthController:
         access_token = create_access_token(
             data={"sub": str(user.id), "wallet_address": user.wallet_address}
         )
+        import urllib.parse
+        avatar_name = urllib.parse.quote(user.username) if user.username else "USR"
+        avatar_url = f"https://ui-avatars.com/api/?name={avatar_name}&background=D1FAE5&color=047857&rounded=true"
         return {
             "message": message,
             "data": {
@@ -151,6 +154,7 @@ class AuthController:
                 "username": user.username,
                 "wallet_address": user.wallet_address,
                 "role": user.role,
+                "avatar_url": avatar_url,
                 "access_token": access_token
             },
             "errors": None
@@ -217,6 +221,9 @@ class AuthController:
                 
         except Exception as e:
             print(f"[!] Warning: Failed to calculate balance in IDR. Error: {e}")
+        import urllib.parse
+        avatar_name = urllib.parse.quote(user.username) if user.username else "USR"
+        avatar_url = f"https://ui-avatars.com/api/?name={avatar_name}&background=D1FAE5&color=047857&rounded=true"
         return {
             "message": "Successfully retrieved user data",
             "data": {
@@ -225,6 +232,7 @@ class AuthController:
                 "email": user.email,
                 "wallet_address": user.wallet_address,
                 "role": user.role,
+                "avatar_url": avatar_url,
                 "balances": balances,
                 "balances_idr": balances_idr
             },
@@ -307,6 +315,10 @@ class AuthController:
             email=new_email
         )
 
+        import urllib.parse
+        avatar_name = urllib.parse.quote(updated_user.username) if updated_user.username else "USR"
+        avatar_url = f"https://ui-avatars.com/api/?name={avatar_name}&background=D1FAE5&color=047857&rounded=true"
+
         return {
             "message": "Profile updated successfully",
             "data": {
@@ -314,7 +326,8 @@ class AuthController:
                 "username": updated_user.username,
                 "email": updated_user.email,
                 "wallet_address": updated_user.wallet_address,
-                "role": updated_user.role
+                "role": updated_user.role,
+                "avatar_url": avatar_url
             },
             "errors": None
         }, 201

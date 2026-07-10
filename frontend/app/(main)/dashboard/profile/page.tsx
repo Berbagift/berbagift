@@ -72,9 +72,17 @@ export default function ProfilePage() {
       
       {/* Header Section */}
       <div className="flex flex-col md:flex-row items-center gap-6 p-6 rounded-2xl bg-card border border-border">
-        <div className="w-24 h-24 rounded-full bg-muted border border-border flex items-center justify-center text-4xl font-bold text-muted-foreground">
-          {getInitial()}
-        </div>
+        {user?.avatar_url ? (
+          <img 
+            src={user?.avatar_url} 
+            alt="User Avatar" 
+            className="w-24 h-24 rounded-full object-cover border-2 border-border shadow-sm"
+          />
+        ) : (
+          <div className="w-24 h-24 rounded-full bg-muted border border-border flex items-center justify-center text-4xl font-bold text-muted-foreground">
+            {getInitial()}
+          </div>
+        )}
         <div className="text-center md:text-left">
           <h1 className="text-3xl font-bold tracking-tight text-foreground">
             {user?.username ? `@${user.username}` : "Welcome to BagiTHR"}

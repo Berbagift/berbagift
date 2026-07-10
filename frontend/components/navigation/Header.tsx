@@ -120,9 +120,17 @@ export function Header({ onMenuClick, isDesktopSidebarOpen = true }: HeaderProps
             onClick={() => setIsProfileOpen(!isProfileOpen)}
             className="flex items-center gap-2 lg:gap-3 cursor-pointer hover:opacity-80 transition-opacity"
           >
-            <div className="w-8 h-8 lg:w-10 lg:h-10 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-700 font-semibold text-sm">
-              {userProfile?.username ? userProfile.username.substring(0, 2).toUpperCase() : (publicKey ? publicKey.substring(0, 2).toUpperCase() : "USR")}
-            </div>
+            {userProfile?.avatar_url ? (
+              <img 
+                src={userProfile.avatar_url} 
+                alt="User Avatar" 
+                className="w-8 h-8 lg:w-10 lg:h-10 rounded-full object-cover bg-emerald-100"
+              />
+            ) : (
+              <div className="w-8 h-8 lg:w-10 lg:h-10 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-700 font-semibold text-sm">
+                {userProfile?.username ? userProfile.username.substring(0, 2).toUpperCase() : (publicKey ? publicKey.substring(0, 2).toUpperCase() : "USR")}
+              </div>
+            )}
             <div className="hidden sm:block text-sm text-left">
               <p className="font-semibold text-black dark:text-neutral-1 leading-none mb-1">
                 {userProfile?.username ? userProfile.username : "My Wallet"}

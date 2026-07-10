@@ -17,6 +17,7 @@ export interface UserProfile {
   username: string;
   initials: string;
   role: string;
+  avatar_url?: string;
   balances: UserBalances;
   balances_idr: UserBalancesIdr;
 }
