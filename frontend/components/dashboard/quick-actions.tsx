@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { useMediaQuery } from 'react-responsive';
 import { ActionCard } from './action-card';
 
 const QUICK_ACTIONS = [
@@ -10,7 +11,7 @@ const QUICK_ACTIONS = [
     href: '/sendthr',
   },
   {
-    title: 'Swap to USDC',
+    title: 'Swap to RPK',
     subtitle: 'Swap your assets in seconds',
     icon: 'fi fi-rr-shuffle',
     colorClass: 'bg-[#f6eefe] text-[#a855f7]', // Purplish
@@ -33,8 +34,20 @@ const QUICK_ACTIONS = [
 ];
 
 export function QuickActionsSection() {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const isTabletRange = useMediaQuery({ minWidth: 1024, maxWidth: 1532 });
+  const isTabletLayout = mounted && isTabletRange;
+
+  const gridClass = isTabletLayout 
+    ? "grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4" 
+    : "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4";
+
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+    <div className={gridClass}>
       {QUICK_ACTIONS.map((action, idx) => (
         <ActionCard key={idx} {...action} />
       ))}

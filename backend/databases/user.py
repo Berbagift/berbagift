@@ -31,7 +31,6 @@ class UserDatabase:
         ).first() is not None
 
     def create_user(self, wallet_address: str, username: str | None = None, email: str | None = None):
-        # Username maximum is 50 chars as per User model and rules
         new_user = User(
             wallet_address=wallet_address,
             username=username[:50] if username else None,
@@ -54,10 +53,8 @@ class UserDatabase:
             user.username = None
         elif username is not None:
             user.username = username
-            
         if email is not None:
             user.email = email
-            
         self.db.commit()
         self.db.refresh(user)
         return user

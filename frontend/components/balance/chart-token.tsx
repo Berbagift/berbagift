@@ -8,10 +8,10 @@ import { AdvancedRealTimeChart } from 'react-ts-tradingview-widgets'; // Sesuaik
 
 
 interface ChartComponentProps {
-  activeTokenId: string;
-  activeRange: string;
-  // Mapping from any activeRange key to a valid Range value
-  rangeMapping: Record<string, Range>;
+    activeTokenId: string;
+    activeRange: string;
+    // Mapping from any activeRange key to a valid Range value
+    rangeMapping: Record<string, Range>;
 }
 
 export default function ChartComponent({ activeTokenId, activeRange, rangeMapping }: ChartComponentProps) {

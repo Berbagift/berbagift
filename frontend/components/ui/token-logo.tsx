@@ -27,13 +27,11 @@ export function TokenLogo({ symbol, className, size = 'md' }: TokenLogoProps) {
     );
   }
 
-  if (sym === 'USDC') {
+  if (sym === 'RPK') {
     return (
-      <img 
-        src="/logo/USDClogo.svg" 
-        alt="USDC" 
-        className={cn("object-contain select-none flex-shrink-0", sizeClasses[size], className)} 
-      />
+      <div className={cn("rounded-full flex items-center justify-center flex-shrink-0 bg-green-600 text-white select-none", sizeClasses[size], className)}>
+        <i className="fi fi-rr-money-bill-wave text-lg" />
+      </div>
     );
   }
 

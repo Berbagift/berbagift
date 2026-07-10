@@ -1,11 +1,15 @@
 export interface UserBalances {
   XLM: number;
   USDC: number;
+  RPK: number;
+  total_xlm?: number;
 }
 
 export interface UserBalancesIdr {
   XLM: number;
   USDC: number;
+  RPK: number;
+  total: number;
 }
 
 export interface UserProfile {

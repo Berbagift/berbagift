@@ -29,7 +29,7 @@ export function StatusState({
   action,
 }: StatusStateProps) {
   return (
-    <div className={cn("flex flex-col items-center justify-center text-center py-16 px-4 w-full", className)}>
+    <div className={cn("flex flex-col items-center justify-center text-center py-16 px-4 w-full min-h-[60vh]", className)}>
       {/* Icon Circle */}
       <div className={cn("w-[150px] h-[150px] rounded-full flex items-center justify-center mb-6 transition-all duration-300", bgColorClass)}>
         <i className={cn("text-[56px] flex items-center justify-center leading-none", icon, iconColorClass)} />

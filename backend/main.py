@@ -6,7 +6,6 @@ from routes.user import router as user_router
 from schemas.response import APIResponse
 from databases.connection import engine
 from models.base import Base
-# Import all models to ensure they are registered with the Base
 import models.user
 import models.nonce
 from alembic import command
@@ -19,19 +18,32 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-# Auto migrate on startup
 alembic_cfg = Config("alembic.ini")
 command.upgrade(alembic_cfg, "head")
 
 from fastapi.middleware.cors import CORSMiddleware
+import threading
+from contextlib import asynccontextmanager
+
+from configs.mongo_db import connect_db as connect_mongo_db
+from controllers.indexer import IndexerController
+from routes.activity import router as activity_router
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    connect_mongo_db()
+    indexer = IndexerController()
+    thread = threading.Thread(target=indexer.run_loop, daemon=True)
+    thread.start()
+    yield
 
 app = FastAPI(
     title="BagiTHR API",
     description="Backend API using FastAPI",
-    version="1.0.0"
+    version="1.0.0",
+    lifespan=lifespan
 )
 
-# Add CORS Middleware
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -49,7 +61,6 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
     errors = {}
     for error in exc.errors():
         field = str(error["loc"][-1])
-        # Use IS_REQUIRED or similar messages based on the error type
         if error["type"] == "missing":
             errors[field] = "IS_REQUIRED"
         else:
@@ -64,11 +75,11 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
         }
     )
 
-# Include routes
 app.include_router(hello_router)
 app.include_router(auth_router)
 app.include_router(token_router)
 app.include_router(user_router)
+app.include_router(activity_router)
 
 @app.get("/", response_model=APIResponse, status_code=200)
 def root():
@@ -80,26 +91,16 @@ def root():
 
 @app.post("/indodax-callback", response_class=PlainTextResponse)
 async def indodax_withdraw_callback(
-    # Menggunakan Form(...) karena Indodax mengirimkan application/x-www-form-urlencoded
     request_id: str = Form(...),
     withdraw_currency: str = Form(...),
     withdraw_address: str = Form(...),
     withdraw_amount: str = Form(...),
-    withdraw_memo: str = Form(None), # Memo bisa jadi kosong
+    withdraw_memo: str = Form(None),                        
     requester_ip: str = Form(...),
     request_date: str = Form(...)
 ):
-    """
-    Webhook untuk memvalidasi penarikan dari Indodax.
-    """
     logger.info(f"Menerima Callback Indodax! ID: {request_id} | Amount: {withdraw_amount} {withdraw_currency}")
-    
-    # Di sini kamu bisa tambahkan logika bisnis/pengecekan ke database
-    # Untuk sekarang, kita buat auto-approve agar penarikan XLM-mu berhasil
     is_valid = True
-    
     if is_valid:
-        # Indodax HANYA mau menerima balikan string "ok" (tanpa kutip) [cite: 311, 312]
         return "ok"
-    
     raise HTTPException(status_code=400, detail="Validasi data withdrawal gagal")

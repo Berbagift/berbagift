@@ -1,7 +1,6 @@
 import os
 from dotenv import load_dotenv
 
-# Load .env file
 load_dotenv()
 
 class DatabaseConfig:
@@ -13,5 +12,4 @@ class DatabaseConfig:
 
     @classmethod
     def get_database_url(cls) -> str:
-        # Format: mysql+pymysql://user:password@host:port/dbname
         return f"mysql+pymysql://{cls.DB_USER}:{cls.DB_PASSWORD}@{cls.DB_HOST}:{cls.DB_PORT}/{cls.DB_NAME}"

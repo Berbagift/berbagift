@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { usePathname, useParams, useRouter } from "next/navigation";
+import { usePathname, useParams } from "next/navigation";
 import { ThemeToggle } from "@/components/shared/ThemeToggle";
 import { useWalletStore } from "@/hooks/use-wallet-state";
 import { removeAuthToken } from "@/lib/auth";
@@ -19,7 +19,6 @@ import { Breadcrumbs, ROUTE_BREADCRUMBS } from "@/components/navigation/Breadcru
 export function Header({ onMenuClick, isDesktopSidebarOpen = true }: HeaderProps) {
   const pathname = usePathname();
   const params = useParams();
-  const router = useRouter();
   const { publicKey, disconnect } = useWalletStore();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const { data: userProfile } = useUserProfile();

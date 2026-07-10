@@ -8,4 +8,5 @@ export interface Activity {
   amount: string;
   status: 'success' | 'processing' | 'expired';
   time: string;
+  txHash?: string;
 }

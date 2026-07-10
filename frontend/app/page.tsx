@@ -26,7 +26,7 @@ export default function Home() {
             <span className="text-primary">beautifully.</span>
           </h1>
           <p className="text-muted-foreground text-lg max-w-lg mx-auto">
-            A simple, transparent, and secure platform to send digital rewards using Stellar XLM and USDC.
+            A simple, transparent, and secure platform to send digital rewards using Stellar XLM and RPK.
           </p>
           <div className="pt-6">
             <Link href="/dashboard">

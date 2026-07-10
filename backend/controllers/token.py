@@ -7,38 +7,32 @@ class TokenController:
     def __init__(self):
         pass
 
-    def get_prices(self, authorization: str | None):
-        # 1. Authenticate user via JWT (Authorization)
-        if not authorization or not authorization.startswith("Bearer "):
-            return {
-                "message": "Authentication failed: Missing or invalid Authorization header",
-                "data": None,
-                "errors": None
-            }, 401
-            
-        token = authorization.split(" ")[1]
+    def get_market_stats(self):
+        import requests
+        url = "https://indodax.com/api/summaries"
         try:
-            payload = verify_access_token(token)
-        except jwt.ExpiredSignatureError:
+            response = requests.get(url, timeout=5)
+            response.raise_for_status()
+            data = response.json()
+            harga_sekarang = float(data['tickers']['xlm_idr']['last'])
+            harga_24j_lalu = float(data['prices_24h']['xlmidr'])
+            persentase = ((harga_sekarang - harga_24j_lalu) / harga_24j_lalu) * 100
             return {
-                "message": "Token has expired",
-                "data": None,
+                "message": "Market stats retrieved successfully",
+                "data": {
+                    "XLM": {
+                        "price": int(harga_sekarang),
+                        "change_24h": persentase
+                    }
+                },
                 "errors": None
-            }, 401
-        except jwt.InvalidTokenError:
+            }, 200
+        except Exception as e:
             return {
-                "message": "Invalid token",
+                "message": "Failed to fetch market stats",
                 "data": None,
-                "errors": None
-            }, 401
-            
-        user_id_str = payload.get("sub")
-        if not user_id_str:
-            return {
-                "message": "Invalid token payload",
-                "data": None,
-                "errors": None
-            }, 401
+                "errors": {"api_error": str(e)}
+            }, 500
 
     def get_prices_waterfall(self):
         providers = [
@@ -47,29 +41,23 @@ class TokenController:
             ("CoinGecko", self._fetch_coingecko),
             ("Indodax", self._fetch_indodax)
         ]
-        
         for name, fetch_func in providers:
             try:
                 data = fetch_func()
-                # Ensure we got valid data before returning
                 if data and data.get("XLM", 0) > 0:
                     return data, name
             except Exception as e:
-                # Log error silently and continue to the next provider
                 print(f"[!] Fallback Warning: Failed to fetch from {name}. Error: {e}")
                 continue
-                
         raise Exception("All pricing providers failed to return valid data.")
 
     def get_prices(self, authorization: str | None):
-        # 1. Authenticate user via JWT (Authorization)
         if not authorization or not authorization.startswith("Bearer "):
             return {
                 "message": "Authentication failed: Missing or invalid Authorization header",
                 "data": None,
                 "errors": None
             }, 401
-            
         token = authorization.split(" ")[1]
         try:
             payload = verify_access_token(token)
@@ -85,7 +73,6 @@ class TokenController:
                 "data": None,
                 "errors": None
             }, 401
-            
         user_id_str = payload.get("sub")
         if not user_id_str:
             return {
@@ -94,7 +81,6 @@ class TokenController:
                 "errors": None
             }, 401
 
-        # 2. Fetch Prices using Waterfall Fallback Strategy
         try:
             data, name = self.get_prices_waterfall()
             return {
@@ -117,26 +103,19 @@ class TokenController:
         import os
         import base64
         import requests
-        
         transfi_mid = os.getenv("TRANSFI_MID")
         transfi_api_key = os.getenv("TRANSFI_API_KEY")
         transfi_api_secret = os.getenv("TRANSFI_API_SECRET")
-        
         if not transfi_api_key or not transfi_api_secret or not transfi_mid:
             raise Exception("TransFi configuration is missing")
-            
         credentials = f"{transfi_api_key}:{transfi_api_secret}"
         encoded_credentials = base64.b64encode(credentials.encode()).decode()
-        
         headers = {
             'mid': transfi_mid,
             'Authorization': f'Basic {encoded_credentials}',
             'Accept': 'application/json'
         }
-        
         url = "https://sandbox-api.transfi.com/v3/exchange-rates"
-        
-        # Fetch XLM to IDR
         params_xlm = {
             "sourceCurrency": "IDR",
             "destinationCurrency": "XLM",
@@ -146,8 +125,6 @@ class TokenController:
         }
         res_xlm = requests.get(url, headers=headers, params=params_xlm, timeout=10)
         res_xlm.raise_for_status()
-        
-        # Fetch USDC to IDR
         params_usdc = {
             "sourceCurrency": "USDC",
             "destinationCurrency": "IDR",
@@ -157,13 +134,11 @@ class TokenController:
         }
         res_usdc = requests.get(url, headers=headers, params=params_usdc, timeout=10)
         res_usdc.raise_for_status()
-        
         def extract_rate(data):
             rate = float(data.get("conversionRate", 0.0))
             if rate > 0:
                 return int(round(1.0 / rate))
             return 0
-            
         return {
             "XLM": extract_rate(res_xlm.json()),
             "USDC": extract_rate(res_usdc.json())
@@ -182,7 +157,6 @@ class TokenController:
         res = requests.get(url, params=params, timeout=10)
         res.raise_for_status()
         data = res.json().get("parsed", [])
-        
         harga_usd = {}
         for item in data:
             feed_id = item["id"]
@@ -193,12 +167,9 @@ class TokenController:
 
         xlm_usd = harga_usd.get("b7a8eba68a997cd0210c2e1e4ee811ad2d174b3611c22d9ebf16f4cb7e9ba850", 0)
         usdc_usd = harga_usd.get("eaa020c61cc479712813461ce153894a96a6c00b21ed0cfc2798d1f9a9e9c94a", 0)
-        
-        # Kurs USD ke IDR
         res_kurs = requests.get("https://open.er-api.com/v6/latest/USD", timeout=5)
         res_kurs.raise_for_status()
         kurs_usd_idr = float(res_kurs.json().get("rates", {}).get("IDR", 16200))
-        
         return {
             "XLM": int(round(xlm_usd * kurs_usd_idr)),
             "USDC": int(round(usdc_usd * kurs_usd_idr))

@@ -1,6 +1,7 @@
 "use client";
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { useMediaQuery } from 'react-responsive';
 import { BalanceCard } from './balance-card';
 import { useCryptoPrices } from '@/lib/api/queries/prices';
 import { useUserProfile } from '@/hooks/use-user-profile';
@@ -9,12 +10,24 @@ export function BalanceSection() {
   const { data: userProfile, isLoading: isProfileLoading } = useUserProfile();
   const { data: prices, isLoading: isPricesLoading } = useCryptoPrices();
 
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const isTabletRange = useMediaQuery({ minWidth: 1024, maxWidth: 1532 });
+  const isTabletLayout = mounted && isTabletRange;
+
+  const gridClass = isTabletLayout 
+    ? "grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4" 
+    : "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4";
+
   if (isProfileLoading || isPricesLoading) {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+      <div className={gridClass}>
         {[...Array(4)].map((_, idx) => (
-          <div 
-            key={idx} 
+          <div
+            key={idx}
             className="flex flex-col p-5 rounded-md border border-border bg-emerald-50/50 dark:bg-emerald-900/10 shadow-none animate-pulse"
           >
             <div className="flex items-center gap-4 h-full">
@@ -34,29 +47,20 @@ export function BalanceSection() {
     );
   }
 
-  // Real balances
   const xlmAmount = userProfile?.balances?.XLM || 0;
   const rpkAmount = userProfile?.balances?.RPK || 0;
-  
-  // Real-time prices from CoinGecko (fallback to 1600/16000 if network fails)
   const xlmPriceIdr = prices?.stellar?.idr || 1600;
-  // Assume RPK is pegged or just use 0 if unknown (fallback to dummy 16000 for display)
-  const rpkPriceIdr = prices?.['usd-coin']?.idr || 16000;
-  
-  // 24-hour price change percentage
   const xlm24hChange = prices?.stellar?.idr_24h_change || 0;
-  const rpk24hChange = prices?.['usd-coin']?.idr_24h_change || 0;
 
-  // Calculate Equal To IDR dynamically
-  const xlmIdr = xlmAmount * xlmPriceIdr;
-  const rpkIdr = rpkAmount * rpkPriceIdr;
-  const totalIdr = xlmIdr + rpkIdr;
-  const totalXlmEquivalent = xlmPriceIdr > 0 ? (totalIdr / xlmPriceIdr) : 0;
-  
+  const xlmIdr = userProfile?.balances_idr?.XLM || 0;
+  const rpkIdr = userProfile?.balances_idr?.RPK || 0;
+  const totalIdr = userProfile?.balances_idr?.total || (xlmIdr + rpkIdr);
+  const totalXlmEquivalent = userProfile?.balances?.total_xlm || 0;
+
   // Total THR Received (Dummy IDR amount converted back to XLM based on current price)
   const thrReceivedIdr = 4500000;
   const thrReceivedXlm = xlmPriceIdr > 0 ? (thrReceivedIdr / xlmPriceIdr) : 0;
-  
+
   // Helper to format percentage with sign
   const formatPercentage = (val: number) => {
     const sign = val >= 0 ? '+' : '';
@@ -69,7 +73,7 @@ export function BalanceSection() {
       amount: `${xlmAmount.toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} XLM`,
       subtitle: `Equal to Rp ${xlmIdr.toLocaleString('id-ID', { maximumFractionDigits: 0 })}`,
       symbol: 'XLM',
-      percentage: formatPercentage(xlm24hChange),
+      percentage: `${formatPercentage(xlm24hChange)}`,
       percentageType: xlm24hChange >= 0 ? 'positive' as const : 'negative' as const,
     },
     {
@@ -77,8 +81,6 @@ export function BalanceSection() {
       amount: `${rpkAmount.toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} RPK`,
       subtitle: `Equal to Rp ${rpkIdr.toLocaleString('id-ID', { maximumFractionDigits: 0 })}`,
       symbol: 'RPK',
-      percentage: formatPercentage(rpk24hChange),
-      percentageType: rpk24hChange >= 0 ? 'positive' as const : 'negative' as const,
     },
     {
       title: 'IDR Balance',
@@ -95,7 +97,7 @@ export function BalanceSection() {
   ];
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+    <div className={gridClass}>
       {balanceData.map((data, idx) => (
         <BalanceCard key={idx} {...data} />
       ))}

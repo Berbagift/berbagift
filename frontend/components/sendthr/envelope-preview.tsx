@@ -7,7 +7,7 @@ import { useSendThrStore } from "@/hooks/use-send-thr-state";
 import { PRESET_ENVELOPES } from "@/lib/data/envelopes";
 import { useEnvelopes } from "@/lib/api/queries";
 import { usersService } from "@/lib/api/services/users";
-import { useWalletStore } from "@/hooks/use-wallet-state";
+
 
 export function EnvelopePreview() {
   const router = useRouter();
@@ -38,61 +38,167 @@ export function EnvelopePreview() {
     ? `${primaryRecipient.username}${additionalCount > 0 ? ` +${additionalCount}` : ""}`
     : "Recipient Name";
 
-  const { publicKey } = useWalletStore();
+
+
+  /**
+   * Resolve the active envelope image to a File/Blob for Pinata upload.
+   * - preset: fetch the URL from CDN as a blob
+   * - upload: already stored as a blob URL in uploadedDesigns
+   */
+  const getEnvelopeFile = async (): Promise<File> => {
+    if (state.uploadMode === "upload" && state.selectedUploadedDesignId) {
+      const custom = state.uploadedDesigns.find(
+        (d) => d.id === state.selectedUploadedDesignId
+      );
+      if (custom) {
+        const res = await fetch(custom.url);
+        const blob = await res.blob();
+        const ext = blob.type.includes("png") ? "png" : "jpg";
+        return new File([blob], `envelope-custom.${ext}`, { type: blob.type });
+      }
+    }
+    // Preset: fetch image by URL
+    const res = await fetch(bgUrl);
+    const blob = await res.blob();
+    const ext = blob.type.includes("png") ? "png" : "jpg";
+    return new File([blob], `envelope-preset.${ext}`, { type: blob.type });
+  };
 
   const handleConfirm = async () => {
-    if (!publicKey) {
-      alert("Wallet not connected. Please connect your wallet first.");
+    if (state.recipients.length === 0) {
+      alert("Please add at least one recipient.");
       return;
     }
 
-    state.setStatus('processing');
-    
+    state.setStatus("processing");
+
+    // ── Pre-flight: Get live Freighter address & verify network ───────────────
+    // IMPORTANT: must get address BEFORE building the transaction so the same
+    // key is used as both the source account and the signer.
+    const { getAddress, getNetwork, signTransaction } = await import("@stellar/freighter-api");
+    const { config } = await import("@/lib/stellar/transactions");
+
+    const { address: senderAddress, error: addrErr } = await getAddress();
+    if (addrErr || !senderAddress) {
+      state.setStatus("error");
+      alert("Could not read address from Freighter. Please unlock your wallet and try again.");
+      return;
+    }
+
+    const { network: freighterNetwork } = await getNetwork();
+    const expectedNetwork = process.env.NEXT_PUBLIC_STELLAR_NETWORK || "TESTNET";
+    if (freighterNetwork && freighterNetwork.toUpperCase() !== expectedNetwork.toUpperCase()) {
+      state.setStatus("error");
+      alert(`Wallet is on ${freighterNetwork} but app expects ${expectedNetwork}. Please switch networks in Freighter.`);
+      return;
+    }
+
     try {
-      // 1. Resolve usernames to wallet addresses
-      const destinations: { address: string; amount: string }[] = [];
-      const totalAmount = parseFloat(state.amount);
-      const amountPerRecipient = (totalAmount / state.recipients.length).toFixed(7);
+      // ── Step 1: Resolve usernames → wallet addresses ──────────────────────
+      console.debug('[BagiTHR] senderAddress (from Freighter):', senderAddress);
+
+      const resolvedRecipients: Array<{
+        walletAddress: string;
+        username: string;
+      }> = [];
 
       for (const rec of state.recipients) {
         try {
           const userData = await usersService.getUserByUsername(rec.username);
-          destinations.push({
-            address: userData.wallet_address,
-            amount: amountPerRecipient
+          resolvedRecipients.push({
+            walletAddress: userData.wallet_address,
+            username: rec.username,
           });
-        } catch (err: any) {
+        } catch {
           throw new Error(`Username not found or invalid: @${rec.username}`);
         }
       }
 
-      // 2. Build Transaction
-      const { buildPaymentTx, submitTransaction, config } = await import('@/lib/stellar/transactions');
-      const xdr = await buildPaymentTx(publicKey, destinations, state.activeToken.id);
+      // ── Step 2: Upload envelope image to Pinata IPFS ──────────────────────
+      const { pinFileToIPFS, pinJSONToIPFS } = await import("@/lib/pinata.js");
 
-      // 3. Sign Transaction via Freighter
-      const { signTransaction } = await import('@stellar/freighter-api');
-      const signResult = await signTransaction(xdr, {
-        networkPassphrase: config.networkPassphrase
-      });
+      let tokenUri: string;
+      try {
+        const envelopeFile = await getEnvelopeFile();
+        const imageHash = await pinFileToIPFS(envelopeFile, {
+          name: `BagiTHR-envelope-${Date.now()}`,
+        });
 
-      if (!signResult || signResult.error) {
-        throw new Error(signResult?.error || "Transaction signing rejected by user");
+        // Pin NFT metadata JSON to IPFS (OpenSea-compatible format)
+        const metadataHash = await pinJSONToIPFS(
+          {
+            name: "BagiTHR NFT",
+            description: state.message || "A BagiTHR gift sent via BagiTHR Platform",
+            image: `ipfs://${imageHash}`,
+            attributes: [
+              { trait_type: "Token", value: state.activeToken.symbol },
+              { trait_type: "Amount", value: state.amount },
+              {
+                trait_type: "Recipients",
+                value: resolvedRecipients.map((r) => r.username).join(", "),
+              },
+            ],
+          },
+          { name: `BagiTHR-metadata-${Date.now()}` }
+        );
+        tokenUri = `ipfs://${metadataHash}`;
+      } catch (pinErr: any) {
+        throw new Error(
+          "Failed to upload envelope to IPFS. Check your Pinata API keys. Details: " +
+            (pinErr?.message || pinErr)
+        );
       }
 
-      // Handle raw buffer or string from Freighter
-      const signedXdrStr = typeof signResult === 'string' 
-        ? signResult 
-        : typeof signResult.signedTxXdr === 'string' ? signResult.signedTxXdr : Buffer.from(signResult as any).toString('base64');
+      // ── Step 3: Build recipients payload for Soroban contract ─────────────
+      const totalAmount = parseFloat(state.amount);
+      const amountPerRecipient = (
+        totalAmount / resolvedRecipients.length
+      ).toFixed(7);
 
-      // 4. Submit to Network
-      await submitTransaction(signedXdrStr);
+      const nftRecipients = resolvedRecipients.map((r) => ({
+        walletAddress: r.walletAddress,
+        amount: amountPerRecipient,
+        message: state.message || "Selamat Hari Raya! 🎁",
+        tokenUri,
+      }));
 
-      state.setStatus('success');
+      // ── Step 4: Build Soroban transaction (use senderAddress from Freighter) ─
+      const { buildNftGiftTx, submitNftGiftTx } = await import(
+        "@/lib/stellar/nft-gift"
+      );
+      // senderAddress was fetched live from Freighter BEFORE this step,
+      // guaranteeing it's the same key that will sign the transaction.
+      const xdr = await buildNftGiftTx(
+        senderAddress,
+        state.activeToken.id, // 'XLM' or 'RPK'
+        nftRecipients
+      );
+
+      // ── Step 5: Sign via Freighter (same address used to build the tx) ───────
+      const { signedTxXdr, error: signError } = await signTransaction(xdr, {
+        networkPassphrase: config.networkPassphrase,
+        address: senderAddress,
+      });
+
+      if (signError) {
+        throw new Error(signError.message || "Transaction signing rejected by user");
+      }
+      if (!signedTxXdr) {
+        throw new Error("Freighter returned empty signed XDR");
+      }
+
+      const signedXdr = signedTxXdr;
+
+      // ── Step 6: Submit to Soroban RPC ──────────────────────────────────────
+      const result = await submitNftGiftTx(signedXdr);
+
+      state.setTxHash(result.hash);
+      state.setStatus("success");
+      // Form state will be reset when the user clicks "Done" on the success screen.
     } catch (err: any) {
       console.error("Transaction failed:", err);
-      alert(err.message || "Transaction failed");
-      state.setStatus('error');
+      alert(err.message || "Transaction failed. Please try again.");
+      state.setStatus("error");
     }
   };
 

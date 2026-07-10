@@ -7,7 +7,4 @@ hello_controller = HelloController()
 
 @router.get("", response_model=APIResponse, status_code=200)
 def hello():
-    """
-    Hello World API
-    """
     return hello_controller.get_hello_world_data()

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
-import { cn } from '@/lib/utils';
+
 import { TOKENS } from '@/lib/data/tokens';
 import { isValidDecimalInput } from '@/lib/utils/currency';
 import { TokenLogo } from '@/components/ui/token-logo';

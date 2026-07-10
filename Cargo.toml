@@ -1,9 +1,8 @@
 [workspace]
 resolver = "2"
 members = [
-  "contracts/hello-world",
-  "contracts/thr-token"
-]
+  "contracts/hello-world", "contracts/nft-gift"
+, "contracts/token-swap"]
 
 [workspace.dependencies]
 soroban-sdk = "26"

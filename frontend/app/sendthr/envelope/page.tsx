@@ -1,15 +1,27 @@
 "use client";
 
 import React from "react";
+import { useRouter } from "next/navigation";
 import { SummaryCards } from "@/components/sendthr/summary-cards";
 import { EnvelopeSelector } from "@/components/sendthr/envelope-selector";
 import { EnvelopePreview } from "@/components/sendthr/envelope-preview";
 import { useSendThrStore } from "@/hooks/use-send-thr-state";
+import { useQueryClient } from "@tanstack/react-query";
 import { StatusState } from "@/components/shared/status-state";
 
 export default function EnvelopeSelectionPage() {
+  const router = useRouter();
+  const queryClient = useQueryClient();
   const status = useSendThrStore((state) => state.status);
+  const txHash = useSendThrStore((state) => state.txHash);
+  const originalResetState = useSendThrStore((state) => state.resetState);
   const setStatus = useSendThrStore((state) => state.setStatus);
+
+  const resetState = () => {
+    queryClient.invalidateQueries({ queryKey: ["userProfile"] });
+    originalResetState();
+    router.push("/sendthr");
+  };
 
   if (status === "processing") {
     return (
@@ -24,15 +36,37 @@ export default function EnvelopeSelectionPage() {
   }
 
   if (status === "success") {
+    const explorerUrl = txHash
+      ? `https://stellar.expert/explorer/testnet/tx/${txHash}`
+      : null;
+
     return (
       <StatusState
         icon="fi-rr-time-check"
         title="Your THR has been sent successfully."
         iconColorClass="text-emerald-600 dark:text-emerald-400"
         bgColorClass="bg-emerald-50 dark:bg-emerald-950/20"
-        buttonText="Done"
-        onButtonClick={() => setStatus("form")}
         className="py-24"
+        action={
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 w-full max-w-sm mx-auto">
+            <button
+              onClick={resetState}
+              className="w-full sm:w-auto min-w-[140px] px-6 py-2.5 bg-[#16a34a] hover:bg-[#15803d] text-white rounded-md font-medium text-sm transition-colors cursor-pointer shadow-sm focus:outline-none"
+            >
+              Done
+            </button>
+            {explorerUrl && (
+              <a
+                href={explorerUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full sm:w-auto min-w-[140px] px-6 py-2.5 border-2 border-[#16a34a] text-[#16a34a] hover:bg-[#16a34a]/5 dark:hover:bg-[#16a34a]/10 rounded-md font-medium text-sm transition-colors flex items-center justify-center gap-2 focus:outline-none"
+              >
+                View Transaction <i className="fi fi-rr-arrow-up-right text-xs mt-0.5" />
+              </a>
+            )}
+          </div>
+        }
       />
     );
   }

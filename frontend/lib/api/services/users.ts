@@ -9,7 +9,7 @@ export interface UserLookupData {
 
 export const usersService = {
   getUserByUsername: async (username: string): Promise<UserLookupData> => {
-    const res = await apiClient.get<ApiResponse<UserLookupData>>(`/api/users/${username}`);
+    const res = await apiClient.get<ApiResponse<UserLookupData>>(`/users/${username}`);
     return unwrapApiData(res.data);
   }
 };

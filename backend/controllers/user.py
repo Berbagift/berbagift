@@ -13,13 +13,11 @@ class UserController:
                 "data": None,
                 "errors": None
             }, 404
-            
         data = {
             "id": user.id,
             "username": user.username,
             "wallet_address": user.wallet_address
         }
-            
         return {
             "message": "Berhasil mendapatkan data user",
             "data": data,

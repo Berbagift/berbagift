@@ -30,6 +30,7 @@ interface SendThrState {
   uploadedDesigns: UploadedDesign[];
   selectedUploadedDesignId: string | null;
   status: 'form' | 'processing' | 'success' | 'error';
+  txHash: string | null;
 
   // Actions
   toggleToken: () => void;
@@ -46,6 +47,8 @@ interface SendThrState {
   addUploadedDesign: (design: UploadedDesign) => void;
   removeUploadedDesign: (id: string) => void;
   setStatus: (status: 'form' | 'processing' | 'success' | 'error') => void;
+  setTxHash: (hash: string | null) => void;
+  resetState: () => void;
 }
 
 const DEFAULT_RECIPIENTS: Recipient[] = [];
@@ -54,23 +57,24 @@ export const useSendThrStore = create<SendThrState>((set, get) => ({
   recipients: DEFAULT_RECIPIENTS,
   amount: '',
   message: '',
-  tokenId: 'USDC',
-  activeToken: TOKENS['USDC'],
+  tokenId: 'RPK',
+  activeToken: TOKENS['RPK'],
 
   selectedTemplateId: 'preset-1', // Default selection
   uploadMode: 'preset',
   uploadedDesigns: [],
   selectedUploadedDesignId: null,
   status: 'form',
+  txHash: null,
 
   toggleToken: () => set((state) => {
-    const newId = state.tokenId === 'USDC' ? 'XLM' : 'USDC';
+    const newId = state.tokenId === 'RPK' ? 'XLM' : 'RPK';
     return { tokenId: newId, activeToken: TOKENS[newId] };
   }),
 
   setTokenId: (id: string) => set(() => ({
     tokenId: id,
-    activeToken: TOKENS[id] || TOKENS['USDC']
+    activeToken: TOKENS[id] || TOKENS['RPK']
   })),
 
   addRecipient: (username: string) => set((state) => {
@@ -117,6 +121,22 @@ export const useSendThrStore = create<SendThrState>((set, get) => ({
   })),
 
   setStatus: (status) => set({ status }),
+
+  setTxHash: (hash) => set({ txHash: hash }),
+
+  resetState: () => set({
+    recipients: DEFAULT_RECIPIENTS,
+    amount: '',
+    message: '',
+    tokenId: 'RPK',
+    activeToken: TOKENS['RPK'],
+    selectedTemplateId: 'preset-1',
+    uploadMode: 'preset',
+    uploadedDesigns: [],
+    selectedUploadedDesignId: null,
+    status: 'form',
+    txHash: null,
+  }),
 }));
 
 // Provide a backward-compatible hook for components that used useSendThrState

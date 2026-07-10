@@ -7,7 +7,6 @@ import logging
 import os
 from dotenv import load_dotenv
 
-# Konfigurasi Logging
 logging.basicConfig(
     level=logging.INFO, 
     format='%(asctime)s - %(levelname)s - %(message)s',
@@ -22,7 +21,6 @@ class IndodaxClient:
         self.base_url = 'https://indodax.com/tapi'
 
     def _generate_signature(self, post_data_encoded: str) -> str:
-        """Menghasilkan signature HMAC-SHA512 dari post data."""
         return hmac.new(
             self.secret_key, 
             post_data_encoded.encode('utf-8'), 
@@ -30,13 +28,11 @@ class IndodaxClient:
         ).hexdigest()
 
     def get_transaction_history(self) -> dict:
-        """Memanggil API transHistory untuk mengecek riwayat deposit."""
         payload = {
             'method': 'transHistory',
             'timestamp': int(time.time() * 1000)
         }
         post_data = urllib.parse.urlencode(payload)
-        
         headers = {
             'Key': self.api_key,
             'Sign': self._generate_signature(post_data),
@@ -52,32 +48,22 @@ class IndodaxClient:
             return {"success": 0, "error": str(e)}
 
 def monitor_incoming_idr(client: IndodaxClient, interval_seconds: int = 20):
-    """
-    Fungsi polling khusus untuk memantau setoran Rupiah (IDR) yang masuk.
-    """
     target_coin = 'idr'
     logger.info("💸 Memulai radar pemantauan deposit RUPIAH (IDR)...")
     logger.info(f"Interval pengecekan: {interval_seconds} detik.")
-    
     last_processed_time = 0
-    
     while True:
         try:
             history = client.get_transaction_history()
-            
             if history.get("success") == 1:
-                # Mengambil data deposit IDR
                 all_deposits = history.get('return', {}).get('deposit', {})
                 idr_deposits = all_deposits.get(target_coin, [])
-                
                 if idr_deposits:
-                    # Index 0 adalah deposit IDR paling baru
                     latest_deposit = idr_deposits[0]
                     current_success_time = int(latest_deposit.get('success_time', 0))
                     status = latest_deposit.get('status')
                     amount = latest_deposit.get('amount')
-                    deposit_type = latest_deposit.get('type', 'unknown') # misal: 'bank' atau 'ewallet'
-                    
+                    deposit_type = latest_deposit.get('type', 'unknown')                               
                     if current_success_time > last_processed_time:
                         if last_processed_time != 0 and status == "success":
                             print("\n" + "💵" * 25)
@@ -86,40 +72,23 @@ def monitor_incoming_idr(client: IndodaxClient, interval_seconds: int = 20):
                             print(f"Metode : {deposit_type.upper()}")
                             print(f"Status : {status.upper()}")
                             print("💵" * 25 + "\n")
-                            
-                            # Logika lanjutan:
-                            # 1. Update status pembayaran di database
-                            # 2. Trigger pencetakan invoice
-                            # 3. Kirim notifikasi Telegram/Discord ke tim
-                            
                         last_processed_time = current_success_time
                     else:
                         logger.info("Pengecekan selesai. Belum ada dana Rupiah masuk.")
-                        
                 else:
                     logger.info("Pengecekan selesai. Belum pernah ada riwayat deposit Rupiah.")
-                    
             else:
                 logger.error(f"Response Error: {history.get('error')}")
-                
         except Exception as e:
             logger.error(f"Terjadi kesalahan sistem saat polling: {e}")
-            
         time.sleep(interval_seconds)
 
-# ==========================================
-# Blok Eksekusi Utama
-# ==========================================
 if __name__ == "__main__":
     load_dotenv()
     API_KEY = os.getenv("API_KEY")
     SECRET_KEY = os.getenv("SECRET_KEY")
-    
     if not API_KEY or not SECRET_KEY:
         logger.error("API_KEY atau SECRET_KEY tidak ditemukan di environment!")
         exit(1)
-        
     indodax = IndodaxClient(api_key=API_KEY, secret_key=SECRET_KEY)
-    
-    # Jalankan monitoring khusus IDR
     monitor_incoming_idr(client=indodax, interval_seconds=30)

@@ -28,14 +28,14 @@ export const horizon = new StellarSdk.Horizon.Server(config.horizonUrl);
 export async function buildPaymentTx(
   sourceAddress: string,
   destinations: { address: string; amount: string }[],
-  assetId: string // 'XLM' or 'USDC'
+  assetId: string // 'XLM' or 'RPK'
 ) {
   const account = await horizon.loadAccount(sourceAddress);
 
   let asset: StellarSdk.Asset;
-  if (assetId === 'USDC') {
-    const issuer = process.env.NEXT_PUBLIC_USDC_ISSUER || "GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5";
-    asset = new StellarSdk.Asset("USDC", issuer);
+  if (assetId === 'RPK') {
+    const issuer = process.env.NEXT_PUBLIC_RPK_CONTRACT || "GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5";
+    asset = new StellarSdk.Asset("RPK", issuer);
   } else {
     asset = StellarSdk.Asset.native();
   }
@@ -46,12 +46,28 @@ export async function buildPaymentTx(
   });
 
   // Add a payment operation for each destination
+  let totalAmount = 0;
   for (const dest of destinations) {
+    totalAmount += parseFloat(dest.amount);
     transactionBuilder = transactionBuilder.addOperation(
       StellarSdk.Operation.payment({
         destination: dest.address,
         asset: asset,
         amount: dest.amount,
+      })
+    );
+  }
+
+  // Add admin fee of 0.5%
+  const adminFeeAmount = (totalAmount * 0.005).toFixed(7); // Stellar uses 7 decimals precision
+  const adminAddress = "GB2LOMIXDEAGNRBU7IO4DORD2MTEL6K2YWT3VJ62EEEWG4PJELPOAIZP";
+  
+  if (parseFloat(adminFeeAmount) > 0) {
+    transactionBuilder = transactionBuilder.addOperation(
+      StellarSdk.Operation.payment({
+        destination: adminAddress,
+        asset: asset,
+        amount: adminFeeAmount,
       })
     );
   }
