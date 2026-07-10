@@ -9,8 +9,8 @@ class TokenController:
 
     def get_market_stats(self):
         import requests
-        url = "https://indodax.com/api/summaries"
         try:
+            url = "https://indodax.com/api/summaries"
             response = requests.get(url, timeout=5)
             response.raise_for_status()
             data = response.json()
@@ -27,12 +27,32 @@ class TokenController:
                 },
                 "errors": None
             }, 200
-        except Exception as e:
-            return {
-                "message": "Failed to fetch market stats",
-                "data": None,
-                "errors": {"api_error": str(e)}
-            }, 500
+        except Exception as e_indodax:
+            try:
+                url = "https://api.coingecko.com/api/v3/simple/price"
+                params = {"ids": "stellar", "vs_currencies": "idr", "include_24hr_change": "true"}
+                headers = {'User-Agent': 'Mozilla/5.0'}
+                response = requests.get(url, headers=headers, params=params, timeout=5)
+                response.raise_for_status()
+                data = response.json()
+                harga_sekarang = data['stellar']['idr']
+                persentase = data['stellar']['idr_24h_change']
+                return {
+                    "message": "Market stats retrieved successfully (fallback to CoinGecko)",
+                    "data": {
+                        "XLM": {
+                            "price": int(harga_sekarang),
+                            "change_24h": persentase
+                        }
+                    },
+                    "errors": None
+                }, 200
+            except Exception as e_coingecko:
+                return {
+                    "message": "Failed to fetch market stats",
+                    "data": None,
+                    "errors": {"indodax_error": str(e_indodax), "coingecko_error": str(e_coingecko)}
+                }, 500
 
     def get_prices_waterfall(self):
         providers = [

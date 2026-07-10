@@ -11,11 +11,16 @@ def cek_persentase_token(koin="xlm_idr"):
         harga_24j_lalu = float(data['prices_24h'][koin_tanpa_underscore])
         persentase = ((harga_sekarang - harga_24j_lalu) / harga_24j_lalu) * 100
         simbol = "📈 Naik" if persentase > 0 else "📉 Turun"
-        print(f"=== Status {koin.upper()} ===")
+        print(f"=== Status {koin.upper()} (Indodax) ===")
         print(f"Harga 24j Lalu : Rp {harga_24j_lalu:,.0f}")
         print(f"Harga Sekarang : Rp {harga_sekarang:,.0f}")
         print(f"Perubahan      : {simbol} {abs(persentase):.2f}%")
         print("-" * 25)
+    except requests.exceptions.JSONDecodeError:
+        print("Gagal mengambil data dari Indodax: Server sedang maintenance atau merespons dengan format yang tidak valid (HTML).")
+        print("\n=== RAW RESPONSE DARI SERVER ===")
+        print(response.text[:500] + "\n...")
+        print("================================")
     except requests.exceptions.RequestException as e:
         print(f"Gagal mengambil data dari Indodax: {e}")
     except KeyError:
