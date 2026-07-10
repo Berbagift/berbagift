@@ -9,35 +9,30 @@ import {
 } from '@/lib/api/queries/notifications';
 
 export default function InboxPage() {
-  const { data: notifications = [], isLoading } = useNotifications();
-  const updateMutation = useUpdateNotification();
-  const markAllReadMutation = useMarkAllNotificationsRead();
-
   const [activeTab, setActiveTab] = useState<string>('All Notification');
   const [selectedId, setSelectedId] = useState<string | null>(null);
+
+  // Fetch from API using the active tab as category filter
+  const { data: notificationsData, isLoading } = useNotifications(activeTab);
+  const notifications = notificationsData?.items || [];
+  const counts = notificationsData?.counts || {};
+
+  const updateMutation = useUpdateNotification();
+  const markAllReadMutation = useMarkAllNotificationsRead();
 
   const TABS = [
     { label: 'All Notification', icon: 'fi-rr-bell' },
     { label: 'Rewards', icon: 'fi-rr-gift' },
     { label: 'Rooms', icon: 'fi-rr-apps-add' },
     { label: 'Transfer', icon: 'fi-rr-paper-plane' },
+    { label: 'Swap', icon: 'fi-rr-refresh' },
     { label: 'System', icon: 'fi-rr-settings' },
   ];
 
-  // Helper to count notifications by category (or total)
+  // Helper to count notifications by category from API response
   const getTabCount = (label: string) => {
-    if (label === 'All Notification') {
-      return notifications.length;
-    }
-    const cat = label; // Tab labels match categories exactly
-    return notifications.filter((n) => n.category === cat).length;
+    return counts[label] || 0;
   };
-
-  // Filter items by category
-  const filteredNotifications = notifications.filter((item) => {
-    if (activeTab === 'All Notification') return true;
-    return item.category === activeTab;
-  });
 
   const handleTabChange = (tabLabel: string) => {
     setActiveTab(tabLabel);
@@ -111,7 +106,7 @@ export default function InboxPage() {
 
       {/* Inbox Layout Container */}
       <InboxLayout
-        items={filteredNotifications}
+        items={notifications}
         onMarkAllAsRead={handleMarkAllAsRead}
         selectedId={selectedId}
         setSelectedId={handleSelectNotification}

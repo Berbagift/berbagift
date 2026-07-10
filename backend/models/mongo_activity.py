@@ -1,6 +1,7 @@
-from mongoengine import Document, StringField, IntField
+from mongoengine import Document, StringField, IntField, BooleanField
 
 class Activity(Document):
+    is_atribut = BooleanField(default=False)
     transaction_hash = StringField(required=True)
     wallet_address = StringField(required=True)
     activity_type = StringField(required=True)

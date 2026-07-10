@@ -68,7 +68,7 @@ export function ActivityTable({ data }: ActivityTableProps) {
       </div>
 
       {/* Table Body */}
-      <div className="flex flex-col bg-white dark:bg-card">
+      <div className="flex flex-col bg-white dark:bg-card overflow-y-auto custom-scrollbar max-h-[600px] md:max-h-[700px]">
         {displayData.length === 0 ? (
           <StatusState
             icon="fi-rr-inbox"

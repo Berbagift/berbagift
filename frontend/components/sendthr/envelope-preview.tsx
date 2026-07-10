@@ -75,10 +75,10 @@ export function EnvelopePreview() {
     // ── Pre-flight: Get live Freighter address & verify network ───────────────
     // IMPORTANT: must get address BEFORE building the transaction so the same
     // key is used as both the source account and the signer.
-    const { getAddress, getNetwork, signTransaction } = await import("@stellar/freighter-api");
+    const { requestAccess, getNetwork, signTransaction } = await import("@stellar/freighter-api");
     const { config } = await import("@/lib/stellar/transactions");
 
-    const { address: senderAddress, error: addrErr } = await getAddress();
+    const { address: senderAddress, error: addrErr } = await requestAccess();
     if (addrErr || !senderAddress) {
       state.setStatus("error");
       alert("Could not read address from Freighter. Please unlock your wallet and try again.");

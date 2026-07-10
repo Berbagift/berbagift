@@ -5,6 +5,7 @@ import { RewardPreview } from './previews/RewardPreview';
 import { TransferPreview } from './previews/TransferPreview';
 import { RoomPreview } from './previews/RoomPreview';
 import { SystemPreview } from './previews/SystemPreview';
+import { SwapPreview } from './previews/SwapPreview';
 
 interface InboxMailPreviewProps {
   item: InboxMailItemData;
@@ -30,6 +31,11 @@ export function InboxMailPreview({ item, onBack }: InboxMailPreviewProps) {
       bg: 'bg-blue-50 dark:bg-blue-950/20',
       text: 'text-blue-600 dark:text-blue-400',
       icon: 'fi-rr-paper-plane',
+    },
+    Swap: {
+      bg: 'bg-indigo-50 dark:bg-indigo-950/20',
+      text: 'text-indigo-600 dark:text-indigo-400',
+      icon: 'fi-rr-refresh',
     },
     System: {
       bg: 'bg-amber-50 dark:bg-amber-950/20',
@@ -82,6 +88,9 @@ export function InboxMailPreview({ item, onBack }: InboxMailPreviewProps) {
           {category === 'Transfer' && (
             <TransferPreview details={details} />
           )}
+          {category === 'Swap' && (
+            <SwapPreview details={details} />
+          )}
           {category === 'Rooms' && (
             <RoomPreview details={details} />
           )}
@@ -98,6 +107,15 @@ export function InboxMailPreview({ item, onBack }: InboxMailPreviewProps) {
             </Button>
           )}
           {category === 'Transfer' && details?.txHash && (
+            <Button
+              variant="outline"
+              className="border-border text-black dark:text-neutral-1 font-semibold rounded-md h-10 px-5 cursor-pointer"
+              onClick={() => window.open(`https://stellar.expert/explorer/testnet/tx/${details.txHash}`, '_blank')}
+            >
+              Verify on Explorer
+            </Button>
+          )}
+          {category === 'Swap' && details?.txHash && (
             <Button
               variant="outline"
               className="border-border text-black dark:text-neutral-1 font-semibold rounded-md h-10 px-5 cursor-pointer"

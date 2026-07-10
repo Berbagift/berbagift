@@ -5,11 +5,11 @@ import { InboxMailItemData } from '@/components/inbox/InboxMailItem';
 /**
  * Hook to retrieve user notifications and inbox messages.
  */
-export function useNotifications() {
+export function useNotifications(category?: string) {
   return useQuery({
-    queryKey: ['notifications'],
+    queryKey: ['notifications', category],
     queryFn: async () => {
-      return notificationsService.getNotifications();
+      return notificationsService.getNotifications(category);
     },
     staleTime: 1000 * 30, // 30 seconds
   });

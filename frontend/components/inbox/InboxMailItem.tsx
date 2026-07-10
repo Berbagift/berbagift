@@ -6,7 +6,7 @@ export interface InboxMailItemData {
   title: string;
   description: string;
   date: string;
-  category: 'Rewards' | 'Rooms' | 'Transfer' | 'System';
+  category: 'Rewards' | 'Rooms' | 'Transfer' | 'Swap' | 'System';
   read: boolean;
   details?: {
     amount?: string;

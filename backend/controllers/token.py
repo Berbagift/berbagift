@@ -36,7 +36,6 @@ class TokenController:
 
     def get_prices_waterfall(self):
         providers = [
-            ("TransFi", self._fetch_transfi),
             ("Pyth Oracle", self._fetch_pyth),
             ("CoinGecko", self._fetch_coingecko),
             ("Indodax", self._fetch_indodax)
@@ -99,50 +98,7 @@ class TokenController:
                 }
             }, 500
 
-    def _fetch_transfi(self):
-        import os
-        import base64
-        import requests
-        transfi_mid = os.getenv("TRANSFI_MID")
-        transfi_api_key = os.getenv("TRANSFI_API_KEY")
-        transfi_api_secret = os.getenv("TRANSFI_API_SECRET")
-        if not transfi_api_key or not transfi_api_secret or not transfi_mid:
-            raise Exception("TransFi configuration is missing")
-        credentials = f"{transfi_api_key}:{transfi_api_secret}"
-        encoded_credentials = base64.b64encode(credentials.encode()).decode()
-        headers = {
-            'mid': transfi_mid,
-            'Authorization': f'Basic {encoded_credentials}',
-            'Accept': 'application/json'
-        }
-        url = "https://sandbox-api.transfi.com/v3/exchange-rates"
-        params_xlm = {
-            "sourceCurrency": "IDR",
-            "destinationCurrency": "XLM",
-            "amount": 100000,
-            "direction": "forward",
-            "orderType": "payin"
-        }
-        res_xlm = requests.get(url, headers=headers, params=params_xlm, timeout=10)
-        res_xlm.raise_for_status()
-        params_usdc = {
-            "sourceCurrency": "USDC",
-            "destinationCurrency": "IDR",
-            "amount": 100,
-            "direction": "forward",
-            "orderType": "payout"
-        }
-        res_usdc = requests.get(url, headers=headers, params=params_usdc, timeout=10)
-        res_usdc.raise_for_status()
-        def extract_rate(data):
-            rate = float(data.get("conversionRate", 0.0))
-            if rate > 0:
-                return int(round(1.0 / rate))
-            return 0
-        return {
-            "XLM": extract_rate(res_xlm.json()),
-            "USDC": extract_rate(res_usdc.json())
-        }
+
 
     def _fetch_pyth(self):
         import requests
