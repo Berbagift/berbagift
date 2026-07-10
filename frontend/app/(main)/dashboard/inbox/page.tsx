@@ -1,62 +1,123 @@
-import React from 'react';
-import { Button } from '@/components/ui/button';
+'use client';
+
+import React, { useState } from 'react';
+import { InboxLayout } from '@/components/inbox/InboxLayout';
+import {
+  useNotifications,
+  useUpdateNotification,
+  useMarkAllNotificationsRead,
+} from '@/lib/api/queries/notifications';
 
 export default function InboxPage() {
+  const { data: notifications = [], isLoading } = useNotifications();
+  const updateMutation = useUpdateNotification();
+  const markAllReadMutation = useMarkAllNotificationsRead();
+
+  const [activeTab, setActiveTab] = useState<string>('All Notification');
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+
   const TABS = [
-    { label: 'All Notification', count: 12, active: true, icon: 'fi-rr-bell' },
-    { label: 'Rewards', count: 3, active: false, icon: 'fi-rr-gift' },
-    { label: 'Rooms', count: 0, active: false, icon: 'fi-rr-apps-add' },
-    { label: 'Transfer', count: 5, active: false, icon: 'fi-rr-paper-plane' },
-    { label: 'System', count: 4, active: false, icon: 'fi-rr-settings' },
+    { label: 'All Notification', icon: 'fi-rr-bell' },
+    { label: 'Rewards', icon: 'fi-rr-gift' },
+    { label: 'Rooms', icon: 'fi-rr-apps-add' },
+    { label: 'Transfer', icon: 'fi-rr-paper-plane' },
+    { label: 'System', icon: 'fi-rr-settings' },
   ];
+
+  // Helper to count notifications by category (or total)
+  const getTabCount = (label: string) => {
+    if (label === 'All Notification') {
+      return notifications.length;
+    }
+    const cat = label; // Tab labels match categories exactly
+    return notifications.filter((n) => n.category === cat).length;
+  };
+
+  // Filter items by category
+  const filteredNotifications = notifications.filter((item) => {
+    if (activeTab === 'All Notification') return true;
+    return item.category === activeTab;
+  });
+
+  const handleTabChange = (tabLabel: string) => {
+    setActiveTab(tabLabel);
+    setSelectedId(null); // Reset selection when filtering
+  };
+
+  const handleMarkAllAsRead = () => {
+    // Pass specific category if a tab is selected (other than 'All Notification')
+    const category = activeTab === 'All Notification' ? undefined : activeTab;
+    markAllReadMutation.mutate(category);
+  };
+
+  // Toggle read status of a specific item
+  const handleToggleRead = (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    const item = notifications.find((n) => n.id === id);
+    if (item) {
+      updateMutation.mutate({ id, updates: { read: !item.read } });
+    }
+  };
+
+  // If selecting an item, we also mark it as read for realistic UX
+  const handleSelectNotification = (id: string | null) => {
+    setSelectedId(id);
+    if (id) {
+      const item = notifications.find((n) => n.id === id);
+      if (item && !item.read) {
+        updateMutation.mutate({ id, updates: { read: true } });
+      }
+    }
+  };
 
   return (
     <div className="space-y-6 md:space-y-8 pb-6 md:pb-8">
-      {/* Top Action Row */}
-      <div className="flex justify-end">
-        <Button variant="outline" className="h-10 rounded-md border-border text-black dark:text-neutral-1 flex items-center gap-2">
-          <i className="fi fi-rr-check mt-[2px]" />
-          Mark all as read
-        </Button>
-      </div>
-
       {/* Category Tabs */}
       <div className="flex items-center w-full overflow-x-auto border border-border rounded-md bg-white dark:bg-card sidebar-scrollbar">
-        {TABS.map((tab, idx) => (
-          <React.Fragment key={idx}>
-            <div className="flex-1 min-w-[160px]">
-              <button
-                className={`w-full flex items-center justify-center gap-2 px-4 py-4 text-sm font-medium whitespace-nowrap transition-colors ${
-                  tab.active
-                    ? 'text-emerald-500'
-                    : 'text-neutral-7 dark:text-neutral-6 hover:text-black dark:text-neutral-1'
-                }`}
-              >
-                <i className={`fi ${tab.icon} mt-[2px]`} />
-                {tab.label}
-                <span className={`rounded-full w-6 h-6 flex items-center justify-center text-xs ml-1 font-semibold ${
-                  tab.active ? 'bg-emerald-50 text-emerald-500' : 'bg-neutral-3 text-black dark:text-neutral-1'
-                }`}>
-                  {tab.count}
-                </span>
-              </button>
-            </div>
-            {/* Divider */}
-            {idx < TABS.length - 1 && (
-              <div className="w-px h-8 bg-neutral-4 flex-shrink-0" />
-            )}
-          </React.Fragment>
-        ))}
+        {TABS.map((tab, idx) => {
+          const isActive = activeTab === tab.label;
+          return (
+            <React.Fragment key={idx}>
+              <div className="flex-1 min-w-[160px]">
+                <button
+                  onClick={() => handleTabChange(tab.label)}
+                  className={`w-full flex items-center justify-center gap-2 px-4 py-4 text-sm font-medium whitespace-nowrap transition-colors cursor-pointer ${
+                    isActive
+                      ? 'text-[#22c55e]'
+                      : 'text-neutral-7 dark:text-neutral-6 hover:text-black dark:hover:text-neutral-1'
+                  }`}
+                >
+                  <i className={`fi ${tab.icon} mt-[2px]`} />
+                  {tab.label}
+                  <span
+                    className={`rounded-full w-6 h-6 flex items-center justify-center text-xs ml-1 font-semibold ${
+                      isActive
+                        ? 'bg-emerald-50 text-[#22c55e] dark:bg-emerald-950/20'
+                        : 'bg-neutral-3 text-black dark:text-neutral-1'
+                    }`}
+                  >
+                    {getTabCount(tab.label)}
+                  </span>
+                </button>
+              </div>
+              {/* Divider */}
+              {idx < TABS.length - 1 && (
+                <div className="w-px h-8 bg-neutral-4 dark:bg-neutral-10 flex-shrink-0" />
+              )}
+            </React.Fragment>
+          );
+        })}
       </div>
 
-      {/* Inbox Content Area (Empty State) */}
-      <div className="border border-border rounded-md bg-white dark:bg-card py-24 min-h-[400px] flex flex-col items-center justify-center text-center">
-        <div className="w-16 h-16 rounded-full bg-neutral-2 dark:bg-neutral-10 flex items-center justify-center mb-4">
-          <i className="fi fi-rr-envelope-open text-3xl text-neutral-5 mt-[2px]" />
-        </div>
-        <h3 className="text-lg font-medium text-black dark:text-neutral-1 mb-1">You&apos;re all caught up</h3>
-        <p className="text-neutral-7 dark:text-neutral-6 text-sm">No new notifications right now</p>
-      </div>
+      {/* Inbox Layout Container */}
+      <InboxLayout
+        items={filteredNotifications}
+        onMarkAllAsRead={handleMarkAllAsRead}
+        selectedId={selectedId}
+        setSelectedId={handleSelectNotification}
+        onToggleRead={handleToggleRead}
+        isLoading={isLoading}
+      />
     </div>
   );
 }
