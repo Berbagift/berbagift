@@ -11,7 +11,7 @@ export function LandingHero() {
 
   const handleCTA = () => {
     if (isConnected) {
-      router.push('/sendthr');
+      router.push('/dashboard');
     } else {
       document.getElementById('cta')?.scrollIntoView({ behavior: 'smooth' });
     }

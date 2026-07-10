@@ -65,7 +65,7 @@ export function Sidebar({ isOpen, onClose, isDesktopOpen = true, onDesktopToggle
         isDesktopOpen ? "justify-between px-6 lg:px-8" : "justify-between lg:justify-center px-6 lg:px-0"
       )}>
         {/* Mobile Logo */}
-        <Link href="/dashboard" className="flex lg:hidden items-center gap-2" onClick={onClose}>
+        <Link href="/" className="flex lg:hidden items-center gap-2" onClick={onClose}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/logo/Brandlogo.svg" alt="Berbagift Logo" className="h-8 w-8 object-contain" />
           <div className="text-2xl font-medium flex items-center">
@@ -83,7 +83,7 @@ export function Sidebar({ isOpen, onClose, isDesktopOpen = true, onDesktopToggle
         <div className={cn("hidden lg:flex items-center", isDesktopOpen ? "justify-between w-full" : "justify-center w-full")}>
           {isDesktopOpen ? (
             <>
-              <Link href="/dashboard" className="flex items-center gap-2">
+              <Link href="/" className="flex items-center gap-2">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src="/logo/Brandlogo.svg" alt="Berbagift Logo" className="h-8 w-8 object-contain" />
                 <div className="text-2xl font-medium flex items-center">

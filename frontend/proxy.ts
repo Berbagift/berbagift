@@ -34,12 +34,6 @@ export function proxy(request: NextRequest) {
       return NextResponse.redirect(url);
     }
 
-    // Auto-redirect to dashboard if user is already authenticated and visits the root login/landing page
-    if (request.nextUrl.pathname === '/' && token) {
-      const url = request.nextUrl.clone();
-      url.pathname = '/dashboard';
-      return NextResponse.redirect(url);
-    }
   }
 
   return NextResponse.next();
