@@ -16,11 +16,11 @@ services:
     volumes:
       - db_data_staging:/var/lib/mysql
     healthcheck:
-      test: ["CMD-SHELL", "mysqladmin ping -h localhost -uroot -p$$MYSQL_ROOT_PASSWORD"]
-      timeout: 10s
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
+      timeout: 5s
       retries: 10
-      interval: 10s
-      start_period: 30s
+      interval: 5s
+      start_period: 5s
     logging:
       driver: "json-file"
       options:
@@ -134,7 +134,7 @@ services:
     container_name: berbagift_adminer_staging
     ports:
       # Staging database browser client
-      - "8088:8080"
+      - "8080:8080"
     depends_on:
       - db
     restart: always
