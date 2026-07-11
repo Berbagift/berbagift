@@ -1,3 +1,7 @@
+import os
+from dotenv import load_dotenv
+load_dotenv(override=True)
+
 from fastapi import FastAPI
 from routes.hello import router as hello_router
 from routes.auth import router as auth_router
@@ -80,6 +84,9 @@ app.include_router(auth_router)
 app.include_router(token_router)
 app.include_router(user_router)
 app.include_router(activity_router)
+
+from routes.nft import router as nft_router
+app.include_router(nft_router)
 
 @app.get("/", response_model=APIResponse, status_code=200)
 def root():

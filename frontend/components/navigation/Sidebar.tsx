@@ -11,6 +11,7 @@ const SIDEBAR_NAV = [
       { name: 'Overview', href: '/dashboard', icon: 'fi fi-rr-apps' },
       { name: 'All Activity', href: '/dashboard/activity', icon: 'fi fi-rr-time-past' },
       { name: 'My Inbox', href: '/dashboard/inbox', icon: 'fi fi-rr-envelope' },
+      { name: 'My Gifts', href: '/dashboard/my-gifts', icon: 'fi fi-rr-box-open' },
     ],
   },
   {

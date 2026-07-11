@@ -41,7 +41,9 @@ export const pinFileToIPFS = async (file, pinataMetaData) => {
 
   const data = new FormData()
   data.append('file', file)
-  data.append('pinataMetadata', JSON.stringify(pinataMetaData))
+  if (pinataMetaData) {
+    data.append('pinataMetadata', JSON.stringify(pinataMetaData))
+  }
 
   return axios
     .post(url, data, {

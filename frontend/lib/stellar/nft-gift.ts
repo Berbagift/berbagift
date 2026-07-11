@@ -14,6 +14,13 @@ export interface NftGiftRecipient {
   tokenUri: string;
 }
 
+export interface ForwardGiftRecipient {
+  walletAddress: string;
+  tokenId: number;     // u32
+  amount: string;
+  message: string;
+}
+
 /**
  * We now call specific functions instead of passing tokenChoice
  */
@@ -139,4 +146,94 @@ export async function submitNftGiftTx(signedXdr: string) {
   }
 
   throw new Error("Transaction timed out waiting for confirmation");
+}
+
+/**
+ * Gets the correct function name for forwarding a gift
+ */
+function getForwardFunctionName(tokenId: string): string {
+  return tokenId === "XLM" ? "send_batch_existing_xlm_and_nft" : "send_batch_existing_rpk_and_nft";
+}
+
+/**
+ * Builds, simulates, and assembles the Soroban transaction to call
+ * `send_batch_existing_xlm_and_nft` or `send_batch_existing_rpk_and_nft`.
+ */
+export async function buildForwardGiftTx(
+  senderAddress: string,
+  tokenId: string, // 'XLM' | 'RPK'
+  recipients: ForwardGiftRecipient[]
+): Promise<string> {
+  if (recipients.length === 0) throw new Error("No recipients provided");
+  if (recipients.length > 3) throw new Error("Max 3 recipients per batch");
+
+  const account = await rpc.getAccount(senderAddress);
+  const contract = new StellarSdk.Contract(NFT_GIFT_CONTRACT_ID);
+
+  const recipientAddrs = StellarSdk.nativeToScVal(
+    recipients.map((r) => StellarSdk.Address.fromString(r.walletAddress)),
+    { type: "address" }
+  );
+
+  const tokenIds = StellarSdk.nativeToScVal(
+    recipients.map((r) => r.tokenId),
+    { type: "u32" }
+  );
+
+  const tokenAmounts = StellarSdk.nativeToScVal(
+    recipients.map((r) => toStroops(r.amount)),
+    { type: "i128" }
+  );
+
+  const messages = StellarSdk.nativeToScVal(
+    recipients.map((r) => r.message),
+    { type: "string" }
+  );
+
+  const senderScVal = new StellarSdk.Address(senderAddress).toScVal();
+  const functionName = getForwardFunctionName(tokenId);
+
+  const tx = new StellarSdk.TransactionBuilder(account, {
+    fee: StellarSdk.BASE_FEE,
+    networkPassphrase: config.networkPassphrase,
+  })
+    .addOperation(
+      contract.call(
+        functionName,
+        senderScVal,
+        recipientAddrs,
+        tokenIds,
+        tokenAmounts,
+        messages
+      )
+    )
+    .setTimeout(180)
+    .build();
+
+  const simResult = await rpc.simulateTransaction(tx);
+  if (StellarSdk.rpc.Api.isSimulationError(simResult)) {
+    throw new Error("Simulation failed: " + simResult.error);
+  }
+
+  const preparedTx = StellarSdk.rpc.assembleTransaction(tx, simResult).build();
+  return preparedTx.toXDR();
+}
+
+/**
+ * Reads the owner of a specific NFT.
+ */
+export async function getOwnerOf(tokenId: number): Promise<string> {
+  const contract = new StellarSdk.Contract(NFT_GIFT_CONTRACT_ID);
+  
+  const tx = new StellarSdk.TransactionBuilder(await rpc.getAccount("GA7YBESG35U5TKNV4281Y3C4M4C4U4Y4C4U4Y4C4U4Y4C4U4Y4C4U4Y"), {
+    fee: StellarSdk.BASE_FEE,
+    networkPassphrase: config.networkPassphrase,
+  }).addOperation(contract.call("owner_of", StellarSdk.nativeToScVal(tokenId, { type: "u32" }))).setTimeout(30).build();
+  
+  const sim = await rpc.simulateTransaction(tx);
+  if (StellarSdk.rpc.Api.isSimulationError(sim) || !sim.result) {
+    throw new Error("Simulation failed");
+  }
+
+  return StellarSdk.scValToNative(sim.result.retval);
 }

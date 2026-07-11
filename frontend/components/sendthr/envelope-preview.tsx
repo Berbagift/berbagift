@@ -114,21 +114,19 @@ export function EnvelopePreview() {
         }
       }
 
-      // ── Step 2: Upload envelope image to Pinata IPFS ──────────────────────
       const { pinFileToIPFS, pinJSONToIPFS } = await import("@/lib/pinata.js");
 
       let tokenUri: string;
       try {
         const envelopeFile = await getEnvelopeFile();
         const imageHash = await pinFileToIPFS(envelopeFile, {
-          name: `BagiTHR-envelope-${Date.now()}`,
+          name: `Berbagift-envelope-${Date.now()}`,
         });
 
-        // Pin NFT metadata JSON to IPFS (OpenSea-compatible format)
         const metadataHash = await pinJSONToIPFS(
           {
-            name: "BagiTHR NFT",
-            description: state.message || "A BagiTHR gift sent via BagiTHR Platform",
+            name: state.title || "Berbagift NFT",
+            description: state.message || "A Berbagift gift sent via Berbagift Platform",
             image: `ipfs://${imageHash}`,
             attributes: [
               { trait_type: "Token", value: state.activeToken.symbol },
@@ -137,19 +135,21 @@ export function EnvelopePreview() {
                 trait_type: "Recipients",
                 value: resolvedRecipients.map((r) => r.username).join(", "),
               },
+              { trait_type: "Sender", value: senderAddress },
+              { trait_type: "Platform", value: "Berbagift" },
+              { trait_type: "Mint Date", value: new Date().toISOString() },
             ],
           },
-          { name: `BagiTHR-metadata-${Date.now()}` }
+          { name: `Berbagift-metadata-${Date.now()}` }
         );
         tokenUri = `ipfs://${metadataHash}`;
       } catch (pinErr: any) {
         throw new Error(
           "Failed to upload envelope to IPFS. Check your Pinata API keys. Details: " +
-            (pinErr?.message || pinErr)
+          (pinErr?.message || pinErr)
         );
       }
 
-      // ── Step 3: Build recipients payload for Soroban contract ─────────────
       const totalAmount = parseFloat(state.amount);
       const amountPerRecipient = (
         totalAmount / resolvedRecipients.length

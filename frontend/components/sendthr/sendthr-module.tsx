@@ -138,6 +138,18 @@ export function SendThrModule() {
           )}
         </div>
 
+        {/* Title Section */}
+        <div className="flex flex-col gap-2">
+          <label className="text-neutral-8 font-medium text-sm">NFT Title</label>
+          <input
+            type="text"
+            value={state.title}
+            onChange={(e) => state.handleTitleChange(e.target.value)}
+            placeholder="e.g. Happy Eid Mubarak!"
+            className="w-full border border-border rounded-md p-3 bg-white dark:bg-card outline-none focus:border-neutral-8 transition-colors text-sm text-black dark:text-neutral-1 placeholder:text-neutral-6 font-sans"
+          />
+        </div>
+
         {/* Message Section */}
         <div className="flex flex-col gap-2">
           <label className="text-neutral-8 font-medium text-sm">Message (Optional)</label>

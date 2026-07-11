@@ -20,6 +20,7 @@ interface SendThrState {
   // Transfer Form State
   recipients: Recipient[];
   amount: string;
+  title: string;
   message: string;
   tokenId: string;
   activeToken: TokenConfig;
@@ -38,6 +39,7 @@ interface SendThrState {
   addRecipient: (username: string) => void;
   removeRecipient: (id: string) => void;
   handleAmountChange: (val: string) => void;
+  handleTitleChange: (val: string) => void;
   handleMessageChange: (val: string) => void;
   getFiatEquivalent: (amt: string) => string;
 
@@ -56,6 +58,7 @@ const DEFAULT_RECIPIENTS: Recipient[] = [];
 export const useSendThrStore = create<SendThrState>((set, get) => ({
   recipients: DEFAULT_RECIPIENTS,
   amount: '',
+  title: '',
   message: '',
   tokenId: 'RPK',
   activeToken: TOKENS['RPK'],
@@ -98,7 +101,7 @@ export const useSendThrStore = create<SendThrState>((set, get) => ({
   })),
 
   handleAmountChange: (val: string) => set({ amount: val }),
-  
+  handleTitleChange: (val: string) => set({ title: val }),
   handleMessageChange: (val: string) => set({ message: val }),
 
   getFiatEquivalent: (amt: string) => getFiatEquivalent(amt, get().tokenId),
@@ -127,6 +130,7 @@ export const useSendThrStore = create<SendThrState>((set, get) => ({
   resetState: () => set({
     recipients: DEFAULT_RECIPIENTS,
     amount: '',
+    title: '',
     message: '',
     tokenId: 'RPK',
     activeToken: TOKENS['RPK'],

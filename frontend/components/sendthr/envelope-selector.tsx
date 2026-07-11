@@ -6,7 +6,7 @@ import { UploadSection } from './upload-section';
 import { cn } from '@/lib/utils';
 import { useEnvelopes } from '@/lib/api/queries';
 
-const PAGE_SIZE = 6;
+const PAGE_SIZE = 3;
 
 export function EnvelopeSelector() {
   const state = useSendThrStore();
