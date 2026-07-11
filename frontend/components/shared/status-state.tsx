@@ -4,6 +4,7 @@ import { cn } from '@/lib/utils';
 interface StatusStateProps {
   icon: string; // Flaticon UIcon class (e.g. 'fi-rr-time-past', 'fi-rr-check', etc.)
   title: React.ReactNode;
+  description?: React.ReactNode;
   iconColorClass?: string; // Custom icon color tailwind class (e.g. 'text-red-500')
   bgColorClass?: string; // Custom background circle color tailwind class (e.g. 'bg-red-50 dark:bg-red-950/20')
   className?: string; // Optional custom className for outer wrapper
@@ -20,6 +21,7 @@ interface StatusStateProps {
 export function StatusState({
   icon,
   title,
+  description,
   iconColorClass = "text-red-500",
   bgColorClass = "bg-red-50 dark:bg-red-950/20",
   className,
@@ -39,6 +41,12 @@ export function StatusState({
       <div className="text-2xl font-medium text-neutral-8 dark:text-neutral-3 max-w-[420px] leading-relaxed whitespace-pre-line">
         {title}
       </div>
+
+      {description && (
+        <div className="mt-3 text-base text-neutral-500 dark:text-neutral-400 max-w-[420px] leading-relaxed whitespace-pre-line">
+          {description}
+        </div>
+      )}
 
       {/* Built-in Action Button */}
       {buttonText && (
