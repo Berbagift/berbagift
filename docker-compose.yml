@@ -17,10 +17,10 @@ services:
       - db_data_dev:/var/lib/mysql
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
-      timeout: 5s
+      timeout: 10s
       retries: 10
-      interval: 5s
-      start_period: 5s
+      interval: 10s
+      start_period: 30s
     logging:
       driver: "json-file"
       options:
