@@ -134,7 +134,7 @@ services:
     container_name: berbagift_adminer_staging
     ports:
       # Staging database browser client
-      - "8080:8080"
+      - "8088:8080"
     depends_on:
       - db
     restart: always
