@@ -51,3 +51,7 @@ frontend/.vercel
 *.tsbuildinfo
 next-env.d.ts
 node_modules
+venv/
+.venv/
+env/
+
