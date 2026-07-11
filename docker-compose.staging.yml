@@ -3,7 +3,7 @@ version: '3.8'
 services:
   db:
     image: mysql:8.0
-    container_name: bagithr_db_staging
+    container_name: berbagift_db_staging
     restart: always
     env_file:
       - .env
@@ -16,7 +16,7 @@ services:
     volumes:
       - db_data_staging:/var/lib/mysql
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
       timeout: 5s
       retries: 10
       interval: 5s
@@ -31,7 +31,7 @@ services:
     build:
       context: ./backend
       target: prod
-    container_name: bagithr_backend_staging
+    container_name: berbagift_backend_staging
     env_file:
       - .env
     environment:
@@ -42,7 +42,7 @@ services:
         condition: service_healthy
     restart: always
     healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/')"]
+      test: [ "CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/')" ]
       interval: 10s
       timeout: 5s
       retries: 3
@@ -63,7 +63,7 @@ services:
         - NEXT_PUBLIC_API_MODE=${NEXT_PUBLIC_API_MODE}
         - NEXT_PUBLIC_STELLAR_NETWORK=${NEXT_PUBLIC_STELLAR_NETWORK}
         - NEXT_PUBLIC_ENABLE_AUTH_MIDDLEWARE=${NEXT_PUBLIC_ENABLE_AUTH_MIDDLEWARE}
-    container_name: bagithr_frontend_staging
+    container_name: berbagift_frontend_staging
     depends_on:
       - backend
     restart: always
@@ -72,7 +72,7 @@ services:
     cap_drop:
       - ALL
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3000/"]
+      test: [ "CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3000/" ]
       interval: 10s
       timeout: 5s
       retries: 3
@@ -93,7 +93,7 @@ services:
 
   nginx:
     image: nginxinc/nginx-unprivileged:alpine
-    container_name: bagithr_nginx_staging
+    container_name: berbagift_nginx_staging
     security_opt:
       - no-new-privileges:true
     cap_drop:
@@ -110,7 +110,7 @@ services:
         condition: service_healthy
     restart: always
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:8080/"]
+      test: [ "CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:8080/" ]
       interval: 10s
       timeout: 5s
       retries: 3
@@ -131,7 +131,7 @@ services:
 
   adminer:
     image: adminer:latest
-    container_name: bagithr_adminer_staging
+    container_name: berbagift_adminer_staging
     ports:
       # Staging database browser client
       - "8080:8080"
