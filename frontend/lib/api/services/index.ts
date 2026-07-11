@@ -3,3 +3,5 @@ export * from './envelopes';
 export * from './tokens';
 export * from './activities';
 export * from './profile';
+export * from './notifications';
+

@@ -1,0 +1,127 @@
+'use client';
+
+import React from 'react';
+import { useSwapState } from '@/hooks/use-swap-state';
+import { SwapBlock } from './swap-block';
+import { SwapIcon } from '@/components/ui/swap-icon';
+import { BalanceHeaderCard } from '@/components/finance/balance-header-card';
+import { FeeBadge } from '@/components/finance/fee-badge';
+import { ActionSubmitButton } from '@/components/forms/action-submit-button';
+import { SecurityNote } from '@/components/finance/security-note';
+import { StatusState } from '@/components/shared/status-state';
+
+
+
+export function SwapModuleClient() {
+  const state = useSwapState();
+  if (state.status === 'processing') {
+    return (
+      <StatusState
+        icon="fi-rr-time-forward"
+        title="Your transaction is being processed."
+        iconColorClass="text-neutral-600 dark:text-neutral-400"
+        bgColorClass="bg-neutral-100 dark:bg-neutral-800/40"
+        className="py-24"
+      />
+    );
+  }
+
+  if (state.status === 'success') {
+    return (
+      <StatusState
+        icon="fi-rr-time-check"
+        title="Your token swap was completed successfully."
+        iconColorClass="text-emerald-600 dark:text-emerald-400"
+        bgColorClass="bg-emerald-50 dark:bg-emerald-950/20"
+        className="py-24"
+        action={
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 w-full max-w-sm mx-auto">
+            <button
+              onClick={() => state.setStatus('form')}
+              className="w-full sm:w-auto min-w-[140px] px-6 py-2.5 bg-[#16a34a] hover:bg-[#15803d] text-white rounded-md font-medium text-sm transition-colors cursor-pointer shadow-sm focus:outline-none"
+            >
+              Done
+            </button>
+            {state.txHash && (
+              <a
+                href={`${process.env.NEXT_PUBLIC_STELLAR_EXPLORER_URL || 'https://stellar.expert/explorer/testnet'}/tx/${state.txHash}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full sm:w-auto min-w-[140px] px-6 py-2.5 border-2 border-[#16a34a] text-[#16a34a] hover:bg-[#16a34a]/5 dark:hover:bg-[#16a34a]/10 rounded-md font-medium text-sm transition-colors flex items-center justify-center gap-2 focus:outline-none"
+              >
+                View Transaction <i className="fi fi-rr-arrow-up-right text-xs mt-0.5" />
+              </a>
+            )}
+          </div>
+        }
+      />
+    );
+  }
+
+  if (state.status === 'error') {
+    return (
+      <StatusState
+        icon="fi-rr-time-delete"
+        title={`Swap could not be completed.\n${state.errorMessage}`}
+        iconColorClass="text-red-500"
+        bgColorClass="bg-red-50 dark:bg-red-950/20"
+        buttonText="Try Again"
+        onButtonClick={() => state.setStatus('form')}
+        className="py-24"
+      />
+    );
+  }
+
+  return (
+    <div className="w-full max-w-[740px] mx-auto bg-white dark:bg-card border border-border rounded-md p-6 md:p-8 flex flex-col shadow-[0_2px_8px_-2px_rgba(0,0,0,0.02)]">
+      {/* Top Balance Section */}
+      <BalanceHeaderCard
+        balance={state.activeBalanceToken.balance}
+        symbol={state.activeBalanceToken.symbol}
+        equivalentIdr={state.activeBalanceToken.equivalentIdr}
+        onToggleToken={state.toggleActiveBalanceToken}
+        className="border-none !p-0 shadow-none mb-8"
+      />
+
+      {/* Main Swap Form */}
+      <div className="flex flex-col gap-2">
+        <SwapBlock
+          label="From"
+          token={state.fromToken}
+          amount={state.fromAmount}
+          onAmountChange={state.handleFromAmountChange}
+          equivalentFiat={state.getFiatEquivalent(state.fromAmount, state.fromToken.id)}
+          showPercentages={true}
+          activePercentage={state.activePercentage}
+          onPercentageSelect={state.handlePercentage}
+        />
+
+        <div className="flex justify-center py-1.5 relative z-10">
+          <button
+            type="button"
+            onClick={state.handleSwapDirection}
+            className="w-12 h-12 bg-white dark:bg-card border border-border rounded-full flex items-center justify-center text-[#16a34a] hover:bg-neutral-2 shadow-md"
+          >
+            <SwapIcon className="w-[18px] h-[18px]" />
+          </button>
+        </div>
+
+        <SwapBlock
+          label="To"
+          token={state.toToken}
+          amount={state.toAmount}
+          onAmountChange={state.handleToAmountChange}
+          equivalentFiat={state.getFiatEquivalent(state.toAmount, state.toToken.id)}
+        />
+      </div>
+
+      <FeeBadge feeText="0.5% Platform fee" className="mt-5 mb-5" />
+
+      <ActionSubmitButton icon="fi-rr-exchange" className="mb-4" onClick={state.handleSwapSubmit}>
+        Swap
+      </ActionSubmitButton>
+
+      <SecurityNote text="Your funds are secure and never leave your wallet" />
+    </div>
+  );
+}

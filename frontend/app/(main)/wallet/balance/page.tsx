@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useMediaQuery } from 'react-responsive';
 import { ChartHeader } from '@/components/balance/chart-header';
 import { TransferCard } from '@/components/balance/transfer-card';
 import { IdrBalanceCard } from '@/components/balance/idr-balance-card';
@@ -9,6 +10,7 @@ import { TOKENS } from '@/lib/data/tokens';
 import ChartComponent from '@/components/balance/chart-token';
 import { LightweightChart } from '@/components/balance/lightweight-chart';
 import { useTokens } from '@/lib/api/queries';
+import { useUserProfile } from '@/hooks/use-user-profile';
 
 export default function BalancePage() {
   const [activeTokenId, setActiveTokenId] = useState('XLM');
@@ -16,13 +18,36 @@ export default function BalancePage() {
   const [chartMode, setChartMode] = useState<'pro' | 'area'>('area');
   const [isTopUpOpen, setIsTopUpOpen] = useState(false);
   const { data: tokenList } = useTokens();
+  const { data: userProfile } = useUserProfile();
+
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const isTabletRange = useMediaQuery({ minWidth: 1024, maxWidth: 1532 });
+  const isTabletLayout = mounted && isTabletRange;
+  
   const tokenMap = Object.fromEntries(
-    (tokenList ?? Object.values(TOKENS)).map((token) => [token.id, token])
+    (tokenList ?? Object.values(TOKENS)).map((token) => [token.id, { ...token }]) // Clone to avoid mutating global TOKENS
   );
+  
+  // Inject real balances from /me API
+  if (userProfile?.balances) {
+    if (tokenMap['XLM']) {
+      tokenMap['XLM'].balance = userProfile.balances.XLM;
+      tokenMap['XLM'].equivalentIdr = userProfile.balances_idr?.XLM || 0;
+    }
+    if (tokenMap['RPK']) {
+      tokenMap['RPK'].balance = userProfile.balances.RPK || 0;
+      tokenMap['RPK'].equivalentIdr = userProfile.balances_idr?.RPK || 0;
+    }
+  }
+
   const token = tokenMap[activeTokenId] ?? TOKENS[activeTokenId];
 
   const toggleToken = () => {
-    setActiveTokenId((prev) => (prev === 'XLM' ? 'USDC' : 'XLM'));
+    setActiveTokenId((prev) => (prev === 'XLM' ? 'RPK' : 'XLM'));
   };
 
   const rangeMapping: Record<string, "1D" | "5D" | "1M" | "3M" | "6M" | "YTD" | "12M" | "60M" | "ALL"> = {
@@ -33,6 +58,9 @@ export default function BalancePage() {
     '3 Year': '60M',
     '5 Year': 'ALL'
   };
+
+  // We use RPK token balance as the IDR balance (1 RPK = 1 IDR)
+  const idrBalance = userProfile?.balances?.RPK || 0;
 
   return (
     <div className="space-y-6 md:space-y-8 pb-6 md:pb-8">
@@ -60,12 +88,12 @@ export default function BalancePage() {
       </div>
 
       {/* Phase 2: Lower Components */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className={`grid gap-6 ${isTabletLayout ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-2'}`}>
         <div>
           <TransferCard />
         </div>
         <div>
-          <IdrBalanceCard onTopUpClick={() => setIsTopUpOpen(true)} />
+          <IdrBalanceCard onTopUpClick={() => setIsTopUpOpen(true)} balance={idrBalance} />
         </div>
       </div>
 

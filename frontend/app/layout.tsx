@@ -10,8 +10,50 @@ const interTight = Inter_Tight({
 });
 
 export const metadata: Metadata = {
-  title: "Berbagift - Reward Communities Beautifully",
-  description: "Berbagift is a platform to send digital rewards, run creator campaigns, and celebrate together — transparently and securely.",
+  title: {
+    default: "Berbagift — Celebrate Every Gift, Beyond Borders",
+    template: "%s | Berbagift"
+  },
+  description: "Wrap digital assets in beautiful custom envelopes and send them with a personal message anywhere in the world—instantly and securely on Stellar.",
+  keywords: [
+    "Berbagift",
+    "digital gifting",
+    "Stellar network",
+    "RPK token",
+    "crypto gifts",
+    "borderless gifting",
+    "red envelope",
+    "BagiTHR",
+    "Web3 rewards",
+    "community giveaways"
+  ],
+  authors: [{ name: "Berbagift Team" }],
+  openGraph: {
+    title: "Berbagift — Celebrate Every Gift, Beyond Borders",
+    description: "Wrap digital assets in beautiful custom envelopes and send them with a personal message anywhere in the world—instantly and securely on Stellar.",
+    url: "https://berbagift.com",
+    siteName: "Berbagift",
+    images: [
+      {
+        url: "/logo/Brandlogo.svg",
+        width: 800,
+        height: 600,
+        alt: "Berbagift Branding Logo",
+      },
+    ],
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Berbagift — Celebrate Every Gift, Beyond Borders",
+    description: "Wrap digital assets in beautiful custom envelopes and send them with a personal message anywhere in the world—instantly on Stellar.",
+    images: ["/logo/Brandlogo.svg"],
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
 };
 
 export default function RootLayout({

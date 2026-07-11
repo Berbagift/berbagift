@@ -1,13 +1,12 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { isConnected as isFreighterConnected, requestAccess, getNetworkDetails, signMessage } from '@stellar/freighter-api';
 import { useWalletStore } from '@/hooks/use-wallet-state';
-import axios from 'axios';
 import { setAuthToken } from '@/lib/auth';
-import { getErrorMessage } from '@/lib/api/client';
+import { apiClient, getErrorMessage } from '@/lib/api/client';
 
 type SignaturePayload = {
   signedMessage?: unknown;
@@ -41,8 +40,9 @@ function signatureToString(signature: unknown): string {
 export function ConnectWalletButton() {
   const router = useRouter();
   const [isConnecting, setIsConnecting] = useState(false);
+  const isConnectingRef = React.useRef(false);
   const [mounted, setMounted] = useState(false);
-  const { connect, isConnected: isWalletConnected } = useWalletStore();
+  const { connect, isConnected: isWalletConnected, publicKey } = useWalletStore();
 
   useEffect(() => {
     const timeoutId = window.setTimeout(() => setMounted(true), 0);
@@ -50,17 +50,28 @@ export function ConnectWalletButton() {
   }, []);
 
   const handleConnect = async () => {
+    if (isConnectingRef.current) return;
+    isConnectingRef.current = true;
     setIsConnecting(true);
     try {
-      if (await isFreighterConnected()) {
+      const { isConnected } = await isFreighterConnected();
+      if (isConnected) {
         const expectedNetwork = process.env.NEXT_PUBLIC_STELLAR_NETWORK?.toUpperCase() || 'TESTNET';
-        const { network, error: networkError } = await getNetworkDetails();
-        
+
+        let networkDetails;
+        try {
+          networkDetails = await getNetworkDetails();
+        } catch (err) {
+          console.error("getNetworkDetails error:", err);
+        }
+
+        const { network, error: networkError } = networkDetails || {};
+
         // Freighter typically uses 'PUBLIC' instead of 'MAINNET'
         const targetNetwork = expectedNetwork === 'MAINNET' ? 'PUBLIC' : expectedNetwork;
 
-        if (networkError) {
-          alert("Error fetching network details: " + networkError);
+        if (!network || networkError) {
+          alert("Error fetching network details: " + (networkError || "Wallet not ready"));
           return;
         }
 
@@ -71,11 +82,10 @@ export function ConnectWalletButton() {
 
         const { address, error } = await requestAccess();
         if (address) {
-          // 1. Fetch nonce from backend directly
-          const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
+          // 1. Fetch nonce from backend via centralized apiClient
           let nonceString;
           try {
-            const nonceRes = await axios.post(`${apiUrl}/api/auth/nonce`, { wallet_address: address });
+            const nonceRes = await apiClient.post('/auth/nonce', { wallet_address: address });
             nonceString = nonceRes.data.data.nonce;
           } catch (err) {
             alert(`Error getting nonce: ${getErrorMessage(err)}`);
@@ -84,46 +94,48 @@ export function ConnectWalletButton() {
 
           // 2. Prompt Freighter to sign the message
           try {
-            const networkPassphrase = targetNetwork === 'PUBLIC'
-              ? 'Public Global Stellar Network ; September 2015'
-              : 'Testnet Stellar Network ; September 2015';
-            const signature = await signMessage(nonceString, { networkPassphrase, address });
-            if (!signature) {
-              alert("Signature rejected by user.");
+            // Use the networkPassphrase returned from getNetworkDetails to ensure a perfect match
+            const networkPassphrase = networkDetails?.networkPassphrase;
+
+            const signResult = await signMessage(nonceString, { networkPassphrase, address });
+            // @ts-ignore - Handle various Freighter API version return types
+            if (!signResult || signResult.error || (!signResult.signedMessage && !signResult.signature && typeof signResult === 'object' && !Buffer.isBuffer(signResult) && !(signResult instanceof Uint8Array))) {
+              // @ts-ignore
+              alert("Signature failed or rejected by user: " + (signResult?.error || ""));
               return;
             }
 
-            const signatureStr = signatureToString(signature);
-            
+            const signatureStr = signatureToString(signResult);
+
             // 3. Send signature to backend for verification
             try {
-              const signInRes = await axios.post(`${apiUrl}/api/auth/sign-in`, {
+              const signInRes = await apiClient.post('/auth/sign-in', {
                 wallet_address: address,
                 signature: signatureStr
               });
-              
+
               // 4. Success! Store the user ID, address, and set auth cookie
               const userId = signInRes.data.data.user_id;
               const accessToken = signInRes.data.data.access_token;
-              
+
               if (accessToken) {
                 setAuthToken(accessToken);
               }
-              
+
               connect(address, userId);
-              router.push('/dashboard');
+              window.location.href = '/dashboard';
             } catch (err) {
               alert(`Authentication failed: ${getErrorMessage(err)}`);
               return;
             }
-            
+
           } catch (signErr) {
             console.error("Signature error:", signErr);
             alert("Failed to sign message: " + getErrorMessage(signErr));
           }
         } else {
           console.error("Freighter error:", error);
-          alert(error || "Failed to connect Freighter.");
+          alert(getErrorMessage(error) || "Failed to connect Freighter.");
         }
       } else {
         alert("Please install the Freighter wallet extension to continue.");
@@ -131,6 +143,7 @@ export function ConnectWalletButton() {
     } catch (error) {
       console.error("Error connecting wallet:", error);
     } finally {
+      isConnectingRef.current = false;
       setIsConnecting(false);
     }
   };
@@ -144,18 +157,22 @@ export function ConnectWalletButton() {
   }
 
   if (isWalletConnected) {
+    const displayAddress = publicKey
+      ? `${publicKey.substring(0, 4)}....${publicKey.substring(publicKey.length - 4)}`
+      : "Dashboard";
+
     return (
-      <Button 
+      <Button
         onClick={() => router.push('/dashboard')}
         className="rounded-full shadow-none font-medium px-6"
       >
-        Dashboard
+        {displayAddress}
       </Button>
     );
   }
 
   return (
-    <Button 
+    <Button
       onClick={handleConnect}
       disabled={isConnecting}
       className="rounded-full shadow-none font-medium px-6"

@@ -18,7 +18,7 @@ export function EnvelopeTemplateCard({ template, isSelected, onSelect }: Envelop
         isSelected ? "border-[#16a34a] bg-[#16a34a]/5" : "border-border hover:border-neutral-8 bg-white dark:bg-card"
       )}
     >
-      <div className="relative w-full aspect-[3/2] rounded overflow-hidden bg-neutral-2">
+      <div className="relative w-full aspect-[436/624] rounded overflow-hidden bg-neutral-2">
         <Image
           src={template.imageUrl}
           alt={template.title}

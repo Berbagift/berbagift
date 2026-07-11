@@ -17,13 +17,13 @@ export function LightweightChart({ activeTokenId, activeRange }: LightweightChar
   const isInitialRangeSetRef = useRef<boolean>(false);
 
   // Fetch real-time price history with infinite scroll capabilities
-  const { 
-    data: chartData, 
-    isLoading, 
-    isError, 
-    fetchNextPage, 
-    isFetchingNextPage, 
-    hasNextPage 
+  const {
+    data: chartData,
+    isLoading,
+    isError,
+    fetchNextPage,
+    isFetchingNextPage,
+    hasNextPage
   } = useBinanceKlinesInfinite(activeTokenId, activeRange);
 
   // Ref wrapper to keep scroll callback updated with latest Query state
@@ -44,15 +44,15 @@ export function LightweightChart({ activeTokenId, activeRange }: LightweightChar
 
     // Detect initial theme
     const isDark = document.documentElement.classList.contains('dark');
-    
+
     // Create chart
     const chart = createChart(chartContainerRef.current, {
       layout: {
         background: { type: ColorType.Solid, color: 'transparent' },
-        textColor: isDark ? '#A3A3A3' : '#737373', 
+        textColor: isDark ? '#A3A3A3' : '#737373',
       },
       grid: {
-        vertLines: { visible: false }, 
+        vertLines: { visible: false },
         horzLines: { visible: false },
       },
       rightPriceScale: {
@@ -64,18 +64,18 @@ export function LightweightChart({ activeTokenId, activeRange }: LightweightChar
       },
       autoSize: true,
     });
-    
+
     chartRef.current = chart;
 
     // Add Area Series (v5 standard)
     const newSeries = chart.addSeries(AreaSeries, {
-        lineColor: '#10b981', // Default green
-        topColor: 'rgba(16, 185, 129, 0.2)',
-        bottomColor: 'rgba(16, 185, 129, 0.0)',
-        lineWidth: 2,
-        lineType: LineType.Curved, // Smooth curved line like Shadcn
+      lineColor: '#10b981', // Default green
+      topColor: 'rgba(16, 185, 129, 0.2)',
+      bottomColor: 'rgba(16, 185, 129, 0.0)',
+      lineWidth: 2,
+      lineType: LineType.Curved, // Smooth curved line like Shadcn
     });
-    
+
     seriesRef.current = newSeries;
 
     // Set up Infinite Scroll Listener
@@ -98,17 +98,17 @@ export function LightweightChart({ activeTokenId, activeRange }: LightweightChar
 
     // Theme observer
     const observer = new MutationObserver(() => {
-        const isDarkNow = document.documentElement.classList.contains('dark');
-        chart.applyOptions({
-            layout: {
-                textColor: isDarkNow ? '#A3A3A3' : '#737373',
-            }
-        });
+      const isDarkNow = document.documentElement.classList.contains('dark');
+      chart.applyOptions({
+        layout: {
+          textColor: isDarkNow ? '#A3A3A3' : '#737373',
+        }
+      });
     });
 
     observer.observe(document.documentElement, {
-        attributes: true,
-        attributeFilter: ['class'],
+      attributes: true,
+      attributeFilter: ['class'],
     });
 
     return () => {
@@ -145,7 +145,7 @@ export function LightweightChart({ activeTokenId, activeRange }: LightweightChar
     // Map fetched API data
     const formattedData = combinedData.map((d) => ({
       time: d.time as Time,
-      value: d.close, 
+      value: d.close,
     }));
 
     seriesRef.current.setData(formattedData);
@@ -196,21 +196,21 @@ export function LightweightChart({ activeTokenId, activeRange }: LightweightChar
 
   return (
     <div className="relative w-full h-[400px] md:h-[500px]">
-        {(isLoading || isFetchingNextPage) && (
-            <div className="absolute top-4 right-4 z-10 flex items-center gap-2 px-3 py-1.5 bg-neutral-2/80 dark:bg-neutral-900/80 backdrop-blur border border-border rounded-full text-xs text-neutral-6 shadow-sm">
-                <div className="w-3.5 h-3.5 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
-                <span>Fetching history...</span>
-            </div>
-        )}
-        {isError && (
-            <div className="absolute inset-0 z-10 flex items-center justify-center bg-background/50 text-neutral-500">
-                Failed to load chart data
-            </div>
-        )}
-        <div 
-            ref={chartContainerRef} 
-            className="w-full h-full"
-        />
+      {(isLoading || isFetchingNextPage) && (
+        <div className="absolute top-4 right-4 z-10 flex items-center gap-2 px-3 py-1.5 bg-neutral-2/80 dark:bg-neutral-900/80 backdrop-blur border border-border rounded-full text-xs text-neutral-6 shadow-sm">
+          <div className="w-3.5 h-3.5 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
+          <span>Fetching history...</span>
+        </div>
+      )}
+      {isError && (
+        <div className="absolute inset-0 z-10 flex items-center justify-center bg-background/50 text-neutral-500">
+          Failed to load chart data
+        </div>
+      )}
+      <div
+        ref={chartContainerRef}
+        className="w-full h-full"
+      />
     </div>
   );
 }

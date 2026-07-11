@@ -1,8 +1,9 @@
 import type { NextConfig } from "next";
 
-const apiUrl = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8888").replace(/\/+$/, "");
+const apiUrl = (process.env.BACKEND_URL || "http://localhost:8000").replace(/\/+$/, "");
 
 const nextConfig: NextConfig = {
+  output: "standalone",
   images: {
     remotePatterns: [
       {
@@ -15,7 +16,7 @@ const nextConfig: NextConfig = {
     return [
       {
         source: "/api/:path*",
-        destination: `${apiUrl}/:path*`,
+        destination: `${apiUrl}/api/:path*`,
       },
     ];
   },

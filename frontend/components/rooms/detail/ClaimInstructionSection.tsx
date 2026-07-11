@@ -26,13 +26,13 @@ const INSTRUCTION_STEPS = [
 
 export function ClaimInstructionSection() {
   return (
-    <div className="bg-white dark:bg-card border border-border rounded-md p-4 sm:p-6 lg:p-8 w-full shadow-none">
-      <div className="flex items-center gap-2 mb-6 md:mb-8">
-        <h3 className="text-lg md:text-xl font-semibold text-black dark:text-neutral-1">How to claim reward</h3>
-        <i className="fi fi-rr-info text-neutral-6" />
+    <div className="bg-white dark:bg-card border border-border rounded-lg p-6 sm:p-8 lg:p-10 w-full shadow-none">
+      <div className="flex items-center gap-3 mb-8 md:mb-12">
+        <h3 className="text-xl font-medium text-black dark:text-neutral-1">How to claim reward</h3>
+        <i className="fi fi-rr-info text-xl text-neutral-8 dark:text-neutral-4" />
       </div>
 
-      <div className="flex flex-col md:flex-row items-center md:items-start justify-center gap-8 lg:gap-12 mb-8 md:mb-12">
+      <div className="flex flex-col md:flex-row items-center md:items-start justify-center gap-8 lg:gap-16 mb-10 md:mb-12">
         {INSTRUCTION_STEPS.map((step, index) => (
           <ClaimInstructionStep
             key={index}
@@ -43,9 +43,9 @@ export function ClaimInstructionSection() {
         ))}
       </div>
 
-      <div className="w-full bg-accent-orange-50 border border-accent-orange-100 rounded-md px-4 py-1.5 flex items-start sm:items-center gap-2.5">
-        <i className="fi fi-rr-info text-accent-orange-500 mt-0.5 sm:mt-0 text-sm" />
-        <span className="text-sm font-medium text-accent-orange-600">
+      <div className="w-full bg-warning-50 rounded-lg p-2.5 flex items-center gap-3">
+        <i className="fi fi-rr-info text-warning-500 text-2xl flex-shrink-0" />
+        <span className="text-base font-medium text-warning-500">
           Rewards must be claimed within the available claim period before they expire automatically.
         </span>
       </div>

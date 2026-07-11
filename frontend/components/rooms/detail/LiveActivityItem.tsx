@@ -40,15 +40,15 @@ function formatAction(action: string): string {
 
 export function LiveActivityItem({ activity }: LiveActivityItemProps) {
   return (
-    <div className="flex items-center justify-between py-3">
+    <div className="flex items-center justify-between">
       <div className="flex items-center gap-3">
-        <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-700 font-semibold text-xs flex-shrink-0 select-none">
+        <div className="w-12 h-12 rounded-full bg-primary-50 flex items-center justify-center text-secondary-500 font-semibold text-xl flex-shrink-0 select-none">
           {activity.initials}
         </div>
-        <span className="text-sm font-semibold text-black dark:text-neutral-1">{activity.username}</span>
+        <span className="text-base font-medium text-black dark:text-neutral-1">{activity.username}</span>
       </div>
       <div className="text-right">
-        <span className="text-sm text-neutral-8 dark:text-neutral-4 font-medium">
+        <span className="text-base text-neutral-8 dark:text-neutral-4 font-medium">
           {formatAction(activity.action)} {formatTimestamp(activity.timestamp)}
         </span>
       </div>

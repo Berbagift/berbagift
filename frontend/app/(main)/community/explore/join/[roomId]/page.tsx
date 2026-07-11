@@ -7,6 +7,22 @@ import { LiveActivityCard } from '@/components/rooms/detail/LiveActivityCard';
 import { useRoomDetail, useClaimReward } from '@/lib/api/queries';
 import { getErrorMessage } from '@/lib/api/client';
 
+const RoomDetailSkeleton = () => (
+  <div className="flex flex-col p-4 sm:p-6 lg:p-0">
+    <div className="flex flex-col gap-2 mb-2">
+      <div className="h-8 w-1/3 bg-emerald-50/50 dark:bg-emerald-900/10 rounded animate-pulse" />
+      <div className="h-6 w-1/2 bg-emerald-50/50 dark:bg-emerald-900/10 rounded animate-pulse mt-2" />
+    </div>
+    <div className="grid grid-cols-1 lg:grid-cols-[1fr_512px] gap-6 lg:gap-8 items-stretch mt-6">
+      <div className="flex flex-col gap-6 lg:gap-8">
+        <div className="h-64 w-full bg-emerald-50/50 dark:bg-emerald-900/10 rounded-xl animate-pulse" />
+        <div className="h-48 w-full bg-emerald-50/50 dark:bg-emerald-900/10 rounded-xl animate-pulse" />
+      </div>
+      <div className="w-full h-[calc(100vh-140px)] bg-emerald-50/50 dark:bg-emerald-900/10 rounded-xl animate-pulse" />
+    </div>
+  </div>
+);
+
 export default function RoomDetailPage() {
   const params = useParams();
   const roomId = params.roomId as string;
@@ -31,11 +47,7 @@ export default function RoomDetailPage() {
   };
 
   if (isLoading) {
-    return (
-      <div className="flex flex-col min-h-[calc(100vh-80px)] justify-center items-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-secondary-500"></div>
-      </div>
-    );
+    return <RoomDetailSkeleton />;
   }
 
   if (!roomData) {
@@ -52,17 +64,17 @@ export default function RoomDetailPage() {
       <div className="p-4 sm:p-6 lg:p-0">
         
         {/* Header Section */}
-        <div className="mb-4 md:mb-8">
-          <h1 className="text-xl md:text-2xl lg:text-3xl font-semibold text-black dark:text-neutral-1 mb-2 md:mb-4">
+        <div className="flex flex-col gap-2 mb-2">
+          <h1 className="text-xl md:text-2xl lg:text-3xl font-medium text-black dark:text-neutral-1">
             {roomData.title}
           </h1>
-          <p className="text-base md:text-lg lg:text-xl text-neutral-8 dark:text-neutral-6 max-w-3xl">
+          <p className="text-base md:text-lg lg:text-xl font-medium text-neutral-8 dark:text-neutral-6 max-w-3xl">
             {roomData.description}
           </p>
         </div>
 
         {/* 2-Column Layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-[75%_25%] gap-6 lg:gap-8 items-stretch">
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_512px] gap-6 lg:gap-8 items-stretch">
           
           {/* Main Content (Left) */}
           <div className="flex flex-col gap-6 lg:gap-8">

@@ -8,10 +8,10 @@ import { AdvancedRealTimeChart } from 'react-ts-tradingview-widgets'; // Sesuaik
 
 
 interface ChartComponentProps {
-  activeTokenId: string;
-  activeRange: string;
-  // Mapping from any activeRange key to a valid Range value
-  rangeMapping: Record<string, Range>;
+    activeTokenId: string;
+    activeRange: string;
+    // Mapping from any activeRange key to a valid Range value
+    rangeMapping: Record<string, Range>;
 }
 
 export default function ChartComponent({ activeTokenId, activeRange, rangeMapping }: ChartComponentProps) {
@@ -43,7 +43,7 @@ export default function ChartComponent({ activeTokenId, activeRange, rangeMappin
 
     if (!isMounted) {
         // Tampilkan loading skeleton atau div kosong dengan ukuran yang sama
-        return <div className="w-full h-[400px] md:h-[500px] bg-card animate-pulse" />;
+        return <div className="w-full h-[400px] md:h-[500px] bg-emerald-50/50 dark:bg-emerald-900/10 rounded-xl animate-pulse" />;
     }
 
     return (

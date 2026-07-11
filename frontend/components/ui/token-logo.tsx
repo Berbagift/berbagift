@@ -27,12 +27,12 @@ export function TokenLogo({ symbol, className, size = 'md' }: TokenLogoProps) {
     );
   }
 
-  if (sym === 'USDC') {
+  if (sym === 'RPK') {
     return (
       <img 
-        src="/logo/USDClogo.svg" 
-        alt="USDC" 
-        className={cn("object-contain select-none flex-shrink-0", sizeClasses[size], className)} 
+        src="/logo/rpk.webp" 
+        alt="RPK" 
+        className={cn("object-contain rounded-full select-none flex-shrink-0", sizeClasses[size], className)} 
       />
     );
   }

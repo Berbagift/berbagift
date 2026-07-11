@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { usePathname, useParams, useRouter } from "next/navigation";
+import { usePathname, useParams } from "next/navigation";
 import { ThemeToggle } from "@/components/shared/ThemeToggle";
 import { useWalletStore } from "@/hooks/use-wallet-state";
 import { removeAuthToken } from "@/lib/auth";
@@ -19,7 +19,6 @@ import { Breadcrumbs, ROUTE_BREADCRUMBS } from "@/components/navigation/Breadcru
 export function Header({ onMenuClick, isDesktopSidebarOpen = true }: HeaderProps) {
   const pathname = usePathname();
   const params = useParams();
-  const router = useRouter();
   const { publicKey, disconnect } = useWalletStore();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const { data: userProfile } = useUserProfile();
@@ -31,7 +30,7 @@ export function Header({ onMenuClick, isDesktopSidebarOpen = true }: HeaderProps
     setIsProfileOpen(false);
     removeAuthToken();
     disconnect();
-    router.push("/");
+    window.location.href = "/";
   };
 
   const renderTitle = (isMobile: boolean = false) => {
@@ -121,15 +120,23 @@ export function Header({ onMenuClick, isDesktopSidebarOpen = true }: HeaderProps
             onClick={() => setIsProfileOpen(!isProfileOpen)}
             className="flex items-center gap-2 lg:gap-3 cursor-pointer hover:opacity-80 transition-opacity"
           >
-            <div className="w-8 h-8 lg:w-10 lg:h-10 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-700 font-semibold text-sm">
-              {userProfile?.username ? userProfile.username.substring(0, 2).toUpperCase() : (publicKey ? publicKey.substring(0, 2).toUpperCase() : "USR")}
-            </div>
+            {userProfile?.avatar_url ? (
+              <img 
+                src={userProfile.avatar_url} 
+                alt="User Avatar" 
+                className="w-8 h-8 lg:w-10 lg:h-10 rounded-full object-cover bg-emerald-100"
+              />
+            ) : (
+              <div className="w-8 h-8 lg:w-10 lg:h-10 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-700 font-semibold text-sm">
+                {userProfile?.username ? userProfile.username.substring(0, 2).toUpperCase() : (publicKey ? publicKey.substring(0, 2).toUpperCase() : "USR")}
+              </div>
+            )}
             <div className="hidden sm:block text-sm text-left">
               <p className="font-semibold text-black dark:text-neutral-1 leading-none mb-1">
                 {userProfile?.username ? userProfile.username : "My Wallet"}
               </p>
               <p className="text-neutral-7 dark:text-neutral-6 text-xs leading-none">
-                {publicKey ? `${publicKey.substring(0, 5)}...${publicKey.substring(publicKey.length - 4)}` : "Disconnected"}
+                {publicKey ? `${publicKey.substring(0, 4)}....${publicKey.substring(publicKey.length - 4)}` : "Disconnected"}
               </p>
             </div>
             <i className={`fi fi-rr-angle-small-down ml-1 text-xs text-neutral-6 transition-transform ${isProfileOpen ? 'rotate-180' : ''}`} />
@@ -147,6 +154,14 @@ export function Header({ onMenuClick, isDesktopSidebarOpen = true }: HeaderProps
                     <ThemeToggle />
                   </div>
                 </div>
+                <Link
+                  href="/dashboard/profile"
+                  onClick={() => setIsProfileOpen(false)}
+                  className="block px-4 py-2.5 text-sm text-neutral-8 dark:text-neutral-3 hover:bg-neutral-3 dark:hover:bg-neutral-10 flex items-center gap-2.5 transition-colors font-medium"
+                >
+                  <i className="fi fi-rr-user text-base" />
+                  My Profile
+                </Link>
                 <button
                   onClick={handleDisconnect}
                   className="w-full text-left px-4 py-2.5 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 flex items-center gap-2.5 transition-colors font-medium"

@@ -17,11 +17,23 @@ class UserDatabase:
             User.deleted_at.is_(None)
         ).first()
 
-    def create_user(self, wallet_address: str, username: str, email: str | None = None):
-        # Username maximum is 50 chars as per User model and rules
+    def get_user_by_username(self, username: str):
+        return self.db.query(User).filter(
+            User.username == username,
+            User.deleted_at.is_(None)
+        ).first()
+
+    def check_username_exists(self, username: str, exclude_user_id: int) -> bool:
+        return self.db.query(User).filter(
+            User.username == username,
+            User.id != exclude_user_id,
+            User.deleted_at.is_(None)
+        ).first() is not None
+
+    def create_user(self, wallet_address: str, username: str | None = None, email: str | None = None):
         new_user = User(
             wallet_address=wallet_address,
-            username=username[:50],
+            username=username[:50] if username else None,
             email=email[:100] if email else None
         )
         self.db.add(new_user)
@@ -36,12 +48,13 @@ class UserDatabase:
             User.deleted_at.is_(None)
         ).first() is not None
 
-    def update_user(self, user: User, username: str | None = None, email: str | None = None) -> User:
-        if username is not None:
+    def update_user(self, user: User, username: str | None = None, email: str | None = None, clear_username: bool = False) -> User:
+        if clear_username:
+            user.username = None
+        elif username is not None:
             user.username = username
         if email is not None:
             user.email = email
-            
         self.db.commit()
         self.db.refresh(user)
         return user

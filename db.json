@@ -601,5 +601,78 @@
       "XLM": 1565999,
       "USDC": 2565999
     }
-  }
+  },
+  "notifications": [
+    {
+      "id": "1",
+      "title": "You claimed your reward",
+      "description": "You successfully claimed 100 RPK from Weekly Trivia. Your balance has been updated.",
+      "date": "5 Jul 2026",
+      "category": "Rewards",
+      "read": false,
+      "details": { "amount": "100 RPK", "roomName": "Weekly Trivia" }
+    },
+    {
+      "id": "2",
+      "title": "Transfer sent",
+      "description": "You successfully sent 50 RPK to @faizhauzan. The transaction has been processed.",
+      "date": "5 Jul 2026",
+      "category": "Transfer",
+      "read": false,
+      "details": { "amount": "50 RPK", "username": "@faizhauzan", "txHash": "5e7f1a8c9b2d3e4f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f" }
+    },
+    {
+      "id": "3",
+      "title": "Transfer failed",
+      "description": "Transfer of 25 RPK to @pixy failed. Your balance remains unchanged.",
+      "date": "5 Jul 2026",
+      "category": "Transfer",
+      "read": false,
+      "details": { "amount": "25 RPK", "username": "@pixy", "txHash": "d3e4f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f5e7f1a8c9b2" }
+    },
+    {
+      "id": "4",
+      "title": "Transfer failed",
+      "description": "Transfer of 10 RPK to @alex failed. Please check your network fees.",
+      "date": "5 Jul 2026",
+      "category": "Transfer",
+      "read": false,
+      "details": { "amount": "10 RPK", "username": "@alex" }
+    },
+    {
+      "id": "5",
+      "title": "Alpha Tester Room is about to start",
+      "description": "The claim session opens in 5 minutes. Head to the waiting room so you don't miss it.",
+      "date": "5 Jul 2026",
+      "category": "Rooms",
+      "read": true,
+      "details": { "roomName": "Alpha Tester Room", "timeLeft": "5 minutes" }
+    },
+    {
+      "id": "6",
+      "title": "Friday Night Drop is now live",
+      "description": "The claim session has started. Go claim your reward now before slots run out.",
+      "date": "5 Jul 2026",
+      "category": "Rooms",
+      "read": true,
+      "details": { "roomName": "Friday Night Drop", "timeLeft": "Live Now" }
+    },
+    {
+      "id": "7",
+      "title": "Midnight Mystery Box is now live",
+      "description": "The claim session has started. Go claim your reward now before slots run out.",
+      "date": "5 Jul 2026",
+      "category": "Rooms",
+      "read": true,
+      "details": { "roomName": "Midnight Mystery Box", "timeLeft": "Live Now" }
+    },
+    {
+      "id": "8",
+      "title": "Security Update: Passkey Linked",
+      "description": "You have successfully linked a new passkey to your account for secure smart transactions.",
+      "date": "4 Jul 2026",
+      "category": "System",
+      "read": true
+    }
+  ]
 }

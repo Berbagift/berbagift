@@ -1,26 +1,50 @@
+import React, { useRef } from 'react';
 import Image from 'next/image';
 import { useSendThrStore } from '@/hooks/use-send-thr-state';
 import { cn } from '@/lib/utils';
 
 export function UploadSection() {
   const state = useSendThrStore();
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleSimulatedUpload = () => {
-    // Simulate an API upload delay and then add a dummy image
-    const newDesign = {
-      id: `upload-${Date.now()}`,
-      url: 'https://placehold.co/436x624/f8f9fa/16a34a?text=Custom+Design',
-      title: `My Custom Design ${state.uploadedDesigns.length + 1}`,
+  const triggerUpload = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const result = event.target?.result as string;
+      if (result) {
+        const newDesign = {
+          id: `upload-${Date.now()}`,
+          url: result,
+          title: file.name,
+        };
+        state.addUploadedDesign(newDesign);
+      }
     };
-    state.addUploadedDesign(newDesign);
+    reader.readAsDataURL(file);
+
+    e.target.value = '';
   };
 
   if (state.uploadedDesigns.length === 0) {
     return (
-      <div 
+      <div
         className="border-2 border-dashed border-border rounded-md p-20 flex flex-col items-center justify-center text-center hover:border-[#16a34a] hover:bg-[#16a34a]/5 transition-colors cursor-pointer w-full"
-        onClick={handleSimulatedUpload}
+        onClick={triggerUpload}
       >
+        <input
+          type="file"
+          accept="image/png, image/jpeg"
+          className="hidden"
+          ref={fileInputRef}
+          onChange={handleFileUpload}
+        />
         <div className="w-16 h-16 bg-neutral-2 rounded-full flex items-center justify-center mb-6 text-neutral-8">
           <i className="fi fi-rr-cloud-upload text-3xl mt-1"></i>
         </div>
@@ -36,8 +60,15 @@ export function UploadSection() {
       {/* Upload Dropzone Card */}
       <div
         className="border-2 border-dashed border-border rounded-md p-6 flex flex-col items-center justify-center text-center hover:border-[#16a34a] hover:bg-[#16a34a]/5 transition-colors cursor-pointer min-h-[160px]"
-        onClick={handleSimulatedUpload}
+        onClick={triggerUpload}
       >
+        <input
+          type="file"
+          accept="image/png, image/jpeg"
+          className="hidden"
+          ref={fileInputRef}
+          onChange={handleFileUpload}
+        />
         <div className="w-10 h-10 bg-neutral-2 rounded-full flex items-center justify-center mb-3 text-neutral-8">
           <i className="fi fi-rr-cloud-upload text-lg mt-1"></i>
         </div>
