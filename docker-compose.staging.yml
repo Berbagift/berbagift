@@ -16,7 +16,7 @@ services:
     volumes:
       - db_data_staging:/var/lib/mysql
     healthcheck:
-      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -uroot -p$$MYSQL_ROOT_PASSWORD"]
       timeout: 10s
       retries: 10
       interval: 10s
