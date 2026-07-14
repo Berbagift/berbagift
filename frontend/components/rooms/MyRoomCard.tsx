@@ -8,7 +8,7 @@ export interface MyRoom {
   title: string;
   description: string;
   rewardPool: string;
-  winners: number;
+  winners: { wallet_address: string; username: string; }[] | number;
   participants: Participant[];
   joined: number;
   maxParticipants: number;

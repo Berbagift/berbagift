@@ -192,6 +192,7 @@ impl MultiRoomAutoDraw {
             room.reward_per_winner = room.reward_pool / (room.total_winners as i128);
             
             let mut temp_participants = participants.clone();
+            let mut winners: Vec<Address> = Vec::new(&env);
             
             for _ in 0..room.total_winners {
                 let count = temp_participants.len();
@@ -202,7 +203,8 @@ impl MultiRoomAutoDraw {
                 let random_index = env.prng().gen_range::<u64>(0..count as u64) as u32;
                 let winner = temp_participants.get(random_index).unwrap();
                 
-                env.storage().persistent().set(&DataKey::IsWinner(room_id, winner), &true);
+                env.storage().persistent().set(&DataKey::IsWinner(room_id, winner.clone()), &true);
+                winners.push_back(winner);
                 
                 // Swap remove (equivalent behavior)
                 temp_participants.remove(random_index);

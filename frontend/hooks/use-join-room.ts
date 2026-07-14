@@ -32,6 +32,18 @@ export function useJoinRoom(room: Room | undefined) {
         return;
       }
 
+      if (!room) {
+        alert("Room data is not available. Please try again.");
+        setIsWeb3Processing(false);
+        return;
+      }
+
+      if (room.room_id == null) {
+        alert("Room ID is missing. Please refresh and try again.");
+        setIsWeb3Processing(false);
+        return;
+      }
+
       const xdr = await buildJoinRoomTx(senderAddress, room.room_id);
 
       const { signedTxXdr, error: signError } = await signTransaction(xdr, {

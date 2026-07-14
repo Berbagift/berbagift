@@ -24,9 +24,11 @@ export interface Room {
   creator: Creator;
   rewardPool: string;
   rewardPoolIdr?: string;
-  winners: number;
+  reward?: string;
+  winners: { wallet_address: string; username: string; }[] | number;
   joined: number;
   maxParticipants: number;
+  capacity?: number;
   participants: Participant[];
   activities: RoomActivity[];
   status: string;

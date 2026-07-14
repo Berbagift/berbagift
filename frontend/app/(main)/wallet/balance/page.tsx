@@ -63,7 +63,7 @@ export default function BalancePage() {
 
   const token = tokenMap[activeTokenId] ?? TOKENS[activeTokenId];
 
-  token.balance = userProfile?.balances?.XLM
+  token.balance = userProfile?.balances?.XLM ?? 0;
 
   const toggleToken = () => {
     setActiveTokenId((prev) => (prev === 'XLM' ? 'RPK' : 'XLM'));

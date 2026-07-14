@@ -17,7 +17,7 @@ class RoomController:
                 username = user.username
                 initials = username[:2].upper()
             else:
-                username = f"{owner_address[:4]}...{owner_address[-4:]}"
+                username = owner_address
                 initials = "U"
             
             room_data["creator"] = {
@@ -25,6 +25,30 @@ class RoomController:
                 "initials": initials,
                 "role": "Room Creator"
             }
+        return room_data
+
+    def _attach_winners_info(self, room_data: dict) -> dict:
+        winners = room_data.get("winners")
+        if isinstance(winners, list) and len(winners) > 0:
+            formatted_winners = []
+            for wallet in winners:
+                if isinstance(wallet, str):
+                    user = self.user_db.get_user_by_wallet(wallet)
+                    if user and user.username:
+                        username = f"@{user.username}"
+                    else:
+                        username = f"@{wallet}"
+                    formatted_winners.append({
+                        "wallet_address": wallet,
+                        "username": username
+                    })
+                else:
+                    formatted_winners.append(wallet)
+            room_data["winners"] = formatted_winners
+        elif room_data.get("status") != "Completed":
+            # Remove empty array so frontend falls back to total_winners count before draw
+            if "winners" in room_data:
+                del room_data["winners"]
         return room_data
 
     def _attach_reward_idr(self, room_data: dict) -> dict:
@@ -114,6 +138,7 @@ class RoomController:
                 if "_id" in room_data:
                     del room_data["_id"]
                 room_data = self._attach_creator_info(room_data)
+                room_data = self._attach_winners_info(room_data)
                 formatted_rooms.append(room_data)
 
             return {
@@ -155,6 +180,7 @@ class RoomController:
                 if "_id" in room_data:
                     del room_data["_id"]
                 room_data = self._attach_creator_info(room_data)
+                room_data = self._attach_winners_info(room_data)
                 formatted_rooms.append(room_data)
 
             return {
@@ -206,6 +232,7 @@ class RoomController:
             if "_id" in room_data:
                 del room_data["_id"]
             room_data = self._attach_creator_info(room_data)
+            room_data = self._attach_winners_info(room_data)
             room_data = self._attach_reward_idr(room_data)
             
             # Add is_joined attribute
@@ -246,7 +273,7 @@ class RoomController:
                     username = f"@{user.username}"
                     initials = user.username[:2].upper()
                 else:
-                    username = f"@{wallet[:4]}...{wallet[-4:]}"
+                    username = f"@{wallet}"
                     initials = "U"
                     
                 result.append({
@@ -294,7 +321,7 @@ class RoomController:
                     if user and user.username:
                         username_cache[addr] = f"@{user.username}"
                     else:
-                        username_cache[addr] = f"@{addr[:4]}...{addr[-4:]}"
+                        username_cache[addr] = f"@{addr}"
                 return username_cache[addr]
                 
             for act in activities:
@@ -335,6 +362,92 @@ class RoomController:
                 "data": result,
                 "errors": None
             }, 200
+        except Exception as e:
+            return {
+                "message": "Internal server error",
+                "data": None,
+                "errors": {"Exception": str(e)}
+            }, 500
+
+    def check_winner(self, identifier: str, authorization: str | None):
+        # ── Auth guard ──────────────────────────────────────────────────────────
+        if not authorization or not authorization.startswith("Bearer "):
+            return {
+                "message": "Authentication required",
+                "data": None,
+                "errors": {"Auth": "IS_INVALID"}
+            }, 401
+
+        token = authorization.split(" ")[1]
+        try:
+            payload = verify_access_token(token)
+            user_id = payload.get("sub")
+        except jwt.ExpiredSignatureError:
+            return {
+                "message": "Token has expired",
+                "data": None,
+                "errors": {"Auth": "IS_INVALID"}
+            }, 401
+        except jwt.InvalidTokenError:
+            return {
+                "message": "Invalid token",
+                "data": None,
+                "errors": {"Auth": "IS_INVALID"}
+            }, 401
+
+        user = self.user_db.get_user_by_id(user_id)
+        if not user:
+            return {
+                "message": "User not found",
+                "data": None,
+                "errors": {"Auth": "IS_INVALID"}
+            }, 404
+
+        wallet_address = user.wallet_address
+        if not wallet_address:
+            return {
+                "message": "Wallet address not found on account",
+                "data": None,
+                "errors": {"wallet": "NOT_FOUND"}
+            }, 400
+
+        # ── Resolve room ────────────────────────────────────────────────────────
+        try:
+            room = RoomDatabase.get_room_by_id(identifier)
+            if not room:
+                return {
+                    "message": "Room not found",
+                    "data": None,
+                    "errors": {"room": "NOT_FOUND"}
+                }, 404
+
+            room_id = room.get("room_id")
+            result = RoomDatabase.check_winner(room_id, wallet_address)
+
+            if not result["found"]:
+                return {
+                    "message": "Room not found",
+                    "data": None,
+                    "errors": {"room": "NOT_FOUND"}
+                }, 404
+
+            if result["reason"] == "draw_not_completed":
+                return {
+                    "message": "Draw has not been completed yet",
+                    "data": {"is_winner": False, "wallet_address": wallet_address},
+                    "errors": None
+                }, 200
+
+            return {
+                "message": "Winner check successful",
+                "data": {
+                    "is_winner": result["is_winner"],
+                    "wallet_address": wallet_address,
+                    "room_id": room_id
+                },
+                "errors": None
+            }, 200
+
         except Exception as e:
             return {
                 "message": "Internal server error",

@@ -457,11 +457,16 @@ class IndexerController:
 
                     elif event_type == "Completed":
                         room_id = scval_to_native(topic_scval[1])
-                        RoomDatabase.upsert_room({
-                            "room_id": room_id,
-                            "status": "Completed"
-                        })
-                        
+
+                        winners = []
+                        if value_scval.vec and len(value_scval.vec.sc_vec) == 2:
+                            winners_scval = value_scval.vec.sc_vec[1]
+                            if winners_scval.vec:
+                                for w in winners_scval.vec.sc_vec:
+                                    winners.append(scval_to_native(w))
+
+                        RoomDatabase.set_room_winners(room_id, winners)
+
                         ActivityDatabase.upsert_activity({
                             "transaction_hash": tx_hash,
                             "wallet_address": "System",
@@ -476,7 +481,7 @@ class IndexerController:
                             "room_id": room_id
                         })
                         
-                        print(f"✅ Indexed Activity: Room {room_id} Giveaway Completed")
+                        print(f"✅ Indexed Activity: Room {room_id} Giveaway Completed — winners: {winners}")
 
                     elif event_type == "Claimed":
                         room_id = scval_to_native(topic_scval[1])

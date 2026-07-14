@@ -9,7 +9,7 @@ import { useCountdown } from '@/hooks/use-countdown';
 
 interface RoomPreviewProps {
   details?: InboxMailItemData['details'];
-  roomId: string;
+  roomId?: string;
 }
 
 export function RoomPreview({ details }: RoomPreviewProps) {

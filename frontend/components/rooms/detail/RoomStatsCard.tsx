@@ -41,7 +41,9 @@ export function RoomStatsCard({ room, onClaim, onLeave, onJoin, isJoining, isCla
           <div className="flex flex-col sm:flex-row items-start gap-6 sm:gap-8">
             <RoomDataBlock icon="fi fi-rr-users" label="Total Winners">
               <div className="flex items-center gap-3">
-                <span className="text-3xl font-semibold text-black dark:text-neutral-1">{room.winners}</span>
+                <span className="text-3xl font-semibold text-black dark:text-neutral-1">
+                  {Array.isArray(room.winners) ? room.winners.length : room.winners}
+                </span>
                 <span className="text-base font-semibold text-black dark:text-neutral-1">Winners</span>
               </div>
             </RoomDataBlock>

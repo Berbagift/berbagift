@@ -1,4 +1,4 @@
-from mongoengine import StringField, IntField, BooleanField
+from mongoengine import StringField, IntField, BooleanField, ListField
 from models.mongo_base import TimestampedDocument
 
 class Room(TimestampedDocument):
@@ -14,6 +14,7 @@ class Room(TimestampedDocument):
     status = StringField(default="Active")
     transaction_hash = StringField()
     claim_session_start = IntField(null=True)
+    winners = ListField(StringField(), default=list)
 
     meta = {'collection': 'rooms'}
 

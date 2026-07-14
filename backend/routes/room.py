@@ -27,6 +27,16 @@ def explore_rooms(
     response_data, status_code = room_controller.explore_rooms(authorization, limit)
     return JSONResponse(status_code=status_code, content=response_data)
 
+@router.get("/{identifier}/check-winner", response_model=APIResponse)
+def check_winner(
+    identifier: str,
+    authorization: str | None = Header(default=None),
+    db: Session = Depends(get_db_session)
+):
+    room_controller = RoomController(db)
+    response_data, status_code = room_controller.check_winner(identifier, authorization)
+    return JSONResponse(status_code=status_code, content=response_data)
+
 @router.get("/{identifier}", response_model=APIResponse)
 def get_room_by_id(
     identifier: str,

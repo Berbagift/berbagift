@@ -28,6 +28,18 @@ export function useClaimRewardWeb3(room: Room | undefined) {
         return;
       }
 
+      if (!room) {
+        alert("Room data is not available. Please try again.");
+        setIsClaiming(false);
+        return;
+      }
+
+      if (room.room_id == null) {
+        alert("Room ID is missing. Please refresh and try again.");
+        setIsClaiming(false);
+        return;
+      }
+
       const xdr = await buildClaimRewardTx(senderAddress, room.room_id);
 
       const { signedTxXdr, error: signError } = await signTransaction(xdr, {

@@ -49,6 +49,27 @@ class RoomDatabase:
         return participant
 
     @staticmethod
+    def set_room_winners(room_id: int, winners: list):
+        """Mark room as Completed and persist the winner address list."""
+        room = Room.objects(room_id=room_id).first()
+        if room:
+            room.status = "Completed"
+            room.winners = winners
+            room.save()
+        return room
+
+    @staticmethod
+    def check_winner(room_id: int, wallet_address: str) -> dict:
+        """Return whether wallet_address is a winner in the given room."""
+        room = Room.objects(room_id=room_id).first()
+        if not room:
+            return {"found": False, "is_winner": False, "reason": "room_not_found"}
+        if room.status != "Completed":
+            return {"found": True, "is_winner": False, "reason": "draw_not_completed"}
+        is_winner = wallet_address in (room.winners or [])
+        return {"found": True, "is_winner": is_winner, "reason": None}
+
+    @staticmethod
     def get_participants(room_id: int):
         participants = RoomParticipant.objects(room_id=room_id, is_joined=True).order_by("-created_at")
         return [p.to_dict() for p in participants]
