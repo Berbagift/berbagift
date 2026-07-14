@@ -12,8 +12,9 @@ export interface InboxMailItemData {
     amount?: string;
     username?: string;
     roomName?: string;
-    timeLeft?: string;
     txHash?: string;
+    message?: string;
+    roomId?: string | number;
   };
 }
 
@@ -40,7 +41,7 @@ export function InboxMailItem({
       className={cn(
         "flex items-start gap-4 p-5 transition-all duration-200 cursor-pointer border-b border-neutral-4 dark:border-neutral-10 last:border-b-0",
         isSelected
-          ? "bg-neutral-3 dark:bg-neutral-10" 
+          ? "bg-neutral-3 dark:bg-neutral-10"
           : "bg-white dark:bg-card hover:bg-neutral-2/50 dark:hover:bg-neutral-10/40"
       )}
     >
@@ -95,13 +96,13 @@ export function InboxMailItem({
             >
               {title}
             </h4>
-            
+
             {/* Orange Unread Dot */}
             {!isRead && (
               <span className="w-1.5 h-1.5 rounded-full bg-amber-500 flex-shrink-0 self-center" />
             )}
           </div>
-          
+
           <span className="text-xs text-neutral-7 dark:text-neutral-6 whitespace-nowrap self-start mt-[1px]">
             {date}
           </span>

@@ -4,8 +4,14 @@ import { useParams, useRouter } from 'next/navigation';
 import { RoomStatsCard } from '@/components/rooms/detail/RoomStatsCard';
 import { ClaimInstructionSection } from '@/components/rooms/detail/ClaimInstructionSection';
 import { LiveActivityCard } from '@/components/rooms/detail/LiveActivityCard';
-import { useRoomDetail, useClaimReward } from '@/lib/api/queries';
+import { useRoomDetail } from '@/lib/api/queries';
+import { useClaimRewardWeb3 } from '@/hooks/use-claim-reward';
+import { useLeaveRoomWeb3 } from '@/hooks/use-leave-room';
 import { getErrorMessage } from '@/lib/api/client';
+import { useJoinRoom } from '@/hooks/use-join-room';
+
+import { useState, useEffect } from 'react';
+import { getAuthToken } from '@/lib/auth';
 
 const RoomDetailSkeleton = () => (
   <div className="flex flex-col p-4 sm:p-6 lg:p-0">
@@ -28,22 +34,26 @@ export default function RoomDetailPage() {
   const roomId = params.roomId as string;
   const router = useRouter();
 
-  const { data: roomData, isLoading } = useRoomDetail(roomId);
-  const claimMutation = useClaimReward();
+  const [token, setToken] = useState<string | null>(null);
+
+  useEffect(() => {
+    setToken(getAuthToken() || null);
+  }, []);
+
+  const { data: roomData, isLoading: isLoading } = useRoomDetail(roomId, token);
+  console.log(roomData)
+  const { handleJoin, isJoining } = useJoinRoom(roomData);
+  const { handleClaimWeb3, isClaiming } = useClaimRewardWeb3(roomData);
+  const { handleLeaveWeb3, isLeaving } = useLeaveRoomWeb3(roomData);
+
+  const isJoined = roomData?.is_joined ?? false;
 
   const handleClaim = () => {
-    claimMutation.mutate(roomId, {
-      onSuccess: (res) => {
-        alert(res.txHash ? `Claim successful! Tx Hash: ${res.txHash}` : "Claim successful!");
-      },
-      onError: (err) => {
-        alert(getErrorMessage(err, "Claim failed. Please try again."));
-      }
-    });
+    handleClaimWeb3();
   };
 
   const handleLeave = () => {
-    router.push('/community/explore');
+    handleLeaveWeb3();
   };
 
   if (isLoading) {
@@ -62,7 +72,7 @@ export default function RoomDetailPage() {
     <div className="flex flex-col">
       {/* Page Content padding matches DashboardLayout standard */}
       <div className="p-4 sm:p-6 lg:p-0">
-        
+
         {/* Header Section */}
         <div className="flex flex-col gap-2 mb-2">
           <h1 className="text-xl md:text-2xl lg:text-3xl font-medium text-black dark:text-neutral-1">
@@ -75,13 +85,17 @@ export default function RoomDetailPage() {
 
         {/* 2-Column Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_512px] gap-6 lg:gap-8 items-stretch">
-          
+
           {/* Main Content (Left) */}
           <div className="flex flex-col gap-6 lg:gap-8">
-            <RoomStatsCard 
-              room={roomData} 
-              onClaim={handleClaim} 
-              onLeave={handleLeave} 
+            <RoomStatsCard
+              room={roomData}
+              onClaim={handleClaim}
+              onLeave={handleLeave}
+              onJoin={isJoined ? undefined : handleJoin}
+              isJoining={isJoining}
+              isClaiming={isClaiming}
+              isLeaving={isLeaving}
             />
             <ClaimInstructionSection />
           </div>

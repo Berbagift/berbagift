@@ -2,7 +2,7 @@
 resolver = "2"
 members = [
   "contracts/hello-world",
-  "contracts/token-swap", "contracts/nft-gift-locked", "contracts/marketplace"]
+  "contracts/token-swap", "contracts/nft-gift-locked", "contracts/marketplace", "contracts/multi-room-auto-draw", "contracts/token-registry"]
 
 [workspace.dependencies]
 soroban-sdk = "26"

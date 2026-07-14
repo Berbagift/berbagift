@@ -32,6 +32,7 @@ from contextlib import asynccontextmanager
 from configs.mongo_db import connect_db as connect_mongo_db
 from controllers.indexer import IndexerController
 from routes.activity import router as activity_router
+import models.mongo_activity_read  # ensure ActivityRead collection/indexes are created
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -86,7 +87,10 @@ app.include_router(user_router)
 app.include_router(activity_router)
 
 from routes.nft import router as nft_router
+from routes.room import router as room_router
+
 app.include_router(nft_router)
+app.include_router(room_router)
 
 @app.get("/", response_model=APIResponse, status_code=200)
 def root():

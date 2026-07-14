@@ -58,10 +58,10 @@ const DEFAULT_RECIPIENTS: Recipient[] = [];
 export const useSendThrStore = create<SendThrState>((set, get) => ({
   recipients: DEFAULT_RECIPIENTS,
   amount: '',
-  title: '',
+  title: 'Berbagift',
   message: '',
-  tokenId: 'RPK',
-  activeToken: TOKENS['RPK'],
+  tokenId: 'XLM',
+  activeToken: TOKENS['XLM'],
 
   selectedTemplateId: 'preset-1', // Default selection
   uploadMode: 'preset',
@@ -130,10 +130,10 @@ export const useSendThrStore = create<SendThrState>((set, get) => ({
   resetState: () => set({
     recipients: DEFAULT_RECIPIENTS,
     amount: '',
-    title: '',
+    title: 'Berbagift',
     message: '',
-    tokenId: 'RPK',
-    activeToken: TOKENS['RPK'],
+    tokenId: 'XLM',
+    activeToken: TOKENS['XLM'],
     selectedTemplateId: 'preset-1',
     uploadMode: 'preset',
     uploadedDesigns: [],

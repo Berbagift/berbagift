@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { useSwapState } from '@/hooks/use-swap-state';
+import { useTokens } from '@/lib/api/queries';
 import { SwapBlock } from './swap-block';
 import { SwapIcon } from '@/components/ui/swap-icon';
 import { BalanceHeaderCard } from '@/components/finance/balance-header-card';
@@ -12,8 +13,14 @@ import { StatusState } from '@/components/shared/status-state';
 
 
 
+import { useRouter } from 'next/navigation';
+
+
 export function SwapModuleClient() {
+  const router = useRouter();
   const state = useSwapState();
+  const { data: tokenList } = useTokens();
+  const availableTokens = tokenList || [];
   if (state.status === 'processing') {
     return (
       <StatusState
@@ -37,7 +44,10 @@ export function SwapModuleClient() {
         action={
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3 w-full max-w-sm mx-auto">
             <button
-              onClick={() => state.setStatus('form')}
+              onClick={() => {
+                state.setStatus('form');
+                router.push('/dashboard');
+              }}
               className="w-full sm:w-auto min-w-[140px] px-6 py-2.5 bg-[#16a34a] hover:bg-[#15803d] text-white rounded-md font-medium text-sm transition-colors cursor-pointer shadow-sm focus:outline-none"
             >
               Done
@@ -94,6 +104,8 @@ export function SwapModuleClient() {
           showPercentages={true}
           activePercentage={state.activePercentage}
           onPercentageSelect={state.handlePercentage}
+          availableTokens={availableTokens}
+          onTokenSelect={(id) => state.setFromTokenId(id)}
         />
 
         <div className="flex justify-center py-1.5 relative z-10">
@@ -112,6 +124,8 @@ export function SwapModuleClient() {
           amount={state.toAmount}
           onAmountChange={state.handleToAmountChange}
           equivalentFiat={state.getFiatEquivalent(state.toAmount, state.toToken.id)}
+          availableTokens={availableTokens}
+          onTokenSelect={(id) => state.setToTokenId(id)}
         />
       </div>
 

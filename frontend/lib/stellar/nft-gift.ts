@@ -1,9 +1,13 @@
 import * as StellarSdk from "@stellar/stellar-sdk";
 import { config } from "./transactions";
+import { parseAmount } from "../utils/currency";
 
 const NFT_GIFT_CONTRACT_ID =
   process.env.NEXT_PUBLIC_NFT_GIFT_CONTRACT_ID ||
   "CAUZT6BVWEM7AI2GFW5PDWWMR7KZMMU3SIRGQ5CV5HZYHSN23N72BRAM";
+
+const XLM_CONTRACT = process.env.NEXT_PUBLIC_XLM_SAC_ADDRESS || "CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC";
+const RPK_CONTRACT = process.env.NEXT_PUBLIC_RPK_CONTRACT || "CAXMJUKELFC7THVUKVH4NA5RYUDLORCKSZ5HTOPOMEXRMZJLFHKZJCQZ";
 
 const rpc = new StellarSdk.rpc.Server(config.rpcUrl);
 
@@ -21,19 +25,14 @@ export interface ForwardGiftRecipient {
   message: string;
 }
 
-/**
- * We now call specific functions instead of passing tokenChoice
- */
-function getFunctionName(tokenId: string): string {
-  return tokenId === "XLM" ? "send_batch_xlm_and_nft" : "send_batch_rpk_and_nft";
-}
+
 
 /**
  * Converts a human-readable token amount string to Soroban i128 (stroops for XLM, base units for RPK).
  * Stellar uses 7 decimal places (1 XLM = 10_000_000 stroops).
  */
 function toStroops(amount: string): bigint {
-  const parsed = parseFloat(amount);
+  const parsed = parseAmount(amount);
   if (isNaN(parsed)) return BigInt(0);
   return BigInt(Math.round(parsed * 10_000_000));
 }
@@ -45,7 +44,7 @@ function toStroops(amount: string): bigint {
  */
 export async function buildNftGiftTx(
   senderAddress: string,
-  tokenId: string, // 'XLM' | 'RPK'
+  tokenAddress: string,
   recipients: NftGiftRecipient[]
 ): Promise<string> {
   if (recipients.length === 0) throw new Error("No recipients provided");
@@ -60,12 +59,17 @@ export async function buildNftGiftTx(
     { type: "address" }
   );
 
-  const tokenAmounts = StellarSdk.nativeToScVal(
-    recipients.map((r) => toStroops(r.amount)),
-    { type: "i128" }
+  let actualTokenAddress = tokenAddress;
+  if (tokenAddress === "XLM") actualTokenAddress = XLM_CONTRACT;
+  else if (tokenAddress === "RPK") actualTokenAddress = RPK_CONTRACT;
+  
+  const tokenScVal = new StellarSdk.Address(actualTokenAddress).toScVal();
+
+  const tokenAmountsScVal = StellarSdk.xdr.ScVal.scvVec(
+    recipients.map((r) => StellarSdk.nativeToScVal(toStroops(r.amount), { type: "i128" }))
   );
 
-  const functionName = getFunctionName(tokenId);
+  const functionName = "send_batch_gift";
 
   const tokenUris = StellarSdk.nativeToScVal(
     recipients.map((r) => r.tokenUri),
@@ -88,8 +92,9 @@ export async function buildNftGiftTx(
       contract.call(
         functionName,
         senderScVal,
+        tokenScVal,
         recipientAddrs,
-        tokenAmounts,
+        tokenAmountsScVal,
         tokenUris,
         messages
       )
@@ -148,12 +153,7 @@ export async function submitNftGiftTx(signedXdr: string) {
   throw new Error("Transaction timed out waiting for confirmation");
 }
 
-/**
- * Gets the correct function name for forwarding a gift
- */
-function getForwardFunctionName(tokenId: string): string {
-  return tokenId === "XLM" ? "send_batch_existing_xlm_and_nft" : "send_batch_existing_rpk_and_nft";
-}
+
 
 /**
  * Builds, simulates, and assembles the Soroban transaction to call
@@ -161,7 +161,7 @@ function getForwardFunctionName(tokenId: string): string {
  */
 export async function buildForwardGiftTx(
   senderAddress: string,
-  tokenId: string, // 'XLM' | 'RPK'
+  tokenAddress: string,
   recipients: ForwardGiftRecipient[]
 ): Promise<string> {
   if (recipients.length === 0) throw new Error("No recipients provided");
@@ -180,9 +180,14 @@ export async function buildForwardGiftTx(
     { type: "u32" }
   );
 
-  const tokenAmounts = StellarSdk.nativeToScVal(
-    recipients.map((r) => toStroops(r.amount)),
-    { type: "i128" }
+  let actualTokenAddress = tokenAddress;
+  if (tokenAddress === "XLM") actualTokenAddress = XLM_CONTRACT;
+  else if (tokenAddress === "RPK") actualTokenAddress = RPK_CONTRACT;
+  
+  const tokenScVal = new StellarSdk.Address(actualTokenAddress).toScVal();
+
+  const tokenAmountsScVal = StellarSdk.xdr.ScVal.scvVec(
+    recipients.map((r) => StellarSdk.nativeToScVal(toStroops(r.amount), { type: "i128" }))
   );
 
   const messages = StellarSdk.nativeToScVal(
@@ -191,7 +196,7 @@ export async function buildForwardGiftTx(
   );
 
   const senderScVal = new StellarSdk.Address(senderAddress).toScVal();
-  const functionName = getForwardFunctionName(tokenId);
+  const functionName = "send_batch_existing_gift";
 
   const tx = new StellarSdk.TransactionBuilder(account, {
     fee: StellarSdk.BASE_FEE,
@@ -201,9 +206,10 @@ export async function buildForwardGiftTx(
       contract.call(
         functionName,
         senderScVal,
+        tokenScVal,
         recipientAddrs,
         tokenIds,
-        tokenAmounts,
+        tokenAmountsScVal,
         messages
       )
     )

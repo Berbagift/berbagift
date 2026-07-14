@@ -20,4 +20,10 @@ def scval_to_native(sc_val: SCVal):
         return sc_val.i32.int32
     elif sc_val.type == sc_val.type.SCV_STRING:
         return sc_val.str.sc_string.decode()
+    elif sc_val.type == sc_val.type.SCV_U64:
+        return sc_val.u64.uint64
+    elif sc_val.type == sc_val.type.SCV_I64:
+        return sc_val.i64.int64
+    elif sc_val.type == sc_val.type.SCV_BOOL:
+        return sc_val.b
     return str(sc_val)

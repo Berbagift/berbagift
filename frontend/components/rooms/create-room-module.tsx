@@ -43,7 +43,7 @@ export function CreateRoomModule() {
         {/* Reward Pool Field Block */}
         <RewardPoolSection
           tokenId={state.tokenId}
-          setTokenId={state.setTokenId}
+          setTokenId={(id) => state.setTokenId(id as 'XLM' | 'RPK')}
           rewardAmount={state.rewardAmount}
           setRewardAmount={state.setRewardAmount}
           equivalentFiat={state.getFiatEquivalentText(state.rewardAmount)}
@@ -54,15 +54,23 @@ export function CreateRoomModule() {
           <button
             type="button"
             onClick={state.handleSaveDraft}
-            className="w-full border border-[#16a34a] hover:bg-emerald-50 dark:hover:bg-emerald-950/20 text-[#16a34a] py-3 rounded-md text-[16px] font-medium flex items-center justify-center transition-colors cursor-pointer"
+            disabled={state.isSubmitting}
+            className="w-full border border-[#16a34a] hover:bg-emerald-50 dark:hover:bg-emerald-950/20 text-[#16a34a] py-3 rounded-md text-[16px] font-medium flex items-center justify-center transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Save draft
           </button>
           <button
             type="submit"
-            className="w-full bg-[#16a34a] hover:bg-[#15803d] text-white py-3 rounded-md text-[16px] font-medium flex items-center justify-center transition-colors shadow-sm cursor-pointer"
+            disabled={state.isSubmitting}
+            className="w-full bg-[#16a34a] hover:bg-[#15803d] text-white py-3 rounded-md text-[16px] font-medium flex items-center justify-center transition-colors shadow-sm cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Create Room
+            {state.isSubmitting ? (
+              <span className="flex items-center gap-2">
+                <i className="fi fi-rr-spinner animate-spin"></i> Processing...
+              </span>
+            ) : (
+              "Create Room"
+            )}
           </button>
         </div>
 

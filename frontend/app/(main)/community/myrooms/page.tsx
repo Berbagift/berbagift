@@ -1,11 +1,14 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { MyRoomCard } from '@/components/rooms/MyRoomCard';
 import { RoomSearch } from '@/components/rooms/RoomSearch';
 import { RoomGrid } from '@/components/rooms/RoomGrid';
-import { useRooms } from '@/lib/api/queries';
+import { useMyRooms } from '@/lib/api/queries';
+import { getAuthToken } from '@/lib/auth';
+import { useWalletStore } from '@/hooks/use-wallet-state';
+import { getRoomParticipantsCount } from '@/lib/stellar/multi-room';
 
 const RoomCardSkeleton = () => (
   <div className="flex flex-col bg-emerald-50/50 dark:bg-emerald-900/10 border border-border rounded-xl p-6 h-[380px] animate-pulse">
@@ -48,11 +51,29 @@ const RoomCardSkeleton = () => (
 
 export default function MyRoomsPage() {
   const [searchQuery, setSearchQuery] = useState('');
+  const [token, setToken] = useState<string | null>(null);
+  const { publicKey } = useWalletStore();
+  const [liveParticipantCounts, setLiveParticipantCounts] = useState<Record<string, number>>({});
 
-  const { data: rooms = [], isLoading: isRoomsLoading } = useRooms();
+  useEffect(() => {
+    setToken(getAuthToken() || null);
+  }, []);
+
+  const { data: rooms = [], isLoading: isRoomsLoading } = useMyRooms(token);
+
+  useEffect(() => {
+    if (rooms.length > 0 && publicKey) {
+      rooms.forEach(async (room) => {
+        const roomIdNum = typeof room.room_id === 'number' ? room.room_id : parseInt(room.id as string, 10);
+        if (!isNaN(roomIdNum)) {
+          const count = await getRoomParticipantsCount(roomIdNum, publicKey);
+          setLiveParticipantCounts((prev) => ({ ...prev, [room.id]: count }));
+        }
+      });
+    }
+  }, [rooms, publicKey]);
 
   const myRooms = rooms
-    .filter((room) => room.id.toString().startsWith('myroom'))
     .map((room) => {
       let mappedStatus: 'Active' | 'Completed' | 'Draft' = 'Active';
       if (room.status === 'Completed') {
@@ -65,11 +86,11 @@ export default function MyRoomsPage() {
         id: room.id,
         title: room.title,
         description: room.description,
-        rewardPool: room.rewardPool,
+        rewardPool: room.rewardPool || room.reward || '0 XLM', // Use raw DB reward if available
         winners: room.winners,
         participants: room.participants || [],
-        joined: room.joined,
-        maxParticipants: room.maxParticipants,
+        joined: liveParticipantCounts[room.id] !== undefined ? liveParticipantCounts[room.id] : (room.joined || 0),
+        maxParticipants: room.maxParticipants || room.capacity || 10,
         status: mappedStatus,
         dateText: room.statusText || 'N/A',
       };
@@ -91,6 +112,10 @@ export default function MyRoomsPage() {
 
   const handleDelete = (id: string) => {
     alert(`Deleting room ${id}`);
+  };
+
+  const handleJoin = (id: string) => {
+    window.location.href = `/community/explore/join/${id}`;
   };
 
   // Filter list of rooms based on search query
@@ -178,6 +203,7 @@ export default function MyRoomsPage() {
               onShare={handleShare}
               onViewResult={handleViewResult}
               onDelete={handleDelete}
+              onJoin={handleJoin}
             />
           ))}
         </RoomGrid>

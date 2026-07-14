@@ -18,6 +18,7 @@ export interface RoomActivity {
 
 export interface Room {
   id: string;
+  room_id?: number;
   title: string;
   description: string;
   creator: Creator;
@@ -32,7 +33,10 @@ export interface Room {
   statusText: string;
   isHighReward: boolean;
   isSaved: boolean;
+  is_joined?: boolean;
+  is_owner?: boolean;
   claimCountdown?: number | null;
+  claim_session_start?: number | string | null;
   startsAt?: string | null;
   createdAt?: string | null;
 }

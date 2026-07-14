@@ -19,16 +19,17 @@ export const notificationsService = {
       const res = await apiClient.get<any>(`/activities/inbox${query}`);
       const apiData = res.data?.data?.items || [];
       const counts = res.data?.data?.counts || {};
-      
+
       const items = apiData.map((item: any) => {
         let cat: 'Rewards' | 'Rooms' | 'Transfer' | 'Swap' | 'System' = 'System';
         const titleLower = (item.title || '').toLowerCase();
-        
+
         if (titleLower.includes('transfer')) cat = 'Transfer';
         else if (titleLower.includes('swap')) cat = 'Swap';
         else if (titleLower.includes('reward') || titleLower.includes('claim')) cat = 'Rewards';
         else if (titleLower.includes('room')) cat = 'Rooms';
-        
+        else if (titleLower.includes('token listed') || titleLower.includes('deposit')) cat = 'System';
+
         return {
           id: item.id,
           title: item.title,
@@ -39,7 +40,10 @@ export const notificationsService = {
           details: {
             txHash: item.tx_hash,
             amount: item.transaction_value,
-            username: item.sender_or_recipient
+            username: item.sender_or_recipient,
+            message: item.message,
+            roomName: item.room_name,
+            roomId: item.room_id
           }
         };
       });
@@ -58,7 +62,7 @@ export const notificationsService = {
       await new Promise((resolve) => setTimeout(resolve, 100));
       return { id, ...updates } as InboxMailItemData;
     }
-    
+
     // Connect to actual backend PATCH /activities/inbox/:id
     try {
       await apiClient.patch(`/activities/inbox/${id}`, {
@@ -67,7 +71,7 @@ export const notificationsService = {
     } catch (e) {
       console.error('Failed to update inbox item:', e);
     }
-    
+
     return { id, ...updates } as InboxMailItemData;
   },
 
@@ -79,7 +83,7 @@ export const notificationsService = {
       await new Promise((resolve) => setTimeout(resolve, 100));
       return;
     }
-    
+
     try {
       await apiClient.post('/activities/inbox/mark-all-read', {
         category: category === 'All Notification' ? undefined : category

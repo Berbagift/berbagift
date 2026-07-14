@@ -25,6 +25,7 @@ const SIDEBAR_NAV = [
     section: 'COMMUNITY',
     items: [
       { name: 'Explore Rooms', href: '/community/explore', icon: 'fi fi-rr-grid' },
+      { name: 'NFT Marketplace', href: '/community/marketplace', icon: 'fi fi-rr-shop' },
       { name: 'My Rooms', href: '/community/myrooms', icon: 'fi fi-rr-folder' },
     ],
   },

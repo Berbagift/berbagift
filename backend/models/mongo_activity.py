@@ -1,7 +1,8 @@
-from mongoengine import Document, StringField, IntField, BooleanField
+from mongoengine import StringField, IntField, BooleanField
+from models.mongo_base import TimestampedDocument
 
-class Activity(Document):
-    is_atribut = BooleanField(default=False)
+class Activity(TimestampedDocument):
+    is_read = BooleanField(default=False)
     transaction_hash = StringField(required=True)
     wallet_address = StringField(required=True)
     activity_type = StringField(required=True)
@@ -13,7 +14,10 @@ class Activity(Document):
     status = StringField(required=True)
 
     datetime = StringField(required=True)
-
+    room_id = IntField(null=True, required=False, default=None)
     ledger = IntField(required=True)
 
-    meta = {'collection': 'activities'}
+    meta = {
+        'collection': 'activities',
+        'indexes': ['room_id']
+    }

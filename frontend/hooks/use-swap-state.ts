@@ -160,9 +160,11 @@ export function useSwapState() {
       setTxHash(result.hash);
 
       await queryClient.invalidateQueries({ queryKey: ['userProfile'] });
+      await queryClient.invalidateQueries({ queryKey: ['activities'] });
 
       setTimeout(() => {
         queryClient.invalidateQueries({ queryKey: ['userProfile'] });
+        queryClient.invalidateQueries({ queryKey: ['activities'] });
       }, 3000);
 
       setStatus('success');
@@ -199,5 +201,7 @@ export function useSwapState() {
     toggleActiveBalanceToken,
     getFiatEquivalent,
     handleSwapSubmit,
+    setFromTokenId,
+    setToTokenId,
   };
 }

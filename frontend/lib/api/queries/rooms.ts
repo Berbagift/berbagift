@@ -10,11 +10,28 @@ export function useRooms(params?: { status?: string; search?: string }) {
   });
 }
 
-export function useRoomDetail(roomId: string) {
+export function useMyRooms(token: string | null, params?: { status?: string; search?: string }) {
   return useQuery({
-    queryKey: ['rooms', 'detail', roomId],
-    queryFn: () => roomsService.getRoomDetail(roomId),
-    enabled: !!roomId,
+    queryKey: ['myrooms', params, token],
+    queryFn: () => roomsService.getMyRooms(token!, params),
+    enabled: !!token,
+    staleTime: 1000 * 60 * 5,
+  });
+}
+
+export function useExploreRooms(token: string | null, params?: { status?: string; search?: string }) {
+  return useQuery({
+    queryKey: ['exploreRooms', params, token],
+    queryFn: () => roomsService.getExploreRooms(token, params),
+    staleTime: 1000 * 60 * 5,
+  });
+}
+
+export function useRoomDetail(roomId: string, token?: string | null) {
+  return useQuery({
+    queryKey: ['rooms', 'detail', roomId, token],
+    queryFn: () => roomsService.getRoomDetail(roomId, token),
+    enabled: roomId != null && !!token,
     staleTime: 1000 * 60 * 2,
   });
 }
@@ -23,7 +40,10 @@ export function useCreateRoom() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (data: Omit<Room, 'id'>) => roomsService.createRoom(data),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['rooms'] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['rooms'] });
+      qc.invalidateQueries({ queryKey: ['myrooms'] });
+    },
   });
 }
 

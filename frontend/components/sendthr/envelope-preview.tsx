@@ -7,10 +7,11 @@ import { useSendThrStore } from "@/hooks/use-send-thr-state";
 import { PRESET_ENVELOPES } from "@/lib/data/envelopes";
 import { useEnvelopes } from "@/lib/api/queries";
 import { usersService } from "@/lib/api/services/users";
-
+import { useQueryClient } from "@tanstack/react-query";
 
 export function EnvelopePreview() {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const state = useSendThrStore();
   const { data: envelopes } = useEnvelopes();
   const presetEnvelopes = envelopes?.length ? envelopes : PRESET_ENVELOPES;
@@ -158,7 +159,7 @@ export function EnvelopePreview() {
       const nftRecipients = resolvedRecipients.map((r) => ({
         walletAddress: r.walletAddress,
         amount: amountPerRecipient,
-        message: state.message || "Selamat Hari Raya! 🎁",
+        message: state.message || "",
         tokenUri,
       }));
 
@@ -170,7 +171,7 @@ export function EnvelopePreview() {
       // guaranteeing it's the same key that will sign the transaction.
       const xdr = await buildNftGiftTx(
         senderAddress,
-        state.activeToken.id, // 'XLM' or 'RPK'
+        state.tokenId,
         nftRecipients
       );
 
@@ -194,6 +195,16 @@ export function EnvelopePreview() {
 
       state.setTxHash(result.hash);
       state.setStatus("success");
+      
+      // Auto refresh balance and activity on dashboard
+      queryClient.invalidateQueries({ queryKey: ['userProfile'] });
+      queryClient.invalidateQueries({ queryKey: ['activities'] });
+      
+      setTimeout(() => {
+        queryClient.invalidateQueries({ queryKey: ['userProfile'] });
+        queryClient.invalidateQueries({ queryKey: ['activities'] });
+      }, 3000);
+      
       // Form state will be reset when the user clicks "Done" on the success screen.
     } catch (err: any) {
       console.error("Transaction failed:", err);

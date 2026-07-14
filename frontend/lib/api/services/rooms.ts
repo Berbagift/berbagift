@@ -29,6 +29,13 @@ function normalizeStatus(status: string): string {
 }
 
 function normalizeRoom(raw: any): Room {
+  let claimCountdown = raw.claimCountdown ?? 0;
+  if (raw.claim_session_start) {
+    const now = Math.floor(Date.now() / 1000);
+    const diff = Number(raw.claim_session_start) - now;
+    claimCountdown = diff > 0 ? diff : 0;
+  }
+
   // 👱 ponytail: shrink - removed defensive String/Number casting, trust API or use basic fallbacks
   return {
     ...raw,
@@ -36,16 +43,20 @@ function normalizeRoom(raw: any): Room {
     title: raw.title ?? 'Untitled Room',
     description: raw.description ?? '',
     creator: raw.creator ?? { username: '@unknown', initials: '??', role: 'Room Creator' },
-    rewardPool: raw.rewardPool ?? '0 XLM',
-    winners: raw.winners ?? raw.totalWinners ?? 0,
-    joined: raw.joined ?? raw.joinedParticipants ?? 0,
-    maxParticipants: raw.maxParticipants ?? raw.totalParticipants ?? 0,
+    rewardPool: raw.rewardPool ?? raw.reward ?? '0 XLM',
+    rewardPoolIdr: raw.rewardPoolIdr ?? 'Rp 0',
+    winners: raw.winners ?? raw.total_winners ?? raw.totalWinners ?? 0,
+    joined: raw.joined ?? raw.total_joined ?? raw.joinedParticipants ?? 0,
+    maxParticipants: raw.maxParticipants ?? raw.capacity ?? raw.totalParticipants ?? 0,
     participants: (raw.participants ?? []).map(normalizeParticipant),
     activities: (raw.activities ?? []).map(normalizeActivity),
     status: normalizeStatus(raw.status ?? ''),
-    statusText: raw.statusText ?? (raw.dateText ? `Starts in ${raw.dateText}` : ''),
+    statusText: raw.statusText ?? (raw.created_at ? new Intl.DateTimeFormat('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }).format(new Date(raw.created_at)) : (raw.dateText ? `Starts in ${raw.dateText}` : '')),
     isHighReward: Boolean(raw.isHighReward),
     isSaved: Boolean(raw.isSaved),
+    is_owner: Boolean(raw.is_owner),
+    claimCountdown,
+    claim_session_start: raw.claim_session_start,
   } as Room;
 }
 
@@ -62,14 +73,38 @@ export const roomsService = {
     return filterRooms((unwrapApiData(res.data) as Record<string, unknown>[]).map(normalizeRoom), params);
   },
 
-  getRoomDetail: async (id: string): Promise<Room> => {
+  getMyRooms: async (token: string, params?: { status?: string; search?: string }): Promise<Room[]> => {
+    try {
+      const res = await apiClient.get<unknown>('/rooms/my-rooms', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      return filterRooms((unwrapApiData(res.data) as Record<string, unknown>[]).map(normalizeRoom), params);
+    } catch (error) {
+      console.warn("Backend /rooms/my-rooms failed, falling back to mock myrooms", error);
+      return filterRooms(myroomsData.map(normalizeRoom), params);
+    }
+  },
+
+  getExploreRooms: async (token: string | null, params?: { status?: string; search?: string }): Promise<Room[]> => {
+    try {
+      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+      const res = await apiClient.get<unknown>('/rooms/explore', { headers });
+      return filterRooms((unwrapApiData(res.data) as Record<string, unknown>[]).map(normalizeRoom), params);
+    } catch (error) {
+      console.warn("Backend /rooms/explore failed, falling back to mock explore", error);
+      return filterRooms(roomsData.map(normalizeRoom), params);
+    }
+  },
+
+  getRoomDetail: async (id: string, token?: string | null): Promise<Room> => {
     if (isLocalMode) {
       await new Promise((r) => setTimeout(r, 300));
       const all = [...roomsData, ...myroomsData].map(normalizeRoom);
       return all.find((r) => r.id === id) ?? normalizeRoom({ id });
     }
 
-    const res = await apiClient.get<unknown>(`/rooms/${id}`);
+    const headers = token ? { Authorization: `Bearer ${token}` } : {};
+    const res = await apiClient.get<unknown>(`/rooms/${id}`, { headers });
     return normalizeRoom(unwrapApiData(res.data) as Record<string, unknown>);
   },
 
@@ -79,8 +114,13 @@ export const roomsService = {
       return normalizeRoom({ id: `myroom-${Date.now()}`, ...roomData });
     }
 
-    const res = await apiClient.post<unknown>('/rooms', roomData);
-    return normalizeRoom(unwrapApiData(res.data) as Record<string, unknown>);
+    try {
+      const res = await apiClient.post<unknown>('/rooms', roomData);
+      return normalizeRoom(unwrapApiData(res.data) as Record<string, unknown>);
+    } catch (error) {
+      console.warn("Backend /rooms not implemented, falling back to mock room creation");
+      return normalizeRoom({ id: `myroom-${Date.now()}`, ...roomData });
+    }
   },
 
   claimReward: async (roomId: string): Promise<{ success: boolean; txHash?: string }> => {

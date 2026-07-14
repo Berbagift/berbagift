@@ -16,8 +16,7 @@ class NFTDatabase:
     @staticmethod
     def get_user_nfts(wallet_address: str, limit: int = 50):
         nfts = NFT.objects(owner_address=wallet_address).order_by("-datetime").limit(limit)
-        import json
-        return [json.loads(nft.to_json()) for nft in nfts]
+        return [nft.to_dict() for nft in nfts]
 
     @staticmethod
     def update_owner(token_id: int, new_owner: str, default_uri: str = None):
@@ -29,3 +28,21 @@ class NFTDatabase:
             nft.save()
             return True
         return False
+
+    @staticmethod
+    def set_listing_status(token_id: int, is_listed: bool, price: str = None):
+        nft = NFT.objects(token_id=token_id).first()
+        if nft:
+            nft.is_listed = is_listed
+            if price is not None:
+                nft.price = price
+            elif not is_listed:
+                nft.price = None
+            nft.save()
+            return True
+        return False
+
+    @staticmethod
+    def get_listed_nfts(limit: int = 50):
+        nfts = NFT.objects(is_listed=True).order_by("-datetime").limit(limit)
+        return [nft.to_dict() for nft in nfts]

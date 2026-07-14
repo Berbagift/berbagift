@@ -38,12 +38,12 @@ import type { UserProfile } from '../types/profile';
 
 export const profileService = {
   getProfile: async (): Promise<UserProfile> => {
-    const res = await apiClient.get('/api/auth/me');
+    const res = await apiClient.get('/auth/me');
     return unwrapApiData(res.data);
   },
 
   updateProfile: async (data: { username?: string; email?: string }): Promise<UserProfile> => {
-    const res = await apiClient.put('/api/auth/me', data);
+    const res = await apiClient.put('/auth/me', data);
     return unwrapApiData(res.data);
   }
 };

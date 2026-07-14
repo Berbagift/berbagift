@@ -10,21 +10,30 @@ interface RoomStatsCardProps {
   room: Room;
   onClaim: () => void;
   onLeave: () => void;
+  onJoin?: () => void;
+  isJoining?: boolean;
+  isClaiming?: boolean;
+  isLeaving?: boolean;
 }
 
-export function RoomStatsCard({ room, onClaim, onLeave }: RoomStatsCardProps) {
-  const { formattedTime } = useCountdown(room.claimCountdown ?? 0);
+export function RoomStatsCard({ room, onClaim, onLeave, onJoin, isJoining, isClaiming, isLeaving }: RoomStatsCardProps) {
+  // Calculate remaining seconds if claim_session_start exists
+  const now = Math.floor(Date.now() / 1000);
+  const claimStart = room.claim_session_start ? Number(room.claim_session_start) : now + (room.claimCountdown ?? 0);
+  const diff = Math.max(0, claimStart - now);
+
+  const { formattedTime, isFinished } = useCountdown(diff);
 
   return (
     <div className="bg-white dark:bg-card border border-border rounded-lg p-6 sm:p-8 w-full shadow-none">
       <div className="flex flex-col md:flex-row gap-6 sm:gap-8">
         {/* Reward Pool & Creator */}
         <div className="w-full md:w-[260px] xl:w-[280px] flex-shrink-0 md:border-r md:border-border md:pr-6">
-            <RoomRewardSection
-              rewardPool={room.rewardPool}
-              rewardPoolIdr={room.rewardPoolIdr ?? 'Rp 0'}
-              creator={room.creator}
-            />
+          <RoomRewardSection
+            rewardPool={room.rewardPool}
+            rewardPoolIdr={room.rewardPoolIdr ?? 'Rp 0'}
+            creator={room.creator}
+          />
         </div>
 
         {/* Stats Grid and Actions */}
@@ -52,7 +61,7 @@ export function RoomStatsCard({ room, onClaim, onLeave }: RoomStatsCardProps) {
 
             <RoomDataBlock icon="fi fi-rr-time-fast" label="Claim starts in">
               <div>
-                <span className="text-3xl font-semibold text-warning-500">{formattedTime}</span>
+                <span className="text-3xl font-semibold text-warning-500">{isFinished ? 'Now' : formattedTime}</span>
               </div>
             </RoomDataBlock>
           </div>
@@ -63,6 +72,12 @@ export function RoomStatsCard({ room, onClaim, onLeave }: RoomStatsCardProps) {
               status={room.status}
               onClaim={onClaim}
               onLeave={onLeave}
+              onJoin={onJoin}
+              isJoining={isJoining}
+              isClaiming={isClaiming}
+              isLeaving={isLeaving}
+              isSessionStarted={isFinished}
+              isOwner={room.is_owner}
             />
           </div>
         </div>

@@ -56,6 +56,9 @@ export const metadata: Metadata = {
   },
 };
 
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -72,6 +75,7 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col">
         <Providers>
           {children}
+          <ToastContainer position="bottom-right" />
         </Providers>
       </body>
     </html>

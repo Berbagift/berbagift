@@ -12,6 +12,8 @@ interface SwapBlockProps {
   showPercentages?: boolean;
   activePercentage?: number | null;
   onPercentageSelect?: (percentage: number) => void;
+  availableTokens?: TokenConfig[];
+  onTokenSelect?: (tokenId: string) => void;
 }
 
 export function SwapBlock({
@@ -23,6 +25,8 @@ export function SwapBlock({
   showPercentages = false,
   activePercentage = null,
   onPercentageSelect,
+  availableTokens,
+  onTokenSelect,
 }: SwapBlockProps) {
   const topRightAccessory = showPercentages && onPercentageSelect ? (
     <PercentageSelectors
@@ -40,7 +44,8 @@ export function SwapBlock({
       equivalentFiat={equivalentFiat}
       topRightAccessory={topRightAccessory}
       showDropdown={true}
-      onTokenClick={() => {}}
+      availableTokens={availableTokens}
+      onTokenSelect={onTokenSelect}
       size="md"
     />
   );

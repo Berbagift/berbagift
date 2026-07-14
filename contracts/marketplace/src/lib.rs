@@ -1,4 +1,6 @@
 #![no_std]
+#![allow(deprecated)]
+#![allow(unused_imports)]
 use soroban_sdk::{
     contract, contractimpl, contracttype, symbol_short, token, Address, Env, Symbol, IntoVal,
 };
@@ -16,8 +18,7 @@ pub struct ListingData {
 #[derive(Clone)]
 pub enum DataKey {
     NftContract,
-    PaymentToken1, // XLM
-    PaymentToken2, // RPK
+    TokenRegistryAddress,
     Listing(u32),  // token_id -> ListingData
 }
 
@@ -34,15 +35,23 @@ impl LockedNFTMarketplace {
     pub fn initialize(
         env: Env,
         nft_contract: Address,
-        payment_token1: Address,
-        payment_token2: Address,
+        registry_contract: Address,
     ) {
         if env.storage().instance().has(&DataKey::NftContract) {
             panic!("Already initialized");
         }
         env.storage().instance().set(&DataKey::NftContract, &nft_contract);
-        env.storage().instance().set(&DataKey::PaymentToken1, &payment_token1);
-        env.storage().instance().set(&DataKey::PaymentToken2, &payment_token2);
+        env.storage().instance().set(&DataKey::TokenRegistryAddress, &registry_contract);
+    }
+
+    fn is_listed(env: &Env, token: &Address) -> bool {
+        let registry: Address = env.storage().instance().get(&DataKey::TokenRegistryAddress).unwrap();
+        let res: bool = env.invoke_contract(
+            &registry,
+            &symbol_short!("is_valid"),
+            soroban_sdk::vec![env, token.clone().into_val(env)],
+        );
+        res
     }
 
     pub fn list_item(
@@ -58,11 +67,8 @@ impl LockedNFTMarketplace {
             panic!("Harga harus > 0");
         }
 
-        let token1: Address = env.storage().instance().get(&DataKey::PaymentToken1).unwrap();
-        let token2: Address = env.storage().instance().get(&DataKey::PaymentToken2).unwrap();
-        
-        if payment_token != token1 && payment_token != token2 {
-            panic!("Hanya menerima pembayaran XLM atau RPK");
+        if !Self::is_listed(&env, &payment_token) {
+            panic!("Token tidak terdaftar");
         }
 
         let nft_contract: Address = env.storage().instance().get(&DataKey::NftContract).unwrap();
@@ -179,7 +185,6 @@ mod test {
     use soroban_sdk::token::Client as TokenClient;
     use soroban_sdk::token::StellarAssetClient as TokenAdminClient;
     
-    // We import the generated client of the nft-gift-locked contract
     use nft_gift_locked::{BundleBatchTransferContractClient};
 
     fn create_token<'a>(env: &Env, admin: &Address) -> (TokenClient<'a>, TokenAdminClient<'a>) {
@@ -188,6 +193,13 @@ mod test {
             TokenClient::new(env, &contract_id.address()),
             TokenAdminClient::new(env, &contract_id.address()),
         )
+    }
+
+    #[contract]
+    pub struct DummyRegistry;
+    #[contractimpl]
+    impl DummyRegistry {
+        pub fn is_valid(env: Env, token: Address) -> bool { true }
     }
 
     #[test]
@@ -200,39 +212,33 @@ mod test {
         let buyer = Address::generate(&env);
 
         let (xlm, xlm_admin) = create_token(&env, &admin);
-        let (rpk, _rpk_admin) = create_token(&env, &admin);
 
-        // Mint XLM for seller to use in NFT minting, and for buyer to buy the NFT
         xlm_admin.mint(&seller, &1000);
         xlm_admin.mint(&buyer, &5000);
 
-        // Register NFT contract
+        let registry_id = env.register(DummyRegistry, ());
+
         let nft_contract_id = env.register(nft_gift_locked::BundleBatchTransferContract, ());
         let nft_client = BundleBatchTransferContractClient::new(&env, &nft_contract_id);
-        nft_client.initialize(&xlm.address, &rpk.address, &admin);
+        nft_client.initialize(&registry_id, &admin);
 
-        // Register Marketplace contract
         let market_contract_id = env.register(LockedNFTMarketplace, ());
         let market_client = LockedNFTMarketplaceClient::new(&env, &market_contract_id);
-        market_client.initialize(&nft_contract_id, &xlm.address, &rpk.address);
+        market_client.initialize(&nft_contract_id, &registry_id);
 
-        // Set marketplace in NFT contract
         nft_client.set_marketplace_address(&admin, &market_contract_id);
 
-        // Mint an NFT
         let recipients = vec![&env, seller.clone()];
         let token_amounts = vec![&env, 100i128];
         let uris = vec![&env, String::from_str(&env, "ipfs://secret")];
         let messages = vec![&env, String::from_str(&env, "Hello")];
-        nft_client.send_batch_xlm_and_nft(&seller, &recipients, &token_amounts, &uris, &messages);
+        nft_client.send_batch_gift(&seller, &xlm.address, &recipients, &token_amounts, &uris, &messages);
 
         let token_id = 1;
         assert_eq!(nft_client.owner_of(&token_id), seller);
 
-        // List item
         market_client.list_item(&seller, &token_id, &xlm.address, &500i128);
 
-        // Verify listing
         let listing = market_client.get_listing_detail(&token_id);
         assert_eq!(listing.seller, seller);
         assert_eq!(listing.price, 500);
@@ -240,19 +246,12 @@ mod test {
 
         let seller_balance_before = xlm.balance(&seller);
 
-        // Buy item
         market_client.buy_item(&buyer, &token_id);
 
-        // Verify seller received 500 XLM
         assert_eq!(xlm.balance(&seller), seller_balance_before + 500);
-        
-        // Verify buyer got the NFT
         assert_eq!(nft_client.owner_of(&token_id), buyer);
-        
-        // Verify URI was reset
         assert_eq!(nft_client.token_uri(&token_id), String::from_str(&env, "ipfs://default-opened-gift"));
 
-        // Verify listing inactive
         let post_listing = market_client.get_listing_detail(&token_id);
         assert!(!post_listing.is_active);
     }

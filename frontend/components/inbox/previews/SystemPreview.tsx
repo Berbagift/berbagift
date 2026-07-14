@@ -3,9 +3,10 @@ import { InboxMailItemData } from '../InboxMailItem';
 
 interface SystemPreviewProps {
   details?: InboxMailItemData['details'];
+  title?: string;
 }
 
-export function SystemPreview({ details }: SystemPreviewProps) {
+export function SystemPreview({ details, title }: SystemPreviewProps) {
   return (
     <div className="bg-amber-50/10 dark:bg-amber-950/5 border border-amber-100/50 dark:border-amber-950/20 rounded-xl p-6 mt-6">
       <div className="flex items-center gap-4">
@@ -15,7 +16,7 @@ export function SystemPreview({ details }: SystemPreviewProps) {
         <div>
           <span className="text-[10px] md:text-xs text-neutral-7 dark:text-neutral-6 uppercase tracking-wider font-semibold">System Announcement</span>
           <h4 className="text-sm font-semibold text-black dark:text-neutral-1 mt-0.5">
-            Security & Updates
+            {title || "System Update"}
           </h4>
         </div>
       </div>

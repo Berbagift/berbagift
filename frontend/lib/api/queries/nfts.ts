@@ -15,3 +15,13 @@ export function useNfts() {
     enabled: !!publicKey,
   });
 }
+
+export function useMarketplaceNfts() {
+  return useQuery({
+    queryKey: ['marketplace_nfts'],
+    queryFn: async () => {
+      const res = await apiClient.get<any>('/nfts/marketplace');
+      return unwrapApiData<any[]>(res.data);
+    },
+  });
+}
