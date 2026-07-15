@@ -24,11 +24,10 @@ export function RoomActionButtons({ status, onClaim, onLeave, onJoin, isJoining,
         <button
           onClick={onJoin}
           disabled={isJoinDisabled}
-          className={`flex-1 flex items-center justify-center gap-2 px-4 h-14 rounded-lg font-medium text-xl transition-colors ${
-            isJoinDisabled
+          className={`flex-1 flex items-center justify-center gap-2 px-4 h-14 rounded-lg font-medium text-xl transition-colors ${isJoinDisabled
               ? 'bg-neutral-6 text-white cursor-not-allowed dark:bg-neutral-9 dark:text-neutral-5'
               : 'bg-primary-500 text-white hover:bg-primary-600'
-          }`}
+            }`}
         >
           {isJoining ? 'Joining...' : !isSessionStarted ? 'Session Not Started' : 'Join Room'}
           {!isJoining && <i className="fi fi-rr-enter text-xl mt-0.5" />}
@@ -53,7 +52,7 @@ export function RoomActionButtons({ status, onClaim, onLeave, onJoin, isJoining,
             className={`flex-1 flex items-center justify-center gap-2 px-4 h-14 rounded-lg font-medium text-xl transition-colors ${(isOwner || isLeaving || s === 'completed') ? 'bg-neutral-6 text-white cursor-not-allowed dark:bg-neutral-9 dark:text-neutral-5 border-none' : 'text-secondary-500 bg-white dark:bg-card border border-secondary-500 dark:border-secondary-500 hover:bg-secondary-50 dark:hover:bg-secondary-950/30'}`}
           >
             {isLeaving ? 'Leaving...' : s === 'completed' ? 'Room Completed' : 'Leave Room'}
-            {!isLeaving && <i className="fi fi-rr-sign-out-alt text-xl mt-0.5" />}
+            {!isLeaving && s !== 'completed' && <i className="fi fi-rr-sign-out-alt text-xl mt-0.5" />}
           </button>
         </>
       )}

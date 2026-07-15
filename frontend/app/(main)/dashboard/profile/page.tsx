@@ -1,13 +1,13 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useUserProfile } from "@/hooks/use-user-profile";
 import { useUpdateProfile } from "@/lib/api/queries/profile";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { getErrorMessage } from "@/lib/api/client";
-import { User, Mail, Wallet, Copy, Check, Save, ShieldCheck, Loader2 } from "lucide-react";
+import { User, Mail, Wallet, Copy, Check, Save, ShieldCheck } from "lucide-react";
 
 function ProfileSkeleton() {
   return (
@@ -54,24 +54,27 @@ function ProfileSkeleton() {
 export default function ProfilePage() {
   const { data: user, isLoading } = useUserProfile();
   const updateProfile = useUpdateProfile();
-  
+
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
   const [copied, setCopied] = useState(false);
 
+  const initialized = useRef(false);
+
   useEffect(() => {
-    if (user) {
+    if (user && !initialized.current) {
       setUsername(user.username || "");
       setEmail(user.email || "");
+      initialized.current = true;
     }
   }, [user]);
 
   const handleSave = () => {
     setErrorMsg("");
     setSuccessMsg("");
-    
+
     updateProfile.mutate({
       username: username.trim() || undefined,
       email: email.trim() || undefined,
@@ -106,13 +109,13 @@ export default function ProfilePage() {
 
   return (
     <div className="flex flex-col justify-center min-h-[calc(100vh-120px)] max-w-4xl mx-auto space-y-8 pb-8 px-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      
+
       {/* Header Section */}
       <div className="flex flex-col md:flex-row items-center gap-6 p-6 rounded-2xl bg-card border border-border">
         {user?.avatar_url ? (
-          <img 
-            src={user?.avatar_url} 
-            alt="User Avatar" 
+          <img
+            src={user?.avatar_url}
+            alt="User Avatar"
             className="w-24 h-24 rounded-full object-cover border-2 border-border shadow-sm"
           />
         ) : (
@@ -122,7 +125,7 @@ export default function ProfilePage() {
         )}
         <div className="text-center md:text-left">
           <h1 className="text-3xl font-bold tracking-tight text-foreground">
-            {user?.username ? `@${user.username}` : "Welcome to BagiTHR"}
+            {user?.username ? `@${user.username}` : "Welcome to Berbagift"}
           </h1>
           <div className="flex items-center justify-center md:justify-start gap-2 mt-2 text-muted-foreground">
             <ShieldCheck className="w-4 h-4 text-primary" />
@@ -141,7 +144,7 @@ export default function ProfilePage() {
             Update your identity to receive THR seamlessly across the network.
           </CardDescription>
         </CardHeader>
-        
+
         <CardContent className="space-y-6 pt-6">
           {errorMsg && (
             <div className="p-4 text-sm text-destructive bg-destructive/10 rounded-xl border border-destructive/20 flex items-center gap-2 animate-in slide-in-from-top-2">
@@ -188,11 +191,11 @@ export default function ProfilePage() {
                 className="h-12 bg-background border-border focus-visible:ring-primary/50 transition-all rounded-xl"
               />
               <p className="text-[0.8rem] text-muted-foreground">
-                Used for account recovery and notifications.
+                Used for notifications.
               </p>
             </div>
           </div>
-          
+
           <div className="space-y-3 pt-4 border-t border-border">
             <label className="text-sm font-semibold flex items-center gap-2 text-foreground/80">
               <Wallet className="w-4 h-4" /> Wallet Address
@@ -219,24 +222,15 @@ export default function ProfilePage() {
             </p>
           </div>
         </CardContent>
-        
+
         <CardFooter className="bg-muted/20 border-t border-border pt-6 pb-6 px-6 flex justify-end">
-          <Button 
-            onClick={handleSave} 
+          <Button
+            onClick={handleSave}
             disabled={updateProfile.isPending}
             className="h-12 px-8 rounded-xl transition-all duration-300"
           >
-            {updateProfile.isPending ? (
-              <>
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                Saving Changes...
-              </>
-            ) : (
-              <>
-                <Save className="w-4 h-4 mr-2" />
-                Save Profile
-              </>
-            )}
+            <Save className="w-4 h-4 mr-2" />
+            {updateProfile.isPending ? "Saving..." : "Save Profile"}
           </Button>
         </CardFooter>
       </Card>
