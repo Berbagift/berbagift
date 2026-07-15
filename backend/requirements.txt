@@ -35,7 +35,7 @@ pydantic_core==2.46.4
 Pygments==2.20.0
 PyJWT==2.8.0
 pymongo==4.17.0
-psycopg2-binary==2.9.10
+PyMySQL==1.1.1
 PyNaCl==1.6.2
 python-dotenv==1.2.2
 python-socketio[asyncio_client]==5.12.0

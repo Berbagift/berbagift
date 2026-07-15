@@ -33,6 +33,9 @@ import models.mongo_listing       # ensure Listing collection/indexes are create
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    # Create all SQLAlchemy tables (MySQL)
+    Base.metadata.create_all(bind=engine)
+    # Connect to MongoDB for indexer
     connect_mongo_db()
     indexer = IndexerController()
     thread = threading.Thread(target=indexer.run_loop, daemon=True)
