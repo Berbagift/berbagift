@@ -1,6 +1,6 @@
 import os
 from dotenv import load_dotenv
-load_dotenv()
+load_dotenv(override=False)  # Docker env vars take precedence
 
 from fastapi import FastAPI
 from routes.hello import router as hello_router
