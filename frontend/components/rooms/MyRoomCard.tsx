@@ -88,12 +88,12 @@ export function MyRoomCard({ room, onEdit, onShare, onViewResult, onDelete, onJo
                 >
                   {isCompleted ? 'Share Result' : 'Share Room'}
                 </button>
-                {isCompleted && (
+                {isCompleted && isDraft && (
                   <button
                     onClick={() => onViewResult?.(room.id)}
                     className="flex-1 h-10 rounded-lg bg-[#16A34A] hover:bg-[#15803d] text-white font-medium text-sm transition-colors flex items-center justify-center cursor-pointer"
                   >
-                    View Result
+                    Join Room
                   </button>
                 )}
               </>

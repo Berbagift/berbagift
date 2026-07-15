@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { MyRoomCard } from '@/components/rooms/MyRoomCard';
 import { RoomSearch } from '@/components/rooms/RoomSearch';
 import { RoomGrid } from '@/components/rooms/RoomGrid';
@@ -9,6 +10,7 @@ import { useMyRooms } from '@/lib/api/queries';
 import { getAuthToken } from '@/lib/auth';
 import { useWalletStore } from '@/hooks/use-wallet-state';
 import { getRoomParticipantsCount } from '@/lib/stellar/multi-room';
+import { toast } from 'react-toastify';
 
 const RoomCardSkeleton = () => (
   <div className="flex flex-col bg-emerald-50/50 dark:bg-emerald-900/10 border border-border rounded-xl p-6 h-[380px] animate-pulse">
@@ -50,14 +52,11 @@ const RoomCardSkeleton = () => (
 );
 
 export default function MyRoomsPage() {
+  const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');
-  const [token, setToken] = useState<string | null>(null);
+  const [token] = useState<string | null>(() => getAuthToken() || null);
   const { publicKey } = useWalletStore();
   const [liveParticipantCounts, setLiveParticipantCounts] = useState<Record<string, number>>({});
-
-  useEffect(() => {
-    setToken(getAuthToken() || null);
-  }, []);
 
   const { data: rooms = [], isLoading: isRoomsLoading } = useMyRooms(token);
 
@@ -99,23 +98,23 @@ export default function MyRoomsPage() {
   const isLoading = isRoomsLoading;
 
   const handleEdit = (id: string) => {
-    alert(`Editing room ${id}`);
+    toast.info(`Editing room ${id}`);
   };
 
   const handleShare = (id: string) => {
-    alert(`Sharing link for room ${id}`);
+    toast.info(`Sharing link for room ${id}`);
   };
 
   const handleViewResult = (id: string) => {
-    alert(`Viewing results for room ${id}`);
+    toast.info(`Viewing results for room ${id}`);
   };
 
   const handleDelete = (id: string) => {
-    alert(`Deleting room ${id}`);
+    toast.info(`Deleting room ${id}`);
   };
 
   const handleJoin = (id: string) => {
-    window.location.href = `/community/explore/join/${id}`;
+    router.push(`/community/explore/join/${id}`);
   };
 
   // Filter list of rooms based on search query

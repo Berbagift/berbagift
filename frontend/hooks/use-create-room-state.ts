@@ -189,7 +189,7 @@ export function useCreateRoomState() {
       }, 3000);
       
       toast.success(`Success! Room "${roomTitle}" has been created on the Stellar network.`);
-      router.push('/community/myrooms');
+      router.push('/dashboard');
     } catch (err: any) {
       console.error("Transaction failed:", err);
       toast.error(err.message || "Transaction failed. Please try again.");

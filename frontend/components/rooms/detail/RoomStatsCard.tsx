@@ -4,19 +4,21 @@ import { RoomDataBlock } from './RoomDataBlock';
 import { RoomStatusBanner } from './RoomStatusBanner';
 import { RoomActionButtons } from './RoomActionButtons';
 import { useCountdown } from '@/hooks/use-countdown';
-import { Room } from '@/lib/api/types';
+import { Room, Participant } from '@/lib/api/types';
 
 interface RoomStatsCardProps {
   room: Room;
+  participants: Participant[];
   onClaim: () => void;
   onLeave: () => void;
   onJoin?: () => void;
   isJoining?: boolean;
   isClaiming?: boolean;
   isLeaving?: boolean;
+  isClaimed?: boolean;
 }
 
-export function RoomStatsCard({ room, onClaim, onLeave, onJoin, isJoining, isClaiming, isLeaving }: RoomStatsCardProps) {
+export function RoomStatsCard({ room, participants, onClaim, onLeave, onJoin, isJoining, isClaiming, isLeaving, isClaimed }: RoomStatsCardProps) {
   // Calculate remaining seconds if claim_session_start exists
   const now = Math.floor(Date.now() / 1000);
   const claimStart = room.claim_session_start ? Number(room.claim_session_start) : now + (room.claimCountdown ?? 0);
@@ -56,6 +58,28 @@ export function RoomStatsCard({ room, onClaim, onLeave, onJoin, isJoining, isCla
                 <span className="text-3xl font-semibold text-black dark:text-neutral-1">{room.joined}/{room.maxParticipants}</span>
                 <span className="text-base font-semibold text-black dark:text-neutral-1">In Room</span>
               </div>
+              {participants.length > 0 && (
+                <div className="flex items-center mt-2">
+                  {participants.slice(0, 4).map((p, i) => (
+                    <div
+                      key={i}
+                      className="flex items-center justify-center w-7 h-7 rounded-full bg-secondary-100 text-secondary-700 text-[10px] font-bold border border-white dark:border-card"
+                      style={{ marginLeft: i !== 0 ? '-10px' : '0', zIndex: 4 - i }}
+                      title={p.username}
+                    >
+                      {p.initials}
+                    </div>
+                  ))}
+                  {participants.length > 4 && (
+                    <div
+                      className="flex items-center justify-center w-7 h-7 rounded-full bg-primary-100 text-primary-600 text-[10px] font-bold border border-white dark:border-card"
+                      style={{ marginLeft: '-10px', zIndex: 0 }}
+                    >
+                      +{participants.length - 4}
+                    </div>
+                  )}
+                </div>
+              )}
             </RoomDataBlock>
 
             {/* Vertical Divider */}
@@ -80,6 +104,7 @@ export function RoomStatsCard({ room, onClaim, onLeave, onJoin, isJoining, isCla
               isLeaving={isLeaving}
               isSessionStarted={isFinished}
               isOwner={room.is_owner}
+              isClaimed={isClaimed}
             />
           </div>
         </div>

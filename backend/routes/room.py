@@ -37,6 +37,16 @@ def check_winner(
     response_data, status_code = room_controller.check_winner(identifier, authorization)
     return JSONResponse(status_code=status_code, content=response_data)
 
+@router.get("/{identifier}/check-claimed", response_model=APIResponse)
+def check_claimed(
+    identifier: str,
+    authorization: str | None = Header(default=None),
+    db: Session = Depends(get_db_session)
+):
+    room_controller = RoomController(db)
+    response_data, status_code = room_controller.check_claimed(identifier, authorization)
+    return JSONResponse(status_code=status_code, content=response_data)
+
 @router.get("/{identifier}", response_model=APIResponse)
 def get_room_by_id(
     identifier: str,

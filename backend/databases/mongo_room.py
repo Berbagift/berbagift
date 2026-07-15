@@ -70,6 +70,17 @@ class RoomDatabase:
         return {"found": True, "is_winner": is_winner, "reason": None}
 
     @staticmethod
+    def check_claimed(room_id: int, wallet_address: str) -> dict:
+        """Return whether wallet_address has claimed in the given room."""
+        room = Room.objects(room_id=room_id).first()
+        if not room:
+            return {"found": False, "is_claimed": False, "reason": "room_not_found"}
+        participant = RoomParticipant.objects(room_id=room_id, wallet_address=wallet_address, is_joined=True).first()
+        if not participant:
+            return {"found": False, "is_claimed": False, "reason": "not_participant"}
+        return {"found": True, "is_claimed": participant.is_claimed, "reason": None}
+
+    @staticmethod
     def get_participants(room_id: int):
         participants = RoomParticipant.objects(room_id=room_id, is_joined=True).order_by("-created_at")
         return [p.to_dict() for p in participants]

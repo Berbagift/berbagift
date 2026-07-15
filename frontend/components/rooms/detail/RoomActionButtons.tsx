@@ -10,11 +10,12 @@ interface RoomActionButtonsProps {
   isLeaving?: boolean;
   isSessionStarted?: boolean;
   isOwner?: boolean;
+  isClaimed?: boolean;
 }
 
-export function RoomActionButtons({ status, onClaim, onLeave, onJoin, isJoining, isClaiming, isLeaving, isSessionStarted = true, isOwner = false }: RoomActionButtonsProps) {
+export function RoomActionButtons({ status, onClaim, onLeave, onJoin, isJoining, isClaiming, isLeaving, isSessionStarted = true, isOwner = false, isClaimed = false }: RoomActionButtonsProps) {
   const s = status?.toLowerCase();
-  const isClaimDisabled = isOwner || isClaiming || (s !== 'claim_open' && s !== 'active' && s !== 'completed');
+  const isClaimDisabled = isOwner || isClaiming || isClaimed || (s !== 'claim_open' && s !== 'active' && s !== 'completed');
   const isJoinDisabled = isJoining || !isSessionStarted;
 
   return (
@@ -42,8 +43,8 @@ export function RoomActionButtons({ status, onClaim, onLeave, onJoin, isJoining,
               : 'bg-secondary-500 text-white hover:bg-secondary-600'
               }`}
           >
-            {isClaiming ? 'Claiming...' : 'Claim Rewards'}
-            {!isClaiming && <i className="fi fi-rr-gift text-xl mt-0.5" />}
+            {isClaiming ? 'Claiming...' : isClaimed ? 'Claimed' : 'Claim Rewards'}
+            {!isClaiming && !isClaimed && <i className="fi fi-rr-gift text-xl mt-0.5" />}
           </button>
 
           <button

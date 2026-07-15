@@ -82,6 +82,30 @@ class RoomController:
             room_data["rewardPoolIdr"] = "Rp 0"
         return room_data
 
+    def _attach_participants_preview(self, room_data: dict) -> dict:
+        """Attach up to 5 participant previews (username + initials) to room data."""
+        room_id = room_data.get("room_id")
+        if room_id is None:
+            return room_data
+        participants = RoomDatabase.get_participants(room_id)
+        preview = []
+        for p in participants[:5]:
+            wallet = p.get("wallet_address")
+            user = self.user_db.get_user_by_wallet(wallet)
+            if user and user.username:
+                username = f"@{user.username}"
+                initials = user.username[:2].upper()
+            else:
+                username = f"@{wallet}"
+                initials = "U"
+            preview.append({
+                "wallet_address": wallet,
+                "username": username,
+                "initials": initials
+            })
+        room_data["participants"] = preview
+        return room_data
+
     def get_my_rooms(self, authorization: str | None, limit: int = 50):
         if not authorization or not authorization.startswith("Bearer "):
             return {
@@ -139,6 +163,7 @@ class RoomController:
                     del room_data["_id"]
                 room_data = self._attach_creator_info(room_data)
                 room_data = self._attach_winners_info(room_data)
+                room_data = self._attach_participants_preview(room_data)
                 formatted_rooms.append(room_data)
 
             return {
@@ -181,6 +206,7 @@ class RoomController:
                     del room_data["_id"]
                 room_data = self._attach_creator_info(room_data)
                 room_data = self._attach_winners_info(room_data)
+                room_data = self._attach_participants_preview(room_data)
                 formatted_rooms.append(room_data)
 
             return {
@@ -295,6 +321,54 @@ class RoomController:
                 "errors": {"Exception": str(e)}
             }, 500
 
+    def _format_activities(self, activities: list) -> list:
+        """Format raw activity dicts into the standard API response shape."""
+        result = []
+        username_cache = {}
+
+        def get_uname(addr):
+            if not addr: return "Unknown"
+            if addr not in username_cache:
+                user = self.user_db.get_user_by_wallet(addr)
+                if user and user.username:
+                    username_cache[addr] = f"@{user.username}"
+                else:
+                    username_cache[addr] = f"@{addr}"
+            return username_cache[addr]
+
+        def extract_id(act):
+            raw = act.get("_id")
+            if isinstance(raw, dict):
+                return raw.get("$oid", str(raw))
+            return str(raw) if raw else ""
+
+        for act in activities:
+            wallet = act.get("wallet_address", "")
+            username = get_uname(wallet)
+            act_type = act.get("activity_type", "")
+
+            message = ""
+            if act_type == "Joined Room":
+                message = f"{username} joined the room."
+            elif act_type == "Left Room":
+                message = f"{username} left the room."
+            elif act_type == "Claimed Reward":
+                message = f"{username} claimed their reward."
+            elif act_type == "Completed Room":
+                message = "The giveaway room has been completed and rewards drawn."
+                username = "Berbagift System"
+                wallet = "System"
+
+            result.append({
+                "id": extract_id(act),
+                "username": username,
+                "wallet_address": wallet,
+                "activity_type": act_type,
+                "message": message,
+                "datetime": act.get("datetime")
+            })
+        return result
+
     def get_room_activities(self, identifier: str, limit: int = 100):
         try:
             room = RoomDatabase.get_room_by_id(identifier)
@@ -309,53 +383,7 @@ class RoomController:
             from databases.mongo_activity import ActivityDatabase
             
             activities = ActivityDatabase.get_room_activities(room_id, limit)
-            
-            # Format activities
-            result = []
-            username_cache = {}
-            
-            def get_uname(addr):
-                if not addr: return "Unknown"
-                if addr not in username_cache:
-                    user = self.user_db.get_user_by_wallet(addr)
-                    if user and user.username:
-                        username_cache[addr] = f"@{user.username}"
-                    else:
-                        username_cache[addr] = f"@{addr}"
-                return username_cache[addr]
-                
-            for act in activities:
-                wallet = act.get("wallet_address", "")
-                username = get_uname(wallet)
-                act_type = act.get("activity_type", "")
-                
-                # Assign icons or formatted messages
-                message = ""
-                if act_type == "Joined Room":
-                    message = f"{username} joined the room."
-                elif act_type == "Left Room":
-                    message = f"{username} left the room."
-                elif act_type == "Claimed Reward":
-                    message = f"{username} claimed their reward."
-                elif act_type == "Completed Room":
-                    message = f"The giveaway room has been completed and rewards drawn."
-                    username = "Berbagift System"
-                    wallet = "System"
-                
-                def extract_id(act):
-                    raw = act.get("_id")
-                    if isinstance(raw, dict):
-                        return raw.get("$oid", str(raw))
-                    return str(raw) if raw else ""
-                    
-                result.append({
-                    "id": extract_id(act),
-                    "username": username,
-                    "wallet_address": wallet,
-                    "activity_type": act_type,
-                    "message": message,
-                    "datetime": act.get("datetime")
-                })
+            result = self._format_activities(activities)
                 
             return {
                 "message": "Successfully retrieved room activities",
@@ -442,6 +470,87 @@ class RoomController:
                 "message": "Winner check successful",
                 "data": {
                     "is_winner": result["is_winner"],
+                    "wallet_address": wallet_address,
+                    "room_id": room_id
+                },
+                "errors": None
+            }, 200
+
+        except Exception as e:
+            return {
+                "message": "Internal server error",
+                "data": None,
+                "errors": {"Exception": str(e)}
+            }, 500
+
+    def check_claimed(self, identifier: str, authorization: str | None):
+        # ── Auth guard ──────────────────────────────────────────────────────────
+        if not authorization or not authorization.startswith("Bearer "):
+            return {
+                "message": "Authentication required",
+                "data": None,
+                "errors": {"Auth": "IS_INVALID"}
+            }, 401
+
+        token = authorization.split(" ")[1]
+        try:
+            payload = verify_access_token(token)
+            user_id = payload.get("sub")
+        except jwt.ExpiredSignatureError:
+            return {
+                "message": "Token has expired",
+                "data": None,
+                "errors": {"Auth": "IS_INVALID"}
+            }, 401
+        except jwt.InvalidTokenError:
+            return {
+                "message": "Invalid token",
+                "data": None,
+                "errors": {"Auth": "IS_INVALID"}
+            }, 401
+
+        user = self.user_db.get_user_by_id(user_id)
+        if not user:
+            return {
+                "message": "User not found",
+                "data": None,
+                "errors": {"Auth": "IS_INVALID"}
+            }, 404
+
+        wallet_address = user.wallet_address
+        if not wallet_address:
+            return {
+                "message": "Wallet address not found on account",
+                "data": None,
+                "errors": {"wallet": "NOT_FOUND"}
+            }, 400
+
+        # ── Resolve room & check claimed ────────────────────────────────────────
+        try:
+            room = RoomDatabase.get_room_by_id(identifier)
+            if not room:
+                return {
+                    "message": "Room not found",
+                    "data": None,
+                    "errors": {"room": "NOT_FOUND"}
+                }, 404
+
+            room_id = room.get("room_id")
+            result = RoomDatabase.check_claimed(room_id, wallet_address)
+
+            if not result["found"]:
+                reason = result.get("reason", "unknown")
+                msg = "Room not found" if reason == "room_not_found" else "You are not a participant in this room"
+                return {
+                    "message": msg,
+                    "data": {"is_claimed": False, "wallet_address": wallet_address},
+                    "errors": {"participant": reason.upper()}
+                }, 200 if reason == "not_participant" else 404
+
+            return {
+                "message": "Claim status check successful",
+                "data": {
+                    "is_claimed": result["is_claimed"],
                     "wallet_address": wallet_address,
                     "room_id": room_id
                 },

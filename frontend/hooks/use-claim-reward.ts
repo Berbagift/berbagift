@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { buildClaimRewardTx, submitClaimRewardTx } from '@/lib/stellar/multi-room';
 import { Room } from '@/lib/api/types';
+import { toast } from 'react-toastify';
 
 export function useClaimRewardWeb3(room: Room | undefined) {
   const [isClaiming, setIsClaiming] = useState(false);
@@ -15,7 +16,7 @@ export function useClaimRewardWeb3(room: Room | undefined) {
 
       const { address: senderAddress, error: addrErr } = await requestAccess();
       if (addrErr || !senderAddress) {
-        alert("Could not read address from Freighter. Please unlock your wallet and try again.");
+        toast.error("Could not read address from Freighter. Please unlock your wallet and try again.");
         setIsClaiming(false);
         return;
       }
@@ -23,19 +24,19 @@ export function useClaimRewardWeb3(room: Room | undefined) {
       const { network: freighterNetwork } = await getNetwork();
       const expectedNetwork = process.env.NEXT_PUBLIC_STELLAR_NETWORK || "TESTNET";
       if (freighterNetwork && freighterNetwork.toUpperCase() !== expectedNetwork.toUpperCase()) {
-        alert(`Wallet is on ${freighterNetwork} but app expects ${expectedNetwork}. Please switch networks in Freighter.`);
+        toast.error(`Wallet is on ${freighterNetwork} but app expects ${expectedNetwork}. Please switch networks in Freighter.`);
         setIsClaiming(false);
         return;
       }
 
       if (!room) {
-        alert("Room data is not available. Please try again.");
+        toast.error("Room data is not available. Please try again.");
         setIsClaiming(false);
         return;
       }
 
       if (room.room_id == null) {
-        alert("Room ID is missing. Please refresh and try again.");
+        toast.error("Room ID is missing. Please refresh and try again.");
         setIsClaiming(false);
         return;
       }
@@ -56,18 +57,17 @@ export function useClaimRewardWeb3(room: Room | undefined) {
 
       await submitClaimRewardTx(signedTxXdr);
 
-      alert(`Success! You have claimed your reward for "${room.title}".`);
-      window.location.reload();
+      toast.success(`Success! You have claimed your reward for "${room.title}".`);
     } catch (err: any) {
       console.error("Claim transaction failed:", err);
       // Check for common error strings
       const errorStr = JSON.stringify(err);
       if (errorStr.includes("Reward already claimed") || (err.message && err.message.includes("Reward already claimed"))) {
-        alert("You have already claimed this reward!");
+        toast.warn("You have already claimed this reward!");
       } else if (errorStr.includes("Not a winner")) {
-        alert("Sorry, you are not a winner in this room.");
+        toast.error("Sorry, you are not a winner in this room.");
       } else {
-        alert(err.message || "Claim transaction failed. Please try again.");
+        toast.error(err.message || "Claim transaction failed. Please try again.");
       }
     } finally {
       setIsClaiming(false);

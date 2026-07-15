@@ -4,10 +4,153 @@ from utils.jwt import verify_access_token
 from databases.mongo_activity import ActivityDatabase
 from databases.user import UserDatabase
 
+
 class ActivityController:
     def __init__(self, db: Session):
         self.db = db
         self.user_db = UserDatabase(db)
+
+    # ── Helpers ──────────────────────────────────────────────────────
+
+    @staticmethod
+    def _extract_id(act: dict) -> str:
+        raw = act.get("_id")
+        if isinstance(raw, dict):
+            return raw.get("$oid", str(raw))
+        return str(raw) if raw else ""
+
+    def _get_uname(self, addr: str, cache: dict) -> str:
+        if not addr:
+            return "Unknown"
+        if addr not in cache:
+            other_user = self.user_db.get_user_by_wallet(addr)
+            if other_user and other_user.username:
+                uname = other_user.username
+                cache[addr] = f"@{uname}" if len(uname) < 56 else f"{addr[:4]}...{addr[-4:]}"
+            else:
+                cache[addr] = f"{addr[:4]}...{addr[-4:]}"
+        return cache[addr]
+
+    def _format_inbox_items(self, activities: list, wallet_address: str) -> list:
+        """Format raw activity dicts into inbox-ready items."""
+        username_cache = {}
+        read_ids = ActivityDatabase.get_read_ids(wallet_address)
+        inbox_items = []
+
+        for act in activities:
+            act_type = act.get("activity_type", "")
+            amount_str = act.get("amount", "")
+
+            title = ""
+            description = ""
+            sender_or_recipient = ""
+
+            if act_type == "Sent token":
+                title = "Transfer success"
+                to_addr = act.get("to") or act.get("to_address", "")
+                uname = self._get_uname(to_addr, username_cache)
+                sender_or_recipient = uname
+                description = f"You successfully sent {amount_str} to {uname}. The transaction has been processed."
+            elif act_type == "Received token":
+                title = "Transfer received"
+                from_addr = act.get("from") or act.get("from_address", "")
+                uname = self._get_uname(from_addr, username_cache)
+                sender_or_recipient = uname
+                description = f"You successfully received {amount_str} from {uname}. The transaction has been processed."
+            elif act_type == "Swap token":
+                title = "Swap success"
+                sender_or_recipient = "Soroban DEX"
+                description = "You successfully swapped your token. The transaction has been processed."
+            elif act_type == "Deposit Liquidity":
+                title = "Deposit success"
+                sender_or_recipient = "Soroban Pool"
+                if act.get("wallet_address") == wallet_address:
+                    description = f"You successfully deposited {amount_str} into the liquidity pool. The transaction has been processed."
+                else:
+                    who = self._get_uname(act.get("wallet_address"), username_cache)
+                    description = f"{who} deposited {amount_str} into the liquidity pool."
+            elif act_type == "Created Room":
+                title = "New Room Created"
+                room_name = act.get("details", "")
+                creator_wallet = act.get("wallet_address", "")
+                if creator_wallet == wallet_address:
+                    sender_or_recipient = "You"
+                    description = f"You successfully created {room_name} with a reward pool of {amount_str}. The room is now live and participants can join."
+                else:
+                    creator_uname = self._get_uname(creator_wallet, username_cache)
+                    sender_or_recipient = creator_uname
+                    description = f"{creator_uname} created a new giveaway room {room_name} with a reward pool of {amount_str}. Join now!"
+            elif act_type == "Completed Room":
+                title = "Room Giveaway Completed"
+                sender_or_recipient = "Berbagift System"
+                room_name = act.get("details", "")
+                description = f"The {room_name}. All winners have been selected and rewards are available to claim."
+            elif act_type == "Add Token":
+                title = "New Token Listed"
+                sender_or_recipient = "Berbagift System"
+                token_info = act.get("details", "")
+                description = f"A new token has been listed on Berbagift: {token_info}. You can now use it for giveaways and swaps."
+            elif act_type == "Joined Room":
+                title = "Joined Room"
+                sender_or_recipient = "Berbagift System"
+                room_name = act.get("details", "")
+                description = f"You successfully {room_name}."
+            else:
+                title = act_type
+                sender_or_recipient = f"{act.get('to_address', 'Unknown')[:4]}...{act.get('to_address', 'Unknown')[-4:]}"
+                description = act.get("details", "")
+
+            id_str = self._extract_id(act)
+            msg = ""
+            raw_details = act.get("details", "")
+
+            if act_type in ["Sent token", "Received token"]:
+                tx_hash = act.get("transaction_hash")
+                try:
+                    from models.mongo_nft import NFT
+                    if tx_hash:
+                        nft = NFT.objects(transaction_hash=tx_hash).first()
+                        if nft and nft.message and nft.message != "Selamat Hari Raya! 🎁":
+                            msg = nft.message
+                            if not sender_or_recipient.startswith("@"):
+                                sender_or_recipient = msg
+                                msg = ""
+                except Exception as e:
+                    print("Error fetching NFT message for activity by tx_hash:", e)
+
+            if not msg and not (
+                raw_details.startswith("From ")
+                or raw_details.startswith("To ")
+                or raw_details == "Selamat Hari Raya! 🎁"
+            ):
+                msg = raw_details
+
+            room_id = act.get("room_id", None)
+            if room_id is None and act_type == "Created Room":
+                tx = act.get("transaction_hash")
+                if tx:
+                    from databases.mongo_room import RoomDatabase
+                    room_doc = RoomDatabase.get_room_by_id(tx)
+                    if room_doc:
+                        room_id = room_doc.get("room_id")
+
+            inbox_items.append({
+                "id": id_str,
+                "title": title,
+                "description": description,
+                "tx_hash": act.get("transaction_hash"),
+                "transaction_value": amount_str,
+                "datetime": act.get("datetime"),
+                "sender_or_recipient": sender_or_recipient,
+                "is_read": id_str in read_ids,
+                "message": msg,
+                "room_name": act.get("details", "") if "Room" in act_type else "",
+                "room_id": room_id,
+            })
+
+        return inbox_items
+
+    # ── General activities ───────────────────────────────────────────
 
     def get_activities(self, authorization: str | None, limit: int = 50):
         if not authorization or not authorization.startswith("Bearer "):
@@ -113,8 +256,7 @@ class ActivityController:
                 return {"message": "User not found", "data": None, "errors": None}, 404
 
             wallet_address = user.wallet_address
-            from databases.mongo_activity import ActivityDatabase
-            
+
             # Calculate counts
             all_activities = ActivityDatabase.get_activities(wallet_address, limit=1000)
             counts = {
@@ -155,21 +297,14 @@ class ActivityController:
             counts["All Notification"] += extra_rooms + extra_tokens
 
             activities = ActivityDatabase.get_activities(wallet_address, limit, category)
-            
+
             if category in ("Rooms", "System", "All Notification", None):
                 public_activities = ActivityDatabase.get_all_public_activities(limit)
-                
-                def extract_id(act):
-                    raw = act.get("_id")
-                    if isinstance(raw, dict):
-                        return raw.get("$oid", str(raw))
-                    return str(raw) if raw else ""
-                
-                existing_ids = {extract_id(a) for a in activities}
+
+                existing_ids = {self._extract_id(a) for a in activities}
                 for act in public_activities:
-                    act_id = extract_id(act)
+                    act_id = self._extract_id(act)
                     act_type = act.get("activity_type", "")
-                    # Filter by category
                     if category == "Rooms" and act_type not in ["Created Room", "Completed Room"]:
                         continue
                     if category == "System" and act_type not in ["Add Token"]:
@@ -179,150 +314,7 @@ class ActivityController:
                         existing_ids.add(act_id)
                 activities.sort(key=lambda a: a.get("datetime", ""), reverse=True)
 
-            username_cache = {}
-            inbox_items = []
-
-            all_activity_ids = []
-            def extract_id_local(act):
-                raw = act.get("_id")
-                if isinstance(raw, dict):
-                    return raw.get("$oid", str(raw))
-                return str(raw) if raw else ""
-
-            for act in activities:
-                aid = extract_id_local(act)
-                if aid:
-                    all_activity_ids.append(aid)
-
-            read_ids = ActivityDatabase.get_read_ids(wallet_address)
-
-            def get_uname(addr):
-                if not addr: return "Unknown"
-                if addr not in username_cache:
-                    other_user = self.user_db.get_user_by_wallet(addr)
-                    if other_user and other_user.username:
-                        uname = other_user.username
-                        if len(uname) < 56:
-                            username_cache[addr] = "@" + uname
-                        else:
-                            username_cache[addr] = f"{addr[:4]}...{addr[-4:]}"
-                    else:
-                        username_cache[addr] = f"{addr[:4]}...{addr[-4:]}"
-                return username_cache[addr]
-
-            for act in activities:
-                act_type = act.get("activity_type", "")
-                amount_str = act.get("amount", "")
-                
-                title = ""
-                description = ""
-                sender_or_recipient = ""
-                
-                if act_type == "Sent token":
-                    title = "Transfer success"
-                    to_addr = act.get("to") or act.get("to_address", "")
-                    uname = get_uname(to_addr)
-                    sender_or_recipient = uname
-                    description = f"You successfully sent {amount_str} to {uname}. The transaction has been processed."
-                elif act_type == "Received token":
-                    title = "Transfer received"
-                    from_addr = act.get("from") or act.get("from_address", "")
-                    uname = get_uname(from_addr)
-                    sender_or_recipient = uname
-                    description = f"You successfully received {amount_str} from {uname}. The transaction has been processed."
-                elif act_type == "Swap token":
-                    title = "Swap success"
-                    sender_or_recipient = "Soroban DEX"
-                    description = f"You successfully swapped your token. The transaction has been processed."
-                elif act_type == "Deposit Liquidity":
-                    title = "Deposit success"
-                    sender_or_recipient = "Soroban Pool"
-                    if act.get("wallet_address") == wallet_address:
-                        description = f"You successfully deposited {amount_str} into the liquidity pool. The transaction has been processed."
-                    else:
-                        who = get_uname(act.get("wallet_address"))
-                        description = f"{who} deposited {amount_str} into the liquidity pool."
-                elif act_type == "Created Room":
-                    title = "New Room Created"
-                    room_name = act.get("details", "")
-                    creator_wallet = act.get("wallet_address", "")
-                    if creator_wallet == wallet_address:
-                        sender_or_recipient = "You"
-                        description = f"You successfully created {room_name} with a reward pool of {amount_str}. The room is now live and participants can join."
-                    else:
-                        creator_uname = get_uname(creator_wallet)
-                        sender_or_recipient = creator_uname
-                        description = f"{creator_uname} created a new giveaway room {room_name} with a reward pool of {amount_str}. Join now!"
-
-                elif act_type == "Completed Room":
-                    title = "Room Giveaway Completed"
-                    sender_or_recipient = "Berbagift System"
-                    room_name = act.get("details", "")
-                    description = f"The {room_name}. All winners have been selected and rewards are available to claim."
-
-                elif act_type == "Add Token":
-                    title = "New Token Listed"
-                    sender_or_recipient = "Berbagift System"
-                    token_info = act.get("details", "")
-                    description = f"A new token has been listed on Berbagift: {token_info}. You can now use it for giveaways and swaps."
-
-                elif act_type == "Joined Room":
-                    title = "Joined Room"
-                    sender_or_recipient = "Berbagift System"
-                    room_name = act.get("details", "")
-                    description = f"You successfully {room_name}."
-                else:
-                    title = act_type
-                    sender_or_recipient = f"{act.get('to_address', 'Unknown')[:4]}...{act.get('to_address', 'Unknown')[-4:]}"
-                    description = act.get("details", "")
-                    
-                id_str = extract_id_local(act)
-                msg = ""
-                raw_details = act.get("details", "")
-                
-                if act_type in ["Sent token", "Received token"]:
-                    tx_hash = act.get("transaction_hash")
-                    
-                    try:
-                        from models.mongo_nft import NFT
-                        if tx_hash:
-                            nft = NFT.objects(transaction_hash=tx_hash).first()
-                            if nft and nft.message and nft.message != "Selamat Hari Raya! 🎁":
-                                msg = nft.message
-                                if not sender_or_recipient.startswith("@"):
-                                    sender_or_recipient = msg
-                                    msg = ""
-                    except Exception as e:
-                        print("Error fetching NFT message for activity by tx_hash:", e)
-                
-                if not msg and not (raw_details.startswith("From ") or raw_details.startswith("To ") or raw_details == "Selamat Hari Raya! 🎁"):
-                    msg = raw_details
-
-                room_id = act.get("room_id", None)
-                # For "Created Room" activities that predate room_id storage:
-                # look up the Room document by tx_hash to get the actual integer room_id.
-                if room_id is None and act_type == "Created Room":
-                    tx = act.get("transaction_hash")
-                    if tx:
-                        from databases.mongo_room import RoomDatabase
-                        room_doc = RoomDatabase.get_room_by_id(tx)
-                        if room_doc:
-                            room_id = room_doc.get("room_id")
-
-                inbox_items.append({
-                    "id": id_str,
-                    "title": title,
-                    "description": description,
-                    "tx_hash": act.get("transaction_hash"),
-                    "transaction_value": amount_str,
-                    "datetime": act.get("datetime"),
-                    "sender_or_recipient": sender_or_recipient,
-                    "is_read": id_str in read_ids,
-                    "message": msg,
-                    "room_name": act.get("details", "") if "Room" in act_type else "",
-                    "room_id": room_id
-
-                })
+            inbox_items = self._format_inbox_items(activities, wallet_address)
 
             return {
                 "message": "Successfully retrieved inbox",
@@ -346,7 +338,7 @@ class ActivityController:
                 "data": None,
                 "errors": {"Auth": "IS_INVALID"}
             }, 401
-            
+
         token = authorization.split(" ")[1]
         try:
             payload = verify_access_token(token)
@@ -355,7 +347,7 @@ class ActivityController:
             return {"message": "Token expired", "data": None, "errors": None}, 401
         except jwt.InvalidTokenError:
             return {"message": "Invalid token", "data": None, "errors": None}, 401
-            
+
         try:
             user = self.user_db.get_user_by_id(user_id)
             if not user:
@@ -390,7 +382,7 @@ class ActivityController:
                 "data": None,
                 "errors": {"Auth": "IS_INVALID"}
             }, 401
-            
+
         token = authorization.split(" ")[1]
         try:
             payload = verify_access_token(token)
@@ -399,33 +391,24 @@ class ActivityController:
             return {"message": "Token expired", "data": None, "errors": None}, 401
         except jwt.InvalidTokenError:
             return {"message": "Invalid token", "data": None, "errors": None}, 401
-            
+
         try:
             user = self.user_db.get_user_by_id(user_id)
             if not user:
                 return {"message": "User not found", "data": None, "errors": None}, 404
 
             wallet_address = user.wallet_address
-            from databases.mongo_activity import ActivityDatabase
 
             updated_count = ActivityDatabase.mark_all_read(wallet_address, category)
 
-            # Also mark public activities (Created Room, Add Token, Completed Room) as read when applicable
             if category in ("Rooms", "System", "All Notification", None):
-                def _eid(act):
-                    raw = act.get("_id")
-                    if isinstance(raw, dict):
-                        return raw.get("$oid", str(raw))
-                    return str(raw) if raw else ""
-
                 public_acts = ActivityDatabase.get_all_public_activities(limit=1000)
-                # Filter by category
                 if category == "Rooms":
                     public_acts = [a for a in public_acts if a.get("activity_type") in ("Created Room", "Completed Room")]
                 elif category == "System":
                     public_acts = [a for a in public_acts if a.get("activity_type") == "Add Token"]
 
-                public_ids = [_eid(a) for a in public_acts]
+                public_ids = [self._extract_id(a) for a in public_acts]
                 ActivityDatabase.mark_all_read_for_wallet(wallet_address, public_ids)
 
             return {

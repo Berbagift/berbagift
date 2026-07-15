@@ -2,6 +2,7 @@ from fastapi import APIRouter, Query, HTTPException, Depends
 from sqlalchemy.orm import Session
 from schemas.response import APIResponse
 from databases.mongo_nft import NFTDatabase
+from databases.mongo_listing import ListingDatabase
 from databases.user import UserDatabase
 from databases.connection import get_db_session
 
@@ -13,21 +14,32 @@ async def get_marketplace_nfts(
     db: Session = Depends(get_db_session)
 ):
     try:
-        nfts = NFTDatabase.get_listed_nfts(limit)
+        listings = ListingDatabase.get_listed_nfts(limit)
         user_db = UserDatabase(db)
-        
-        for nft in nfts:
-            owner_wallet = nft.get("owner_address")
+
+        enriched = []
+        for listing in listings:
+            owner_wallet = listing.get("wallet_address")
             if owner_wallet:
                 user = user_db.get_user_by_wallet(owner_wallet)
                 if user and user.username:
-                    nft["owner_username"] = f"@{user.username}"
+                    listing["owner_username"] = f"@{user.username}"
                 else:
-                    nft["owner_username"] = f"{owner_wallet[:4]}...{owner_wallet[-4:]}"
-                    
+                    listing["owner_username"] = f"{owner_wallet[:4]}...{owner_wallet[-4:]}"
+
+            # Merge in message from NFT document
+            token_id = listing.get("token_id")
+            if token_id:
+                nft_doc = NFTDatabase.get_nft_by_token_id(token_id)
+                if nft_doc:
+                    listing["message"] = nft_doc.get("message", "")
+                    listing["sender_address"] = nft_doc.get("sender_address", "")
+
+            enriched.append(listing)
+
         return {
             "message": "Berhasil mendapatkan daftar NFT Marketplace",
-            "data": nfts,
+            "data": enriched,
             "errors": None
         }
     except Exception as e:
@@ -42,7 +54,7 @@ async def get_user_nfts(
     try:
         nfts = NFTDatabase.get_user_nfts(wallet_address, limit)
         user_db = UserDatabase(db)
-        
+
         for nft in nfts:
             sender_wallet = nft.get("sender_address")
             if sender_wallet:

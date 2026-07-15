@@ -4,10 +4,9 @@ import { useParams, useRouter } from 'next/navigation';
 import { RoomStatsCard } from '@/components/rooms/detail/RoomStatsCard';
 import { ClaimInstructionSection } from '@/components/rooms/detail/ClaimInstructionSection';
 import { LiveActivityCard } from '@/components/rooms/detail/LiveActivityCard';
-import { useRoomDetail } from '@/lib/api/queries';
+import { useRoomDetail, useCheckClaimed, useRoomActivities, useRoomParticipants } from '@/lib/api/queries';
 import { useClaimRewardWeb3 } from '@/hooks/use-claim-reward';
 import { useLeaveRoomWeb3 } from '@/hooks/use-leave-room';
-import { getErrorMessage } from '@/lib/api/client';
 import { useJoinRoom } from '@/hooks/use-join-room';
 
 import { useState, useEffect } from 'react';
@@ -41,7 +40,11 @@ export default function RoomDetailPage() {
   }, []);
 
   const { data: roomData, isLoading: isLoading } = useRoomDetail(roomId, token);
-  console.log(roomData)
+  const { data: claimedData } = useCheckClaimed(roomId, token);
+  const { data: liveActivities = [] } = useRoomActivities(roomId);
+  const { data: roomParticipants = [] } = useRoomParticipants(roomId);
+  const isClaimed = claimedData?.is_claimed ?? false;
+
   const { handleJoin, isJoining } = useJoinRoom(roomData);
   const { handleClaimWeb3, isClaiming } = useClaimRewardWeb3(roomData);
   const { handleLeaveWeb3, isLeaving } = useLeaveRoomWeb3(roomData);
@@ -90,12 +93,14 @@ export default function RoomDetailPage() {
           <div className="flex flex-col gap-6 lg:gap-8">
             <RoomStatsCard
               room={roomData}
+              participants={roomParticipants}
               onClaim={handleClaim}
               onLeave={handleLeave}
               onJoin={isJoined ? undefined : handleJoin}
               isJoining={isJoining}
               isClaiming={isClaiming}
               isLeaving={isLeaving}
+              isClaimed={isClaimed}
             />
             <ClaimInstructionSection />
           </div>
@@ -103,7 +108,7 @@ export default function RoomDetailPage() {
           {/* Sidebar (Right) */}
           <div className="w-full h-full relative">
             <div className="sticky top-24 h-[calc(100vh-140px)]">
-              <LiveActivityCard activities={roomData.activities} />
+              <LiveActivityCard activities={liveActivities} />
             </div>
           </div>
 

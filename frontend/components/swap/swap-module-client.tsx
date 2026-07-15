@@ -83,7 +83,7 @@ export function SwapModuleClient() {
   }
 
   return (
-    <div className="w-full max-w-[740px] mx-auto bg-white dark:bg-card border border-border rounded-md p-6 md:p-8 flex flex-col shadow-[0_2px_8px_-2px_rgba(0,0,0,0.02)]">
+    <div className="w-full max-w-[740px] mx-auto bg-white dark:bg-card border border-border rounded-md p-6 md:p-8 flex flex-col">
       {/* Top Balance Section */}
       <BalanceHeaderCard
         balance={state.activeBalanceToken.balance}
@@ -112,7 +112,7 @@ export function SwapModuleClient() {
           <button
             type="button"
             onClick={state.handleSwapDirection}
-            className="w-12 h-12 bg-white dark:bg-card border border-border rounded-full flex items-center justify-center text-[#16a34a] hover:bg-neutral-2 shadow-md"
+            className="w-12 h-12 bg-white dark:bg-card border border-border rounded-full flex items-center justify-center text-[#16a34a] hover:bg-neutral-2"
           >
             <SwapIcon className="w-[18px] h-[18px]" />
           </button>

@@ -7,6 +7,7 @@ import { RoomSearch } from '@/components/rooms/RoomSearch';
 import { EmptyState } from '@/components/rooms/EmptyState';
 import { Button } from '@/components/ui/button';
 import { MintNFTModal } from '@/components/marketplace/mint-nft-modal';
+import { toast } from 'react-toastify';
 
 const NFTCardSkeleton = () => (
   <div className="flex flex-col bg-white dark:bg-card border border-border rounded-xl p-0 h-[400px] animate-pulse overflow-hidden">
@@ -39,7 +40,7 @@ export default function MarketplacePage() {
 
   const handleBuy = (tokenId: string, price: string) => {
     // In the future, integrate smart contract call here
-    alert(`Buying NFT #${tokenId} for ${price} - Coming Soon!`);
+    toast.info(`Buying NFT #${tokenId} for ${price} - Coming Soon!`);
   };
 
   return (

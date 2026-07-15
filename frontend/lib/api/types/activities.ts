@@ -9,4 +9,5 @@ export interface Activity {
   status: 'success' | 'processing' | 'expired';
   time: string;
   txHash?: string;
+  datetime?: string;
 }

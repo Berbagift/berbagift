@@ -54,3 +54,30 @@ export function useClaimReward() {
     onSuccess: (_, roomId) => qc.invalidateQueries({ queryKey: ['rooms', 'detail', roomId] }),
   });
 }
+
+export function useCheckClaimed(roomId: string, token: string | null) {
+  return useQuery({
+    queryKey: ['rooms', 'check-claimed', roomId, token],
+    queryFn: () => roomsService.checkClaimed(roomId, token!),
+    enabled: !!roomId && !!token,
+    staleTime: 1000 * 60 * 2,
+  });
+}
+
+export function useRoomActivities(roomId: string) {
+  return useQuery({
+    queryKey: ['rooms', 'activities', roomId],
+    queryFn: () => roomsService.getRoomActivities(roomId),
+    enabled: !!roomId,
+    staleTime: 3000,
+  });
+}
+
+export function useRoomParticipants(roomId: string) {
+  return useQuery({
+    queryKey: ['rooms', 'participants', roomId],
+    queryFn: () => roomsService.getRoomParticipants(roomId),
+    enabled: !!roomId,
+    staleTime: 3000,
+  });
+}

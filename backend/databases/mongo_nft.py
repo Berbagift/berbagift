@@ -14,6 +14,11 @@ class NFTDatabase:
         return nft
 
     @staticmethod
+    def get_nft_by_token_id(token_id: int):
+        nft = NFT.objects(token_id=token_id).first()
+        return nft.to_dict() if nft else None
+
+    @staticmethod
     def get_user_nfts(wallet_address: str, limit: int = 50):
         nfts = NFT.objects(owner_address=wallet_address).order_by("-datetime").limit(limit)
         return [nft.to_dict() for nft in nfts]

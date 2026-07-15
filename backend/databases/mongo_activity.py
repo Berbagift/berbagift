@@ -13,7 +13,8 @@ def _extract_id(act_dict: dict) -> str:
 
 class ActivityDatabase:
     @staticmethod
-    def upsert_activity(data: dict):
+    def upsert_activity(data: dict) -> tuple:
+        """Upsert activity. Returns (activity, is_new). is_new=True on first insert."""
         tx_hash = data.get("transaction_hash")
         act_type = data.get("activity_type")
         wallet = data.get("wallet_address")
@@ -24,13 +25,14 @@ class ActivityDatabase:
             activity_type=act_type,
             details=details,
         ).first()
+        is_new = activity is None
         if not activity:
             activity = Activity(**data)
         else:
             for k, v in data.items():
                 setattr(activity, k, v)
         activity.save()
-        return activity
+        return activity, is_new
 
     # ------------------------------------------------------------------
     # Read-status helpers (per-user, stored in activity_reads collection)

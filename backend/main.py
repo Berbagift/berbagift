@@ -16,6 +16,7 @@ from alembic import command
 from alembic.config import Config
 from schemas.indodax import IndodaxCallbackPayload
 from services.indodax import validate_withdrawal_request
+from services.socket_manager import create_socket_app
 from fastapi import APIRouter, Form, HTTPException
 from fastapi.responses import PlainTextResponse
 import logging
@@ -33,6 +34,7 @@ from configs.mongo_db import connect_db as connect_mongo_db
 from controllers.indexer import IndexerController
 from routes.activity import router as activity_router
 import models.mongo_activity_read  # ensure ActivityRead collection/indexes are created
+import models.mongo_listing       # ensure Listing collection/indexes are created
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -115,3 +117,7 @@ async def indodax_withdraw_callback(
     if is_valid:
         return "ok"
     raise HTTPException(status_code=400, detail="Validasi data withdrawal gagal")
+
+# Wrap FastAPI app with Socket.IO support
+# Run with: uvicorn main:app --reload --host 0.0.0.0 --port 8000
+app = create_socket_app(app)

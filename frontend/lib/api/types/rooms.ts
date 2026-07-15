@@ -7,12 +7,26 @@ export interface Creator {
 export interface Participant {
   username: string;
   initials: string;
+  wallet_address?: string;
+  joined_at?: string;
 }
 
 export interface RoomActivity {
   username: string;
   initials: string;
   action: 'joined' | 'left';
+  timestamp: string;
+}
+
+export interface LiveActivity {
+  id: string;
+  username: string;
+  initials: string;
+  wallet_address: string;
+  activity_type: 'Joined Room' | 'Left Room' | 'Claimed Reward' | 'Completed Room';
+  action: 'joined' | 'left' | 'claimed' | 'completed';
+  message: string;
+  datetime: string;
   timestamp: string;
 }
 
@@ -37,6 +51,7 @@ export interface Room {
   isSaved: boolean;
   is_joined?: boolean;
   is_owner?: boolean;
+  is_claimed?: boolean;
   claimCountdown?: number | null;
   claim_session_start?: number | string | null;
   startsAt?: string | null;

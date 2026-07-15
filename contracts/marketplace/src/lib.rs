@@ -2,7 +2,7 @@
 #![allow(deprecated)]
 #![allow(unused_imports)]
 use soroban_sdk::{
-    contract, contractimpl, contracttype, symbol_short, token, Address, Env, Symbol, IntoVal,
+    contract, contractimpl, contracttype, symbol_short, token, Address, Env, IntoVal, Symbol,
 };
 
 #[contracttype]
@@ -19,12 +19,12 @@ pub struct ListingData {
 pub enum DataKey {
     NftContract,
     TokenRegistryAddress,
-    Listing(u32),  // token_id -> ListingData
+    Listing(u32), // token_id -> ListingData
 }
 
 // Define the interface of the NFT contract we want to call
 // We can use a trait to generate a client, or just use env.invoke_contract.
-// Let's use env.invoke_contract to avoid complex dependencies, 
+// Let's use env.invoke_contract to avoid complex dependencies,
 // since we only need `owner_of` and `transfer`.
 
 #[contract]
@@ -32,20 +32,24 @@ pub struct LockedNFTMarketplace;
 
 #[contractimpl]
 impl LockedNFTMarketplace {
-    pub fn initialize(
-        env: Env,
-        nft_contract: Address,
-        registry_contract: Address,
-    ) {
+    pub fn initialize(env: Env, nft_contract: Address, registry_contract: Address) {
         if env.storage().instance().has(&DataKey::NftContract) {
             panic!("Already initialized");
         }
-        env.storage().instance().set(&DataKey::NftContract, &nft_contract);
-        env.storage().instance().set(&DataKey::TokenRegistryAddress, &registry_contract);
+        env.storage()
+            .instance()
+            .set(&DataKey::NftContract, &nft_contract);
+        env.storage()
+            .instance()
+            .set(&DataKey::TokenRegistryAddress, &registry_contract);
     }
 
     fn is_listed(env: &Env, token: &Address) -> bool {
-        let registry: Address = env.storage().instance().get(&DataKey::TokenRegistryAddress).unwrap();
+        let registry: Address = env
+            .storage()
+            .instance()
+            .get(&DataKey::TokenRegistryAddress)
+            .unwrap();
         let res: bool = env.invoke_contract(
             &registry,
             &symbol_short!("is_valid"),
@@ -99,7 +103,9 @@ impl LockedNFTMarketplace {
             is_active: true,
         };
 
-        env.storage().persistent().set(&DataKey::Listing(token_id), &listing);
+        env.storage()
+            .persistent()
+            .set(&DataKey::Listing(token_id), &listing);
 
         env.events().publish(
             (symbol_short!("Listed"), seller, token_id),
@@ -110,7 +116,10 @@ impl LockedNFTMarketplace {
     pub fn buy_item(env: Env, buyer: Address, token_id: u32) {
         buyer.require_auth();
 
-        let mut listing: ListingData = env.storage().persistent().get(&DataKey::Listing(token_id))
+        let mut listing: ListingData = env
+            .storage()
+            .persistent()
+            .get(&DataKey::Listing(token_id))
             .unwrap_or_else(|| panic!("Listing tidak ditemukan"));
 
         if !listing.is_active {
@@ -122,7 +131,9 @@ impl LockedNFTMarketplace {
 
         // 1. Tandai listing tidak aktif (CEI)
         listing.is_active = false;
-        env.storage().persistent().set(&DataKey::Listing(token_id), &listing);
+        env.storage()
+            .persistent()
+            .set(&DataKey::Listing(token_id), &listing);
 
         // 2. Proses Pembayaran
         let token_client = token::Client::new(&env, &listing.payment_token);
@@ -130,14 +141,19 @@ impl LockedNFTMarketplace {
 
         // 3. Proses Transfer NFT
         let nft_contract: Address = env.storage().instance().get(&DataKey::NftContract).unwrap();
-        
+
         // Memanggil fungsi `transfer` di kontrak NFT-locked yang mensyaratkan auth dari marketplace.
-        // Karena kita sedang berada di eksekusi marketplace ini, `env.invoke_contract` 
+        // Karena kita sedang berada di eksekusi marketplace ini, `env.invoke_contract`
         // akan menggunakan otorisasi dari kontrak ini secara otomatis.
         let _res: () = env.invoke_contract(
             &nft_contract,
             &Symbol::new(&env, "transfer"),
-            soroban_sdk::vec![&env, listing.seller.clone().into_val(&env), buyer.clone().into_val(&env), token_id.into_val(&env)],
+            soroban_sdk::vec![
+                &env,
+                listing.seller.clone().into_val(&env),
+                buyer.clone().into_val(&env),
+                token_id.into_val(&env)
+            ],
         );
 
         env.events().publish(
@@ -149,7 +165,10 @@ impl LockedNFTMarketplace {
     pub fn cancel_listing(env: Env, seller: Address, token_id: u32) {
         seller.require_auth();
 
-        let mut listing: ListingData = env.storage().persistent().get(&DataKey::Listing(token_id))
+        let mut listing: ListingData = env
+            .storage()
+            .persistent()
+            .get(&DataKey::Listing(token_id))
             .unwrap_or_else(|| panic!("Listing tidak ditemukan"));
 
         if !listing.is_active {
@@ -160,32 +179,48 @@ impl LockedNFTMarketplace {
         }
 
         listing.is_active = false;
-        env.storage().persistent().set(&DataKey::Listing(token_id), &listing);
+        env.storage()
+            .persistent()
+            .set(&DataKey::Listing(token_id), &listing);
 
-        env.events().publish(
-            (symbol_short!("Canceled"), seller, token_id),
-            (),
-        );
+        env.events()
+            .publish((symbol_short!("Canceled"), seller, token_id), ());
     }
 
     pub fn get_listing_detail(env: Env, token_id: u32) -> ListingData {
-        env.storage().persistent().get(&DataKey::Listing(token_id)).unwrap()
+        env.storage()
+            .persistent()
+            .get(&DataKey::Listing(token_id))
+            .unwrap()
     }
 
     pub fn get_seller(env: Env, token_id: u32) -> Address {
-        let listing: ListingData = env.storage().persistent().get(&DataKey::Listing(token_id)).unwrap();
+        let listing: ListingData = env
+            .storage()
+            .persistent()
+            .get(&DataKey::Listing(token_id))
+            .unwrap();
         listing.seller
+    }
+
+    /// Returns true if the NFT is currently listed and active on the marketplace.
+    /// This is safe to call from other contracts (e.g. the gift contract)
+    /// because it does not panic when no listing exists.
+    pub fn is_nft_listed(env: Env, token_id: u32) -> bool {
+        let listing: Option<ListingData> =
+            env.storage().persistent().get(&DataKey::Listing(token_id));
+        listing.map_or(false, |l| l.is_active)
     }
 }
 
 #[cfg(test)]
 mod test {
     use super::*;
-    use soroban_sdk::{testutils::Address as _, vec, Address, Env, String};
     use soroban_sdk::token::Client as TokenClient;
     use soroban_sdk::token::StellarAssetClient as TokenAdminClient;
-    
-    use nft_gift_locked::{BundleBatchTransferContractClient};
+    use soroban_sdk::{testutils::Address as _, vec, Address, Env, String};
+
+    use nft_gift_locked::BundleBatchTransferContractClient;
 
     fn create_token<'a>(env: &Env, admin: &Address) -> (TokenClient<'a>, TokenAdminClient<'a>) {
         let contract_id = env.register_stellar_asset_contract_v2(admin.clone());
@@ -199,7 +234,9 @@ mod test {
     pub struct DummyRegistry;
     #[contractimpl]
     impl DummyRegistry {
-        pub fn is_valid(env: Env, token: Address) -> bool { true }
+        pub fn is_valid(env: Env, token: Address) -> bool {
+            true
+        }
     }
 
     #[test]
@@ -232,7 +269,14 @@ mod test {
         let token_amounts = vec![&env, 100i128];
         let uris = vec![&env, String::from_str(&env, "ipfs://secret")];
         let messages = vec![&env, String::from_str(&env, "Hello")];
-        nft_client.send_batch_gift(&seller, &xlm.address, &recipients, &token_amounts, &uris, &messages);
+        nft_client.send_batch_gift(
+            &seller,
+            &xlm.address,
+            &recipients,
+            &token_amounts,
+            &uris,
+            &messages,
+        );
 
         let token_id = 1;
         assert_eq!(nft_client.owner_of(&token_id), seller);
@@ -250,7 +294,10 @@ mod test {
 
         assert_eq!(xlm.balance(&seller), seller_balance_before + 500);
         assert_eq!(nft_client.owner_of(&token_id), buyer);
-        assert_eq!(nft_client.token_uri(&token_id), String::from_str(&env, "ipfs://default-opened-gift"));
+        assert_eq!(
+            nft_client.token_uri(&token_id),
+            String::from_str(&env, "ipfs://default-opened-gift")
+        );
 
         let post_listing = market_client.get_listing_detail(&token_id);
         assert!(!post_listing.is_active);

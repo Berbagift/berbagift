@@ -28,6 +28,8 @@ export function EnvelopePreview() {
       (d) => d.id === state.selectedUploadedDesignId,
     );
     if (custom) bgUrl = custom.url;
+  } else if (state.uploadMode === "my_nfts" && state.selectedNftImageUrl) {
+    bgUrl = state.selectedNftImageUrl;
   }
 
   // Recipient Display Logic
@@ -47,6 +49,12 @@ export function EnvelopePreview() {
    * - upload: already stored as a blob URL in uploadedDesigns
    */
   const getEnvelopeFile = async (): Promise<File> => {
+    if (state.uploadMode === "my_nfts" && state.selectedNftImageUrl) {
+      const res = await fetch(state.selectedNftImageUrl);
+      const blob = await res.blob();
+      const ext = blob.type.includes("png") ? "png" : "jpg";
+      return new File([blob], `envelope-mynft.${ext}`, { type: blob.type });
+    }
     if (state.uploadMode === "upload" && state.selectedUploadedDesignId) {
       const custom = state.uploadedDesigns.find(
         (d) => d.id === state.selectedUploadedDesignId

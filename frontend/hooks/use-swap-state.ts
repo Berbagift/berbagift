@@ -12,6 +12,7 @@ import { buildSwapTx, getReserves } from '@/lib/stellar/swap';
 
 import { submitTransaction } from '@/lib/stellar/transactions';
 import { useQueryClient } from '@tanstack/react-query';
+import { toast } from 'react-toastify';
 
 export function useSwapState() {
   const queryClient = useQueryClient();
@@ -136,7 +137,7 @@ export function useSwapState() {
 
   const handleSwapSubmit = async () => {
     if (!isConnected || !publicKey) {
-      alert("Please connect your wallet first.");
+      toast.error("Please connect your wallet first.");
       return;
     }
 

@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { buildJoinRoomTx, submitJoinRoomTx } from '@/lib/stellar/multi-room';
 import { Room } from '@/lib/api/types';
+import { toast } from 'react-toastify';
 
 export function useJoinRoom(room: Room | undefined) {
   const router = useRouter();
@@ -19,7 +20,7 @@ export function useJoinRoom(room: Room | undefined) {
 
       const { address: senderAddress, error: addrErr } = await requestAccess();
       if (addrErr || !senderAddress) {
-        alert("Could not read address from Freighter. Please unlock your wallet and try again.");
+        toast.error("Could not read address from Freighter. Please unlock your wallet and try again.");
         setIsWeb3Processing(false);
         return;
       }
@@ -27,19 +28,19 @@ export function useJoinRoom(room: Room | undefined) {
       const { network: freighterNetwork } = await getNetwork();
       const expectedNetwork = process.env.NEXT_PUBLIC_STELLAR_NETWORK || "TESTNET";
       if (freighterNetwork && freighterNetwork.toUpperCase() !== expectedNetwork.toUpperCase()) {
-        alert(`Wallet is on ${freighterNetwork} but app expects ${expectedNetwork}. Please switch networks in Freighter.`);
+        toast.error(`Wallet is on ${freighterNetwork} but app expects ${expectedNetwork}. Please switch networks in Freighter.`);
         setIsWeb3Processing(false);
         return;
       }
 
       if (!room) {
-        alert("Room data is not available. Please try again.");
+        toast.error("Room data is not available. Please try again.");
         setIsWeb3Processing(false);
         return;
       }
 
       if (room.room_id == null) {
-        alert("Room ID is missing. Please refresh and try again.");
+        toast.error("Room ID is missing. Please refresh and try again.");
         setIsWeb3Processing(false);
         return;
       }
@@ -60,20 +61,19 @@ export function useJoinRoom(room: Room | undefined) {
 
       await submitJoinRoomTx(signedTxXdr);
 
-      alert(`Success! You have joined "${room.title}".`);
-      window.location.reload();
+      toast.success(`Success! You have joined "${room.title}".`);
     } catch (err: any) {
       console.error("Transaction failed:", err);
       // Check for common error strings
       const errorStr = JSON.stringify(err);
       if (errorStr.includes("Already joined") || (err.message && err.message.includes("Already joined"))) {
-        alert("You have already joined this room!");
+        toast.warn("You have already joined this room!");
       } else if (errorStr.includes("Room is full")) {
-        alert("Room is already full.");
+        toast.error("Room is already full.");
       } else if (errorStr.includes("UnreachableCodeReached") || errorStr.includes("InvalidAction")) {
-        alert("Cannot join right now. Please make sure the claim session has already started and you are not the room creator.");
+        toast.error("Cannot join right now. Please make sure the claim session has already started and you are not the room creator.");
       } else {
-        alert(err.message || "Transaction failed. Please try again.");
+        toast.error(err.message || "Transaction failed. Please try again.");
       }
     } finally {
       setIsWeb3Processing(false);

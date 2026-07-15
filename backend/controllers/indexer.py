@@ -11,7 +11,9 @@ from databases.mongo_activity import ActivityDatabase
 from databases.mongo_nft import NFTDatabase
 from databases.mongo_room import RoomDatabase
 from databases.mongo_registry import RegistryDatabase
+from databases.mongo_listing import ListingDatabase
 from utils.scval import scval_to_native
+from services.socket_manager import emit_threadsafe
 
 TOKEN_MAP = {
     "CAXMJUKELFC7THVUKVH4NA5RYUDLORCKSZ5HTOPOMEXRMZJLFHKZJCQZ": "RPK",
@@ -84,7 +86,7 @@ class IndexerController:
                         token_address = scval_to_native(topic_scval[1])
                         token_symbol = TOKEN_MAP.get(token_address, "Token")
                         RegistryDatabase.add_token(token_address, token_symbol)
-                        ActivityDatabase.upsert_activity({
+                        _, is_new = ActivityDatabase.upsert_activity({
                             "transaction_hash": tx_hash,
                             "wallet_address": "System",
                             "activity_type": "Add Token",
@@ -96,13 +98,19 @@ class IndexerController:
                             "datetime": datetime.now(timezone.utc).isoformat(),
                             "ledger": ledger_seq
                         })
+                        if is_new:
+                            emit_threadsafe('activity:new', {
+                                "wallet_address": "System",
+                                "activity_type": "Add Token",
+                                "tx_hash": tx_hash
+                            })
                         print(f"✅ Indexed Activity: Added Token {token_symbol} to Registry")
 
                     elif event_type == "rm_token":
                         token_address = scval_to_native(topic_scval[1])
                         token_symbol = TOKEN_MAP.get(token_address, "Token")
                         RegistryDatabase.remove_token(token_address)
-                        ActivityDatabase.upsert_activity({
+                        _, is_new = ActivityDatabase.upsert_activity({
                             "transaction_hash": tx_hash,
                             "wallet_address": "System",
                             "activity_type": "Remove Token",
@@ -114,6 +122,12 @@ class IndexerController:
                             "datetime": datetime.now(timezone.utc).isoformat(),
                             "ledger": ledger_seq
                         })
+                        if is_new:
+                            emit_threadsafe('activity:new', {
+                                "wallet_address": "System",
+                                "activity_type": "Remove Token",
+                                "tx_hash": tx_hash
+                            })
                         print(f"✅ Indexed Activity: Removed Token {token_symbol} from Registry")
                         
                     elif event_type == "swap_b2t":
@@ -123,7 +137,7 @@ class IndexerController:
                         token_in_symbol = "XLM"
                         if value_scval.vec and len(value_scval.vec.sc_vec) == 3:
                             amount_in = scval_to_native(value_scval.vec.sc_vec[0])
-                            ActivityDatabase.upsert_activity({
+                            _, is_new = ActivityDatabase.upsert_activity({
                                 "transaction_hash": tx_hash,
                                 "wallet_address": caller,
                                 "activity_type": "Swap token",
@@ -135,6 +149,12 @@ class IndexerController:
                                 "datetime": datetime.now(timezone.utc).isoformat(),
                                 "ledger": ledger_seq
                             })
+                            if is_new:
+                                emit_threadsafe('activity:new', {
+                                    "wallet_address": caller,
+                                    "activity_type": "Swap token",
+                                    "tx_hash": tx_hash
+                                })
                             print(f"✅ Indexed Activity: Swap token ({token_in_symbol} to {token_out_symbol}) by {caller}")
 
                     elif event_type == "swap_t2b":
@@ -144,7 +164,7 @@ class IndexerController:
                         token_out_symbol = "XLM"
                         if value_scval.vec and len(value_scval.vec.sc_vec) == 3:
                             amount_in = scval_to_native(value_scval.vec.sc_vec[0])
-                            ActivityDatabase.upsert_activity({
+                            _, is_new = ActivityDatabase.upsert_activity({
                                 "transaction_hash": tx_hash,
                                 "wallet_address": caller,
                                 "activity_type": "Swap token",
@@ -156,6 +176,12 @@ class IndexerController:
                                 "datetime": datetime.now(timezone.utc).isoformat(),
                                 "ledger": ledger_seq
                             })
+                            if is_new:
+                                emit_threadsafe('activity:new', {
+                                    "wallet_address": caller,
+                                    "activity_type": "Swap token",
+                                    "tx_hash": tx_hash
+                                })
                             print(f"✅ Indexed Activity: Swap token ({token_in_symbol} to {token_out_symbol}) by {caller}")
 
                     elif event_type == "swap_t2t":
@@ -167,7 +193,7 @@ class IndexerController:
                         
                         if value_scval.vec and len(value_scval.vec.sc_vec) == 4:
                             amount_in = scval_to_native(value_scval.vec.sc_vec[0])
-                            ActivityDatabase.upsert_activity({
+                            _, is_new = ActivityDatabase.upsert_activity({
                                 "transaction_hash": tx_hash,
                                 "wallet_address": caller,
                                 "activity_type": "Swap token",
@@ -179,6 +205,12 @@ class IndexerController:
                                 "datetime": datetime.now(timezone.utc).isoformat(),
                                 "ledger": ledger_seq
                             })
+                            if is_new:
+                                emit_threadsafe('activity:new', {
+                                    "wallet_address": caller,
+                                    "activity_type": "Swap token",
+                                    "tx_hash": tx_hash
+                                })
                             print(f"✅ Indexed Activity: Swap token ({token_in_symbol} to {token_out_symbol}) by {caller}")
 
                     elif event_type == "add_liq":
@@ -188,7 +220,7 @@ class IndexerController:
                             base_amount = scval_to_native(value_scval.vec.sc_vec[1])
                             token_amount = scval_to_native(value_scval.vec.sc_vec[2])
                             token_symbol = TOKEN_MAP.get(token_addr, "Token")
-                            ActivityDatabase.upsert_activity({
+                            _, is_new = ActivityDatabase.upsert_activity({
                                 "transaction_hash": tx_hash,
                                 "wallet_address": caller,
                                 "activity_type": "Deposit Liquidity",
@@ -200,6 +232,12 @@ class IndexerController:
                                 "datetime": datetime.now(timezone.utc).isoformat(),
                                 "ledger": ledger_seq
                             })
+                            if is_new:
+                                emit_threadsafe('activity:new', {
+                                    "wallet_address": caller,
+                                    "activity_type": "Deposit Liquidity",
+                                    "tx_hash": tx_hash
+                                })
                             print(f"✅ Indexed Activity: Deposit by {caller}")
 
                     elif event_type == "BndlSent":
@@ -213,7 +251,7 @@ class IndexerController:
                             user_message = scval_to_native(value_scval.vec.sc_vec[3])
                             token_symbol = TOKEN_MAP.get(token_addr, "Token")
                             formatted_amount = f"{format_amount(token_amount)} {token_symbol}"
-                            ActivityDatabase.upsert_activity({
+                            _, is_new = ActivityDatabase.upsert_activity({
                                 "transaction_hash": tx_hash,
                                 "wallet_address": sender_addr,
                                 "activity_type": "Sent token",
@@ -225,7 +263,13 @@ class IndexerController:
                                 "datetime": datetime.now(timezone.utc).isoformat(),
                                 "ledger": ledger_seq
                             })
-                            ActivityDatabase.upsert_activity({
+                            if is_new:
+                                emit_threadsafe('activity:new', {
+                                    "wallet_address": sender_addr,
+                                    "activity_type": "Sent token",
+                                    "tx_hash": tx_hash
+                                })
+                            _, is_new = ActivityDatabase.upsert_activity({
                                 "transaction_hash": tx_hash,
                                 "wallet_address": recipient_addr,
                                 "activity_type": "Received token",
@@ -237,6 +281,12 @@ class IndexerController:
                                 "datetime": datetime.now(timezone.utc).isoformat(),
                                 "ledger": ledger_seq
                             })
+                            if is_new:
+                                emit_threadsafe('activity:new', {
+                                    "wallet_address": recipient_addr,
+                                    "activity_type": "Received token",
+                                    "tx_hash": tx_hash
+                                })
                             
                             NFTDatabase.upsert_nft({
                                 "token_id": item_id,
@@ -269,7 +319,7 @@ class IndexerController:
                             price = scval_to_native(value_scval.vec.sc_vec[1])
                             token_symbol = TOKEN_MAP.get(payment_token, "Token")
                             formatted_price = f"{format_amount(price)} {token_symbol}"
-                            ActivityDatabase.upsert_activity({
+                            _, is_new = ActivityDatabase.upsert_activity({
                                 "transaction_hash": tx_hash,
                                 "wallet_address": seller,
                                 "activity_type": "List NFT",
@@ -281,7 +331,29 @@ class IndexerController:
                                 "datetime": datetime.now(timezone.utc).isoformat(),
                                 "ledger": ledger_seq
                             })
+                            if is_new:
+                                emit_threadsafe('activity:new', {
+                                    "wallet_address": seller,
+                                    "activity_type": "List NFT",
+                                    "tx_hash": tx_hash
+                                })
                             NFTDatabase.set_listing_status(token_id, True, formatted_price)
+
+                            # Also write to dedicated Listing collection
+                            from models.mongo_nft import NFT
+                            nft_doc = NFT.objects(token_id=token_id).first()
+                            token_uri = ""
+                            if nft_doc:
+                                token_uri = nft_doc.token_uri or ""
+                            ListingDatabase.upsert_listing({
+                                "token_id": token_id,
+                                "token_uri": token_uri,
+                                "transaction_hash": tx_hash,
+                                "price": formatted_price,
+                                "payment_token": token_symbol,
+                                "wallet_address": seller,
+                            })
+
                             print(f"✅ Indexed Activity: Listed NFT #{token_id} by {seller}")
 
                     elif event_type == "Sold":
@@ -294,7 +366,7 @@ class IndexerController:
                             token_symbol = TOKEN_MAP.get(payment_token, "Token")
                             formatted_price = f"{format_amount(price)} {token_symbol}"
                             
-                            ActivityDatabase.upsert_activity({
+                            _, is_new = ActivityDatabase.upsert_activity({
                                 "transaction_hash": tx_hash,
                                 "wallet_address": buyer,
                                 "activity_type": "Buy NFT",
@@ -306,8 +378,14 @@ class IndexerController:
                                 "datetime": datetime.now(timezone.utc).isoformat(),
                                 "ledger": ledger_seq
                             })
+                            if is_new:
+                                emit_threadsafe('activity:new', {
+                                    "wallet_address": buyer,
+                                    "activity_type": "Buy NFT",
+                                    "tx_hash": tx_hash
+                                })
                             
-                            ActivityDatabase.upsert_activity({
+                            _, is_new = ActivityDatabase.upsert_activity({
                                 "transaction_hash": tx_hash,
                                 "wallet_address": seller,
                                 "activity_type": "Sell NFT",
@@ -319,16 +397,23 @@ class IndexerController:
                                 "datetime": datetime.now(timezone.utc).isoformat(),
                                 "ledger": ledger_seq
                             })
+                            if is_new:
+                                emit_threadsafe('activity:new', {
+                                    "wallet_address": seller,
+                                    "activity_type": "Sell NFT",
+                                    "tx_hash": tx_hash
+                                })
                             
                             NFTDatabase.set_listing_status(token_id, False, None)
                             NFTDatabase.update_owner(token_id, buyer)
+                            ListingDatabase.remove_listing(token_id)
                             
                             print(f"✅ Indexed Activity: Sold NFT #{token_id} from {seller} to {buyer}")
                     
                     elif event_type == "Canceled":
                         seller = scval_to_native(topic_scval[1])
                         token_id = scval_to_native(topic_scval[2])
-                        ActivityDatabase.upsert_activity({
+                        _, is_new = ActivityDatabase.upsert_activity({
                             "transaction_hash": tx_hash,
                             "wallet_address": seller,
                             "activity_type": "Cancel Listing",
@@ -340,7 +425,14 @@ class IndexerController:
                             "datetime": datetime.now(timezone.utc).isoformat(),
                             "ledger": ledger_seq
                         })
+                        if is_new:
+                            emit_threadsafe('activity:new', {
+                                "wallet_address": seller,
+                                "activity_type": "Cancel Listing",
+                                "tx_hash": tx_hash
+                            })
                         NFTDatabase.set_listing_status(token_id, False, None)
+                        ListingDatabase.remove_listing(token_id)
                         print(f"✅ Indexed Activity: Canceled NFT #{token_id} by {seller}")
 
                     elif event_type == "RoomCreated":
@@ -364,7 +456,7 @@ class IndexerController:
                             token_symbol = TOKEN_MAP.get(token_addr, "Token")
                             formatted_amount = f"{format_amount(reward)} {token_symbol}"
                             
-                            ActivityDatabase.upsert_activity({
+                            _, is_new = ActivityDatabase.upsert_activity({
                                 "transaction_hash": tx_hash,
                                 "wallet_address": admin,
                                 "activity_type": "Created Room",
@@ -376,6 +468,12 @@ class IndexerController:
                                 "datetime": datetime.now(timezone.utc).isoformat(),
                                 "ledger": ledger_seq
                             })
+                            if is_new:
+                                emit_threadsafe('activity:new', {
+                                    "wallet_address": admin,
+                                    "activity_type": "Created Room",
+                                    "tx_hash": tx_hash
+                                })
                             
                             room_data = {
                                 "room_id": room_id,
@@ -410,7 +508,7 @@ class IndexerController:
                         })
                         RoomDatabase.upsert_participant(room_id, user)
                         
-                        ActivityDatabase.upsert_activity({
+                        _, is_new = ActivityDatabase.upsert_activity({
                             "transaction_hash": tx_hash,
                             "wallet_address": user,
                             "activity_type": "Joined Room",
@@ -423,6 +521,12 @@ class IndexerController:
                             "ledger": ledger_seq,
                             "room_id": room_id
                         })
+                        if is_new:
+                            emit_threadsafe('activity:new', {
+                                "wallet_address": user,
+                                "activity_type": "Joined Room",
+                                "tx_hash": tx_hash
+                            })
                         print(f"✅ Indexed Activity: User {user} joined Room {room_id}")
 
                     elif event_type == "UserLeft":
@@ -440,7 +544,7 @@ class IndexerController:
                         })
                         RoomDatabase.set_participant_left(room_id, user)
                         
-                        ActivityDatabase.upsert_activity({
+                        _, is_new = ActivityDatabase.upsert_activity({
                             "transaction_hash": tx_hash,
                             "wallet_address": user,
                             "activity_type": "Left Room",
@@ -453,6 +557,12 @@ class IndexerController:
                             "ledger": ledger_seq,
                             "room_id": room_id
                         })
+                        if is_new:
+                            emit_threadsafe('activity:new', {
+                                "wallet_address": user,
+                                "activity_type": "Left Room",
+                                "tx_hash": tx_hash
+                            })
                         print(f"✅ Indexed Activity: User {user} left Room {room_id}")
 
                     elif event_type == "Completed":
@@ -467,7 +577,7 @@ class IndexerController:
 
                         RoomDatabase.set_room_winners(room_id, winners)
 
-                        ActivityDatabase.upsert_activity({
+                        _, is_new = ActivityDatabase.upsert_activity({
                             "transaction_hash": tx_hash,
                             "wallet_address": "System",
                             "activity_type": "Completed Room",
@@ -480,6 +590,12 @@ class IndexerController:
                             "ledger": ledger_seq,
                             "room_id": room_id
                         })
+                        if is_new:
+                            emit_threadsafe('activity:new', {
+                                "wallet_address": "System",
+                                "activity_type": "Completed Room",
+                                "tx_hash": tx_hash
+                            })
                         
                         print(f"✅ Indexed Activity: Room {room_id} Giveaway Completed — winners: {winners}")
 
@@ -489,20 +605,32 @@ class IndexerController:
                             user = scval_to_native(value_scval.vec.sc_vec[0])
                             
                             RoomDatabase.set_participant_claimed(room_id, user)
+
+                            # Fetch room reward from database
+                            reward_amount = "Reward"
+                            room_doc = RoomDatabase.get_room_by_id(str(room_id))
+                            if room_doc:
+                                reward_amount = room_doc.get("reward", "Reward")
                             
-                            ActivityDatabase.upsert_activity({
+                            _, is_new = ActivityDatabase.upsert_activity({
                                 "transaction_hash": tx_hash,
                                 "wallet_address": user,
                                 "activity_type": "Claimed Reward",
                                 "from_address": self.multi_room_contract_id,
                                 "to_address": user,
                                 "details": f"Room #{room_id}",
-                                "amount": "Reward",
+                                "amount": reward_amount,
                                 "status": "success",
                                 "datetime": datetime.now(timezone.utc).isoformat(),
                                 "ledger": ledger_seq,
                                 "room_id": room_id
                             })
+                            if is_new:
+                                emit_threadsafe('activity:new', {
+                                    "wallet_address": user,
+                                    "activity_type": "Claimed Reward",
+                                    "tx_hash": tx_hash
+                                })
                             print(f"✅ Indexed Activity: User {user} claimed reward for Room {room_id}")
 
                     elif event_type == "FeePaid":
@@ -521,7 +649,7 @@ class IndexerController:
                             }
                             source_name = contract_name_map.get(contract_id, "Unknown")
                             
-                            ActivityDatabase.upsert_activity({
+                            _, is_new = ActivityDatabase.upsert_activity({
                                 "transaction_hash": tx_hash,
                                 "wallet_address": payer,
                                 "activity_type": "Platform Fee",
@@ -533,6 +661,12 @@ class IndexerController:
                                 "datetime": datetime.now(timezone.utc).isoformat(),
                                 "ledger": ledger_seq
                             })
+                            if is_new:
+                                emit_threadsafe('activity:new', {
+                                    "wallet_address": payer,
+                                    "activity_type": "Platform Fee",
+                                    "tx_hash": tx_hash
+                                })
                             print(f"✅ Indexed Activity: Fee {formatted_fee} from {payer} ({source_name})")
 
                 except Exception as e:

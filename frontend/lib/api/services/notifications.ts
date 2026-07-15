@@ -1,4 +1,4 @@
-import { apiClient, unwrapApiData } from '../client';
+import { apiClient } from '../client';
 import { InboxMailItemData } from '@/components/inbox/InboxMailItem';
 import notificationsData from '@/mockapi/notifications.json';
 
@@ -16,13 +16,14 @@ export const notificationsService = {
 
     try {
       const query = category ? `?category=${encodeURIComponent(category)}` : '';
-      const res = await apiClient.get<any>(`/activities/inbox${query}`);
-      const apiData = res.data?.data?.items || [];
-      const counts = res.data?.data?.counts || {};
+      const res = await apiClient.get(`/activities/inbox${query}`);
+      const apiData: unknown[] = res.data?.data?.items || [];
+      const counts: Record<string, number> = res.data?.data?.counts || {};
 
-      const items = apiData.map((item: any) => {
+      const items: InboxMailItemData[] = apiData.map((item) => {
+        const it = item as Record<string, unknown>;
+        const titleLower = (it.title as string || '').toLowerCase();
         let cat: 'Rewards' | 'Rooms' | 'Transfer' | 'Swap' | 'System' = 'System';
-        const titleLower = (item.title || '').toLowerCase();
 
         if (titleLower.includes('transfer')) cat = 'Transfer';
         else if (titleLower.includes('swap')) cat = 'Swap';
@@ -31,19 +32,20 @@ export const notificationsService = {
         else if (titleLower.includes('token listed') || titleLower.includes('deposit')) cat = 'System';
 
         return {
-          id: item.id,
-          title: item.title,
-          description: item.description,
-          date: new Date(item.datetime).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }),
+          id: it.id as string,
+          title: it.title as string,
+          description: it.description as string,
+          date: new Date(it.datetime as string).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }),
           category: cat,
-          read: item.is_read || false,
+          read: (it.is_read as boolean) || false,
+          _datetime: it.datetime as string,
           details: {
-            txHash: item.tx_hash,
-            amount: item.transaction_value,
-            username: item.sender_or_recipient,
-            message: item.message,
-            roomName: item.room_name,
-            roomId: item.room_id
+            txHash: it.tx_hash as string | undefined,
+            amount: it.transaction_value as string | undefined,
+            username: it.sender_or_recipient as string | undefined,
+            message: it.message as string | undefined,
+            roomName: it.room_name as string | undefined,
+            roomId: it.room_id as string | number | undefined
           }
         };
       });

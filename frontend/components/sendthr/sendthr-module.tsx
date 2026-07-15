@@ -13,6 +13,7 @@ import { useRegistryTokens } from '@/hooks/use-registry-tokens';
 import { useUserProfile } from '@/hooks/use-user-profile';
 
 import { useCryptoPrices } from '@/lib/api/queries/prices';
+import { toast } from 'react-toastify';
 
 export function SendThrModule() {
   const router = useRouter();
@@ -46,7 +47,7 @@ export function SendThrModule() {
     const pendingInput = recipientInput.trim().replace(/^@/, '');
     
     if (state.recipients.length === 0 && !pendingInput) {
-      alert('Please add at least one recipient');
+      toast.error('Please add at least one recipient');
       return;
     }
     
@@ -56,7 +57,7 @@ export function SendThrModule() {
     }
 
     if (!state.amount || parseFloat(state.amount) <= 0) {
-      alert('Please enter a valid amount');
+      toast.error('Please enter a valid amount');
       return;
     }
     
@@ -66,7 +67,7 @@ export function SendThrModule() {
 
     // Check balance before proceeding
     if (totalAmount > realBalance) {
-      alert(`Insufficient ${activeSymbol} balance. You need ${totalAmount} ${activeSymbol} (including 0.5% platform fee).`);
+      toast.error(`Insufficient ${activeSymbol} balance. You need ${totalAmount} ${activeSymbol} (including 0.5% platform fee).`);
       return;
     }
 

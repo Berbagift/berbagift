@@ -1,5 +1,5 @@
 import { apiClient, unwrapApiData } from '../client';
-import { Room, RoomActivity, Participant } from '../types';
+import { Room, RoomActivity, Participant, LiveActivity } from '../types';
 
 import roomsData from '@/mockapi/rooms.json';
 import myroomsData from '@/mockapi/myrooms.json';
@@ -58,6 +58,29 @@ function normalizeRoom(raw: any): Room {
     claimCountdown,
     claim_session_start: raw.claim_session_start,
   } as Room;
+}
+
+// --- Live Activity normalizer ---
+
+function normalizeLiveActivity(a: any): LiveActivity {
+  const username = a.username ?? '';
+  const activityType = a.activity_type ?? '';
+  let action = 'joined';
+  if (activityType === 'Left Room') action = 'left';
+  else if (activityType === 'Claimed Reward') action = 'claimed';
+  else if (activityType === 'Completed Room') action = 'completed';
+
+  return {
+    id: a.id ?? '',
+    username,
+    wallet_address: a.wallet_address ?? '',
+    activity_type: activityType,
+    message: a.message ?? '',
+    datetime: a.datetime ?? '',
+    action,
+    timestamp: a.datetime ?? '',
+    initials: username.replace(/^@/, '').slice(0, 2).toUpperCase() || '??',
+  } as LiveActivity;
 }
 
 // --- Service ---
@@ -131,6 +154,29 @@ export const roomsService = {
 
     const res = await apiClient.post<unknown>(`/rooms/${roomId}/claim`);
     return unwrapApiData(res.data) as { success: boolean; txHash?: string };
+  },
+
+  checkClaimed: async (roomId: string, token: string): Promise<{ is_claimed: boolean }> => {
+    const res = await apiClient.get<unknown>(`/rooms/${roomId}/check-claimed`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    return unwrapApiData(res.data) as { is_claimed: boolean };
+  },
+
+  getRoomActivities: async (roomId: string): Promise<LiveActivity[]> => {
+    const res = await apiClient.get<unknown>(`/rooms/${roomId}/activities`);
+    return ((unwrapApiData(res.data) as any[]) ?? []).map(normalizeLiveActivity);
+  },
+
+  getRoomParticipants: async (roomId: string): Promise<Participant[]> => {
+    const res = await apiClient.get<unknown>(`/rooms/${roomId}/participants`);
+    const raw = unwrapApiData(res.data) as any[];
+    return raw.map((p: any) => ({
+      username: p.username ?? '',
+      initials: p.initials ?? '??',
+      wallet_address: p.wallet_address ?? '',
+      joined_at: p.joined_at ?? '',
+    }));
   },
 };
 

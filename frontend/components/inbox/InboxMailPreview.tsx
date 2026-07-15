@@ -104,9 +104,13 @@ export function InboxMailPreview({ item, onBack }: InboxMailPreviewProps) {
 
         {/* Footer/CTA Row */}
         <div className="mt-8 flex justify-end">
-          {category === 'Rewards' && (
-            <Button className="bg-[#22c55e] hover:bg-[#1fb356] text-white font-semibold rounded-md shadow-sm h-10 px-5 cursor-pointer">
-              Claim Gift Box
+          {category === 'Rewards' && details?.txHash && (
+            <Button
+              variant="outline"
+              className="border-border text-black dark:text-neutral-1 font-semibold rounded-md h-10 px-5 cursor-pointer"
+              onClick={() => window.open(`https://stellar.expert/explorer/testnet/tx/${details.txHash}`, '_blank')}
+            >
+              Verify on Explorer
             </Button>
           )}
           {category === 'Transfer' && details?.txHash && (
