@@ -95,6 +95,12 @@ services:
       backend:
         condition: service_healthy
     restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://127.0.0.1:3000/ || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
     security_opt:
       - no-new-privileges:true
     cap_drop:
