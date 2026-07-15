@@ -73,7 +73,7 @@ class AuthController:
 
     def generate_nonce(self, request: NonceRequest):
         random_nonce = secrets.token_hex(16)
-        message = f"Welcome to BagiTHR!\n\nPlease sign this message to authenticate.\nNonce: {random_nonce}"
+        message = f"Welcome to Berbagift!\n\nPlease sign this message to authenticate.\nNonce: {random_nonce}"
         self.nonce_db.upsert_nonce(wallet_address=request.wallet_address, nonce_message=message)
         return {
             "message": "Nonce generated successfully",

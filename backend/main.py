@@ -97,7 +97,7 @@ app.include_router(room_router)
 @app.get("/", response_model=APIResponse, status_code=200)
 def root():
     return {
-        "message": "Welcome to BagiTHR API",
+        "message": "Welcome to Berbagift API",
         "data": None,
         "errors": None
     }
