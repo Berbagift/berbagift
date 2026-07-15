@@ -14,12 +14,13 @@ export interface UploadedDesign {
   title: string;
 }
 
-export type UploadMode = 'preset' | 'upload';
+export type UploadMode = 'preset' | 'upload' | 'my_nfts';
 
 interface SendThrState {
   // Transfer Form State
   recipients: Recipient[];
   amount: string;
+  title: string;
   message: string;
   tokenId: string;
   activeToken: TokenConfig;
@@ -29,7 +30,12 @@ interface SendThrState {
   uploadMode: UploadMode;
   uploadedDesigns: UploadedDesign[];
   selectedUploadedDesignId: string | null;
+  /** Token ID of NFT selected from "My NFTs" */
+  selectedNftTokenId: number | null;
+  /** Resolved image URL for the selected NFT */
+  selectedNftImageUrl: string | null;
   status: 'form' | 'processing' | 'success' | 'error';
+  txHash: string | null;
 
   // Actions
   toggleToken: () => void;
@@ -37,15 +43,19 @@ interface SendThrState {
   addRecipient: (username: string) => void;
   removeRecipient: (id: string) => void;
   handleAmountChange: (val: string) => void;
+  handleTitleChange: (val: string) => void;
   handleMessageChange: (val: string) => void;
   getFiatEquivalent: (amt: string) => string;
 
   setUploadMode: (mode: UploadMode) => void;
   setSelectedTemplateId: (id: string | null) => void;
   setSelectedUploadedDesignId: (id: string | null) => void;
+  setSelectedNft: (tokenId: number, imageUrl: string) => void;
   addUploadedDesign: (design: UploadedDesign) => void;
   removeUploadedDesign: (id: string) => void;
   setStatus: (status: 'form' | 'processing' | 'success' | 'error') => void;
+  setTxHash: (hash: string | null) => void;
+  resetState: () => void;
 }
 
 const DEFAULT_RECIPIENTS: Recipient[] = [];
@@ -53,31 +63,34 @@ const DEFAULT_RECIPIENTS: Recipient[] = [];
 export const useSendThrStore = create<SendThrState>((set, get) => ({
   recipients: DEFAULT_RECIPIENTS,
   amount: '',
+  title: 'Berbagift',
   message: '',
-  tokenId: 'USDC',
-  activeToken: TOKENS['USDC'],
+  tokenId: 'XLM',
+  activeToken: TOKENS['XLM'],
 
-  selectedTemplateId: 'preset-1', // Default selection
+  selectedTemplateId: 'preset-1',
   uploadMode: 'preset',
   uploadedDesigns: [],
   selectedUploadedDesignId: null,
+  selectedNftTokenId: null,
+  selectedNftImageUrl: null,
   status: 'form',
+  txHash: null,
 
   toggleToken: () => set((state) => {
-    const newId = state.tokenId === 'USDC' ? 'XLM' : 'USDC';
+    const newId = state.tokenId === 'RPK' ? 'XLM' : 'RPK';
     return { tokenId: newId, activeToken: TOKENS[newId] };
   }),
 
   setTokenId: (id: string) => set(() => ({
     tokenId: id,
-    activeToken: TOKENS[id] || TOKENS['USDC']
+    activeToken: TOKENS[id] || TOKENS['RPK']
   })),
 
   addRecipient: (username: string) => set((state) => {
     if (!username.trim()) return state;
     const cleanUsername = username.trim().toLowerCase().replace(/^@/, '');
     
-    // Avoid duplicates
     if (state.recipients.some(r => r.username.toLowerCase() === cleanUsername)) return state;
 
     const initials = cleanUsername.slice(0, 2).toUpperCase();
@@ -94,16 +107,33 @@ export const useSendThrStore = create<SendThrState>((set, get) => ({
   })),
 
   handleAmountChange: (val: string) => set({ amount: val }),
-  
+  handleTitleChange: (val: string) => set({ title: val }),
   handleMessageChange: (val: string) => set({ message: val }),
 
   getFiatEquivalent: (amt: string) => getFiatEquivalent(amt, get().tokenId),
 
   setUploadMode: (mode: UploadMode) => set({ uploadMode: mode }),
   
-  setSelectedTemplateId: (id: string | null) => set({ selectedTemplateId: id, selectedUploadedDesignId: null }),
-  
-  setSelectedUploadedDesignId: (id: string | null) => set({ selectedUploadedDesignId: id, selectedTemplateId: null }),
+  setSelectedTemplateId: (id: string | null) => set({
+    selectedTemplateId: id,
+    selectedUploadedDesignId: null,
+    selectedNftTokenId: null,
+    selectedNftImageUrl: null,
+  }),
+
+  setSelectedUploadedDesignId: (id: string | null) => set({
+    selectedUploadedDesignId: id,
+    selectedTemplateId: null,
+    selectedNftTokenId: null,
+    selectedNftImageUrl: null,
+  }),
+
+  setSelectedNft: (tokenId: number, imageUrl: string) => set({
+    selectedNftTokenId: tokenId,
+    selectedNftImageUrl: imageUrl,
+    selectedTemplateId: null,
+    selectedUploadedDesignId: null,
+  }),
 
   addUploadedDesign: (design: UploadedDesign) => set((state) => ({
     uploadedDesigns: [...state.uploadedDesigns, design],
@@ -117,6 +147,25 @@ export const useSendThrStore = create<SendThrState>((set, get) => ({
   })),
 
   setStatus: (status) => set({ status }),
+
+  setTxHash: (hash) => set({ txHash: hash }),
+
+  resetState: () => set({
+    recipients: DEFAULT_RECIPIENTS,
+    amount: '',
+    title: 'Berbagift',
+    message: '',
+    tokenId: 'XLM',
+    activeToken: TOKENS['XLM'],
+    selectedTemplateId: 'preset-1',
+    uploadMode: 'preset',
+    uploadedDesigns: [],
+    selectedUploadedDesignId: null,
+    selectedNftTokenId: null,
+    selectedNftImageUrl: null,
+    status: 'form',
+    txHash: null,
+  }),
 }));
 
 // Provide a backward-compatible hook for components that used useSendThrState

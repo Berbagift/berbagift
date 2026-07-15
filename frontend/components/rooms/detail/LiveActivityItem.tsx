@@ -7,6 +7,7 @@ interface LiveActivityItemProps {
     initials: string;
     action: string;
     timestamp: string;
+    message?: string;
   };
 }
 
@@ -16,12 +17,11 @@ interface LiveActivityItemProps {
  * Otherwise, pass through the raw value (backward compat with legacy "30s ago" format).
  */
 function formatTimestamp(timestamp: string): string {
-  // ISO 8601 check — if it contains 'T' or 'Z', treat as date
   if (timestamp.includes('T') || timestamp.includes('Z')) {
     try {
       const date = new Date(timestamp);
       if (!isNaN(date.getTime())) {
-        return formatDistanceToNow(date, { addSuffix: false });
+        return formatDistanceToNow(date, { addSuffix: true });
       }
     } catch {
       // fall through
@@ -30,27 +30,29 @@ function formatTimestamp(timestamp: string): string {
   return timestamp;
 }
 
-/**
- * Capitalize action text for display ("joined" → "Joined", "left" → "Leave").
- */
-function formatAction(action: string): string {
-  if (action.toLowerCase() === 'left') return 'Leave';
-  return action.charAt(0).toUpperCase() + action.slice(1);
-}
+const actionConfig: Record<string, { color: string; bg: string }> = {
+  joined:    { color: 'text-emerald-600 dark:text-emerald-400', bg: 'bg-emerald-50 dark:bg-emerald-950' },
+  left:      { color: 'text-red-500 dark:text-red-400', bg: 'bg-red-50 dark:bg-red-950' },
+  claimed:   { color: 'text-amber-600 dark:text-amber-400', bg: 'bg-amber-50 dark:bg-amber-950' },
+  completed: { color: 'text-blue-600 dark:text-blue-400', bg: 'bg-blue-50 dark:bg-blue-950' },
+};
 
 export function LiveActivityItem({ activity }: LiveActivityItemProps) {
+  const config = actionConfig[activity.action] ?? actionConfig.joined;
+  const displayText = activity.message || activity.action;
+
   return (
-    <div className="flex items-center justify-between py-3">
-      <div className="flex items-center gap-3">
-        <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-700 font-semibold text-xs flex-shrink-0 select-none">
-          {activity.initials}
-        </div>
-        <span className="text-sm font-semibold text-black dark:text-neutral-1">{activity.username}</span>
+    <div className="flex items-start gap-3">
+      <div className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold text-sm flex-shrink-0 select-none ${config.bg} ${config.color}`}>
+        {activity.initials}
       </div>
-      <div className="text-right">
-        <span className="text-sm text-neutral-8 dark:text-neutral-4 font-medium">
-          {formatAction(activity.action)} {formatTimestamp(activity.timestamp)}
-        </span>
+      <div className="flex-1 min-w-0">
+        <p className="text-sm text-black dark:text-neutral-1 leading-relaxed">
+          {displayText}
+        </p>
+        <p className="text-xs text-neutral-8 dark:text-neutral-6 mt-0.5">
+          {formatTimestamp(activity.timestamp)}
+        </p>
       </div>
     </div>
   );

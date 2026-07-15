@@ -1,26 +1,44 @@
 "use client";
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { useMediaQuery } from 'react-responsive';
 import { BalanceCard } from './balance-card';
+import { useCryptoPrices } from '@/lib/api/queries/prices';
 import { useUserProfile } from '@/hooks/use-user-profile';
 
 export function BalanceSection() {
-  const { data: user, isLoading } = useUserProfile();
+  const { data: userProfile, isLoading: isProfileLoading } = useUserProfile();
+  const { data: prices, isLoading: isPricesLoading } = useCryptoPrices();
 
-  if (isLoading) {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const isTabletRange = useMediaQuery({ minWidth: 1024, maxWidth: 1532 });
+  const isTabletLayout = mounted && isTabletRange;
+
+  const gridClass = isTabletLayout 
+    ? "grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4" 
+    : "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4";
+
+  if (isProfileLoading || isPricesLoading) {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+      <div className={gridClass}>
         {[...Array(4)].map((_, idx) => (
-          <div 
-            key={idx} 
-            className="flex flex-col p-5 rounded-md border border-border bg-card shadow-none h-[106px] animate-pulse"
+          <div
+            key={idx}
+            className="flex flex-col p-5 rounded-md border border-border bg-emerald-50/50 dark:bg-emerald-900/10 shadow-none animate-pulse"
           >
             <div className="flex items-center gap-4 h-full">
-              <div className="w-16 h-16 rounded-full bg-neutral-2 dark:bg-neutral-8 flex-shrink-0" />
-              <div className="flex flex-col flex-1 gap-2">
-                <div className="h-4 w-24 bg-neutral-2 dark:bg-neutral-8 rounded" />
-                <div className="h-6 w-32 bg-neutral-2 dark:bg-neutral-8 rounded" />
-                <div className="h-4 w-28 bg-neutral-2 dark:bg-neutral-8 rounded" />
+              <div className="w-14 h-14 rounded-full bg-emerald-100/80 dark:bg-emerald-800/30 flex-shrink-0" />
+              <div className="flex flex-col flex-1 gap-1">
+                <div className="flex items-center justify-between w-full">
+                  <div className="h-4 w-20 bg-emerald-100/80 dark:bg-emerald-800/30 rounded" />
+                  <div className="h-5 w-12 bg-emerald-100/80 dark:bg-emerald-800/30 rounded" />
+                </div>
+                <div className="h-8 w-28 bg-emerald-100/80 dark:bg-emerald-800/30 rounded my-1" />
+                <div className="h-4 w-32 bg-emerald-100/80 dark:bg-emerald-800/30 rounded" />
               </div>
             </div>
           </div>
@@ -29,51 +47,57 @@ export function BalanceSection() {
     );
   }
 
-  const balances = user?.balances || { XLM: 0.0, USDC: 0.0 };
-  const balances_idr = user?.balances_idr || { XLM: 0, USDC: 0 };
+  const xlmAmount = userProfile?.balances?.XLM || 0;
+  const rpkAmount = userProfile?.balances?.RPK || 0;
+  const xlmPriceIdr = prices?.stellar?.idr || 1600;
+  const xlm24hChange = prices?.stellar?.idr_24h_change || 0;
 
-  const xlmAmount = balances.XLM;
-  const usdcAmount = balances.USDC;
+  const xlmIdr = userProfile?.balances_idr?.XLM || 0;
+  const rpkIdr = userProfile?.balances_idr?.RPK || 0;
+  const totalIdr = userProfile?.balances_idr?.total || (xlmIdr + rpkIdr);
+  const totalXlmEquivalent = userProfile?.balances?.total_xlm || 0;
 
-  const xlmIdr = balances_idr.XLM;
-  const usdcIdr = balances_idr.USDC;
-  
-  const totalIdr = xlmIdr + usdcIdr;
+  // Total THR Received (Dummy IDR amount converted back to XLM based on current price)
+  const thrReceivedIdr = 4500000;
+  const thrReceivedXlm = xlmPriceIdr > 0 ? (thrReceivedIdr / xlmPriceIdr) : 0;
 
-  // Calculate equivalent total XLM
-  // Average XLM price in IDR if balance is 0 or calculation fails
-  const xlmPriceIdr = xlmAmount > 0 ? (xlmIdr / xlmAmount) : 3500;
-  const totalXlm = xlmPriceIdr > 0 ? (totalIdr / xlmPriceIdr) : 0;
+  // Helper to format percentage with sign
+  const formatPercentage = (val: number) => {
+    const sign = val >= 0 ? '+' : '';
+    return `${sign}${val.toFixed(2)}%`;
+  };
 
   const balanceData = [
     {
       title: 'XLM Balance',
-      amount: `${xlmAmount.toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 5 })} XLM`,
-      subtitle: `Equal to Rp ${xlmIdr.toLocaleString('id-ID')}`,
+      amount: `${xlmAmount.toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} XLM`,
+      subtitle: `Equal to Rp ${xlmIdr.toLocaleString('id-ID', { maximumFractionDigits: 0 })}`,
       symbol: 'XLM',
+      percentage: `${formatPercentage(xlm24hChange)}`,
+      percentageType: xlm24hChange >= 0 ? 'positive' as const : 'negative' as const,
     },
     {
-      title: 'USDC Balance',
-      amount: `${usdcAmount.toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USDC`,
-      subtitle: `Equal to Rp ${usdcIdr.toLocaleString('id-ID')}`,
-      symbol: 'USDC',
+      title: 'RPK Balance',
+      amount: `${rpkAmount.toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} RPK`,
+      subtitle: `Equal to Rp ${rpkIdr.toLocaleString('id-ID', { maximumFractionDigits: 0 })}`,
+      symbol: 'RPK',
     },
     {
       title: 'IDR Balance',
-      amount: `Rp ${totalIdr.toLocaleString('id-ID')}`,
-      subtitle: `Equal to ${totalXlm.toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} XLM`,
+      amount: `Rp ${totalIdr.toLocaleString('id-ID', { maximumFractionDigits: 0 })}`,
+      subtitle: `Equal to ${totalXlmEquivalent.toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} XLM`,
       symbol: 'IDR',
     },
     {
       title: 'Total THR Received',
-      amount: 'Rp 4.500.000', // Mocked or calculated later
-      subtitle: `Equal to ${(4500000 / xlmPriceIdr).toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} XLM`,
+      amount: `Rp ${thrReceivedIdr.toLocaleString('id-ID')}`,
+      subtitle: `Equal to ${thrReceivedXlm.toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} XLM`,
       symbol: 'THR',
     },
   ];
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+    <div className={gridClass}>
       {balanceData.map((data, idx) => (
         <BalanceCard key={idx} {...data} />
       ))}

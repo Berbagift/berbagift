@@ -10,8 +10,8 @@ export default function DashboardPage() {
   const { data: user } = useUserProfile();
 
   const displayName = user?.username 
-    ? (user.username.startsWith('G') && user.username.length === 56
-        ? `${user.username.slice(0, 4)}...${user.username.slice(-4)}`
+    ? (user.username.startsWith('G') && user.username.length >= 40
+        ? `${user.username.slice(0, 4)}....${user.username.slice(-4)}`
         : user.username)
     : 'User';
 

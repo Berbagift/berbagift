@@ -39,7 +39,10 @@ frontend/yarn-error.log*
 frontend/.pnpm-debug.log*
 
 # env files (can opt-in for committing if needed)
-frontend/.env*
+.env
+.env.*
+!.env.example
+!.env.template
 
 # vercel
 frontend/.vercel
@@ -48,4 +51,15 @@ frontend/.vercel
 *.tsbuildinfo
 next-env.d.ts
 node_modules
-backend/.env*
+venv/
+.venv/
+env/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.coverage
+htmlcov/

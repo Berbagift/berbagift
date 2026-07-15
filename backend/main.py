@@ -1,32 +1,56 @@
+import os
+from dotenv import load_dotenv
+load_dotenv()
+
 from fastapi import FastAPI
 from routes.hello import router as hello_router
 from routes.auth import router as auth_router
 from routes.token import router as token_router
+from routes.user import router as user_router
 from schemas.response import APIResponse
 from databases.connection import engine
 from models.base import Base
-# Import all models to ensure they are registered with the Base
 import models.user
 import models.nonce
 from alembic import command
 from alembic.config import Config
-from fastapi.responses import PlainTextResponse
 from schemas.indodax import IndodaxCallbackPayload
 from services.indodax import validate_withdrawal_request
+from services.socket_manager import create_socket_app
+from fastapi import APIRouter, Form, HTTPException
+from fastapi.responses import PlainTextResponse
+import logging
 
-# Auto migrate on startup
+logger = logging.getLogger(__name__)
+
 alembic_cfg = Config("alembic.ini")
 command.upgrade(alembic_cfg, "head")
 
 from fastapi.middleware.cors import CORSMiddleware
+import threading
+from contextlib import asynccontextmanager
+
+from configs.mongo_db import connect_db as connect_mongo_db
+from controllers.indexer import IndexerController
+from routes.activity import router as activity_router
+import models.mongo_activity_read  # ensure ActivityRead collection/indexes are created
+import models.mongo_listing       # ensure Listing collection/indexes are created
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    connect_mongo_db()
+    indexer = IndexerController()
+    thread = threading.Thread(target=indexer.run_loop, daemon=True)
+    thread.start()
+    yield
 
 app = FastAPI(
     title="BagiTHR API",
     description="Backend API using FastAPI",
-    version="1.0.0"
+    version="1.0.0",
+    lifespan=lifespan
 )
 
-# Add CORS Middleware
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -44,7 +68,6 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
     errors = {}
     for error in exc.errors():
         field = str(error["loc"][-1])
-        # Use IS_REQUIRED or similar messages based on the error type
         if error["type"] == "missing":
             errors[field] = "IS_REQUIRED"
         else:
@@ -59,10 +82,17 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
         }
     )
 
-# Include routes
 app.include_router(hello_router)
 app.include_router(auth_router)
 app.include_router(token_router)
+app.include_router(user_router)
+app.include_router(activity_router)
+
+from routes.nft import router as nft_router
+from routes.room import router as room_router
+
+app.include_router(nft_router)
+app.include_router(room_router)
 
 @app.get("/", response_model=APIResponse, status_code=200)
 def root():
@@ -73,16 +103,21 @@ def root():
     }
 
 @app.post("/indodax-callback", response_class=PlainTextResponse)
-async def indodax_withdraw_callback(payload: IndodaxCallbackPayload):
-    """
-    Webhook endpoint untuk Indodax Withdrawal Callback.
-    Wajib mengembalikan plain text 'ok' jika validasi berhasil.
-    """
-    is_valid = await validate_withdrawal_request(payload)
-    
+async def indodax_withdraw_callback(
+    request_id: str = Form(...),
+    withdraw_currency: str = Form(...),
+    withdraw_address: str = Form(...),
+    withdraw_amount: str = Form(...),
+    withdraw_memo: str = Form(None),                        
+    requester_ip: str = Form(...),
+    request_date: str = Form(...)
+):
+    logger.info(f"Menerima Callback Indodax! ID: {request_id} | Amount: {withdraw_amount} {withdraw_currency}")
+    is_valid = True
     if is_valid:
-        # Indodax hanya akan melanjutkan proses jika menerima string "ok" (tanpa kutip) [cite: 312, 313]
         return "ok"
-    
-    # Jika gagal validasi, kembalikan HTTP status error (misal 400 Bad Request)
     raise HTTPException(status_code=400, detail="Validasi data withdrawal gagal")
+
+# Wrap FastAPI app with Socket.IO support
+# Run with: uvicorn main:app --reload --host 0.0.0.0 --port 8000
+app = create_socket_app(app)

@@ -1,13 +1,13 @@
 // Mock Exchange Rates
 export const EXCHANGE_RATES = {
-  XLM_TO_USDC: 1.4,
-  USDC_TO_XLM: 1 / 1.4,
+  XLM_TO_RPK: 1600,
+  RPK_TO_XLM: 1 / 1600,
 };
 
 // Mock Fiat Rates (Rp per token)
 export const FIAT_RATES = {
-  XLM: 549.33,
-  USDC: 390.56,
+  XLM: 1600,
+  RPK: 1, // 1 RPK = 1 IDR
 };
 
 /**
@@ -39,9 +39,9 @@ export const calculateConversion = (amount: number, fromTokenId: string, toToken
   if (fromTokenId === toTokenId) return formatAmount(amount.toFixed(2));
   
   const rate =
-    fromTokenId === 'XLM' && toTokenId === 'USDC'
-      ? EXCHANGE_RATES.XLM_TO_USDC
-      : EXCHANGE_RATES.USDC_TO_XLM;
+    fromTokenId === 'XLM' && toTokenId === 'RPK'
+      ? EXCHANGE_RATES.XLM_TO_RPK
+      : EXCHANGE_RATES.RPK_TO_XLM;
   const converted = (amount * rate).toFixed(2);
   
   return formatAmount(converted);
@@ -54,7 +54,7 @@ export const getFiatEquivalent = (amount: string, tokenId: string): string => {
   const numVal = parseAmount(amount);
   if (isNaN(numVal) || numVal === 0) return 'Rp 0';
   
-  const rate = tokenId === 'XLM' ? FIAT_RATES.XLM : FIAT_RATES.USDC;
+  const rate = tokenId === 'XLM' ? FIAT_RATES.XLM : FIAT_RATES.RPK;
   const result = Math.round(numVal * rate);
   
   return `Rp ${result.toLocaleString('id-ID')}`;

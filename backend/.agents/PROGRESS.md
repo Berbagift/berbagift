@@ -66,6 +66,12 @@
   - Upgraded the `GET /api/auth/me` endpoint to calculate and include the user's balances in Indonesian Rupiah (IDR) inside the `"balances_idr"` response key.
   - Dynamically calculates values by multiplying on-chain XLM/USDC balances with live rates retrieved from the high-availability pricing pipeline.
   - Gracefully falls back to 0 on valuation failures to keep the endpoint operational even if all pricing networks are down.
+- [x] **Phase 16**: Username Lookup API (`/api/users/{username}`).
+  - Restored `unique=True` on the `username` field in the `User` model to ensure 1 username maps to exactly 1 wallet address, which is required for the PRD's username-based THR distribution feature.
+  - Added duplicate username validation in the profile update endpoint (`PUT /api/auth/me`), returning `409 Conflict` if the requested username is already taken.
+  - Created `GET /api/users/{username}` to allow users to fetch wallet addresses by searching for a username.
+  - Returns a `200 OK` response with the matching user (id, username, wallet_address) to facilitate the username-based THR distribution specified in the PRD.
+  - Standardized response formatting to strictly match `RULES.md` requirements.
 
 ## 🏗️ Architecture & Context
 - **Framework**: FastAPI (Sync logic currently, standard routing).

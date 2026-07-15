@@ -1,10 +1,10 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
-import { cn } from '@/lib/utils';
-import { TOKENS } from '@/lib/data/tokens';
+
 import { isValidDecimalInput } from '@/lib/utils/currency';
 import { TokenLogo } from '@/components/ui/token-logo';
+import { useRegistryTokens } from '@/hooks/use-registry-tokens';
 
 interface RewardPoolSectionProps {
   tokenId: string;
@@ -24,8 +24,8 @@ export function RewardPoolSection({
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const availableTokens = Object.values(TOKENS);
-  const activeToken = TOKENS[tokenId] || TOKENS.XLM;
+  const { tokens: availableTokens, getToken } = useRegistryTokens();
+  const activeToken = getToken(tokenId);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -46,23 +46,22 @@ export function RewardPoolSection({
       </span>
       <div className="flex gap-3">
         
-        {/* Token Selection Dropdown */}
+        {/* Token Dropdown */}
         <div className="relative" ref={dropdownRef}>
           <button
             type="button"
             onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-            className="flex items-center justify-between gap-2 px-3 py-2.5 border border-border rounded-md bg-white dark:bg-card hover:bg-neutral-2 dark:hover:bg-neutral-10 cursor-pointer shrink-0 w-[115px] sm:w-[130px] transition-colors"
+            className="flex items-center justify-between gap-2 px-3 py-2.5 border border-border rounded-md bg-white dark:bg-card hover:bg-neutral-2 transition-colors shrink-0 w-[115px] sm:w-[130px] cursor-pointer h-full"
           >
             <div className="flex items-center gap-2">
               <TokenLogo symbol={activeToken.symbol} size="sm" />
               <span className="font-semibold text-neutral-9 dark:text-neutral-2 text-base">{activeToken.symbol}</span>
             </div>
-            <i className="fi fi-rr-angle-small-down text-neutral-7 dark:text-neutral-6 mt-0.5"></i>
+            <i className="fi fi-rr-angle-small-down text-neutral-7 dark:text-neutral-5"></i>
           </button>
 
-          {/* Dropdown Options */}
           {isDropdownOpen && (
-            <div className="absolute top-full left-0 mt-1 w-[160px] bg-white dark:bg-card border border-border rounded-md shadow-lg z-50 py-1 overflow-hidden">
+            <div className="absolute top-full left-0 mt-1 w-[180px] bg-white dark:bg-card border border-border rounded-md shadow-lg z-50 py-1 overflow-hidden">
               {availableTokens.map((t) => (
                 <button
                   key={t.id}
@@ -71,13 +70,13 @@ export function RewardPoolSection({
                     setTokenId(t.id);
                     setIsDropdownOpen(false);
                   }}
-                  className="w-full flex items-center justify-between px-3 py-2 hover:bg-neutral-2 dark:hover:bg-neutral-10 transition-colors text-left"
+                  className="w-full flex items-center justify-between px-3 py-2 hover:bg-neutral-2 transition-colors text-left"
                 >
                   <div className="flex items-center gap-2">
                     <TokenLogo symbol={t.symbol} size="sm" />
-                    <span className="font-medium text-neutral-9 dark:text-neutral-2 text-base">{t.symbol}</span>
+                    <span className="font-medium text-black dark:text-neutral-1 text-sm">{t.symbol}</span>
                   </div>
-                  {t.id === tokenId && (
+                  {t.id === activeToken.id && (
                     <i className="fi fi-rr-check text-[#16a34a] text-xs"></i>
                   )}
                 </button>

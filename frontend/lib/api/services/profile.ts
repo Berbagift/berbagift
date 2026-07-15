@@ -33,20 +33,17 @@ export const authService = {
 };
 */
 
+import { apiClient, unwrapApiData } from '../client';
+import type { UserProfile } from '../types/profile';
+
 export const profileService = {
-  /**
-   * Retrieve current user profile.
-   * Commented placeholder structure below:
-   */
-  /*
-  getProfile: async (): Promise<ApiResponse<UserProfile>> => {
-    const res = await apiClient.get<ApiResponse<UserProfile>>('/auth/me');
-    return res.data;
+  getProfile: async (): Promise<UserProfile> => {
+    const res = await apiClient.get('/auth/me');
+    return unwrapApiData(res.data);
   },
 
-  updateProfile: async (data: { username: string }): Promise<ApiResponse<UserProfile>> => {
-    const res = await apiClient.put<ApiResponse<UserProfile>>('/auth/me', data);
-    return res.data;
+  updateProfile: async (data: { username?: string; email?: string }): Promise<UserProfile> => {
+    const res = await apiClient.put('/auth/me', data);
+    return unwrapApiData(res.data);
   }
-  */
 };

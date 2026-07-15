@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { ActivityTable } from '@/components/dashboard/activity-table';
+import { ActivityTable, ActivityTableSkeleton } from '@/components/dashboard/activity-table';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useActivities } from '@/lib/api/queries';
@@ -23,8 +23,14 @@ export default function AllActivityPage() {
 
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-secondary-500"></div>
+      <div className="space-y-6 md:space-y-8 pb-6 md:pb-8">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="h-10 w-full md:w-80 bg-emerald-50/50 dark:bg-emerald-900/10 rounded-md animate-pulse"></div>
+          <div className="h-10 w-32 bg-emerald-50/50 dark:bg-emerald-900/10 rounded-md animate-pulse"></div>
+        </div>
+        <div className="border border-border rounded-md p-5 bg-white dark:bg-card">
+          <ActivityTableSkeleton />
+        </div>
       </div>
     );
   }

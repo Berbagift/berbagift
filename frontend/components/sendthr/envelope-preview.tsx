@@ -6,9 +6,12 @@ import { useRouter } from "next/navigation";
 import { useSendThrStore } from "@/hooks/use-send-thr-state";
 import { PRESET_ENVELOPES } from "@/lib/data/envelopes";
 import { useEnvelopes } from "@/lib/api/queries";
+import { usersService } from "@/lib/api/services/users";
+import { useQueryClient } from "@tanstack/react-query";
 
 export function EnvelopePreview() {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const state = useSendThrStore();
   const { data: envelopes } = useEnvelopes();
   const presetEnvelopes = envelopes?.length ? envelopes : PRESET_ENVELOPES;
@@ -25,6 +28,8 @@ export function EnvelopePreview() {
       (d) => d.id === state.selectedUploadedDesignId,
     );
     if (custom) bgUrl = custom.url;
+  } else if (state.uploadMode === "my_nfts" && state.selectedNftImageUrl) {
+    bgUrl = state.selectedNftImageUrl;
   }
 
   // Recipient Display Logic
@@ -36,19 +41,209 @@ export function EnvelopePreview() {
     ? `${primaryRecipient.username}${additionalCount > 0 ? ` +${additionalCount}` : ""}`
     : "Recipient Name";
 
-  // =========================================================================
-  // DEV MOCK CONFIGURATION
-  // - Set IS_DEV_MODE to true to auto-simulate transitions (Processing -> Success)
-  // - Set IS_DEV_MODE to false for testing real API endpoints/backend status integration
-  // =========================================================================
-  const IS_DEV_MODE = true;
 
-  const handleConfirm = () => {
-    state.setStatus('processing');
-    if (IS_DEV_MODE) {
+
+  /**
+   * Resolve the active envelope image to a File/Blob for Pinata upload.
+   * - preset: fetch the URL from CDN as a blob
+   * - upload: already stored as a blob URL in uploadedDesigns
+   */
+  const getEnvelopeFile = async (): Promise<File> => {
+    if (state.uploadMode === "my_nfts" && state.selectedNftImageUrl) {
+      const res = await fetch(state.selectedNftImageUrl);
+      const blob = await res.blob();
+      const ext = blob.type.includes("png") ? "png" : "jpg";
+      return new File([blob], `envelope-mynft.${ext}`, { type: blob.type });
+    }
+    if (state.uploadMode === "upload" && state.selectedUploadedDesignId) {
+      const custom = state.uploadedDesigns.find(
+        (d) => d.id === state.selectedUploadedDesignId
+      );
+      if (custom) {
+        const res = await fetch(custom.url);
+        const blob = await res.blob();
+        const ext = blob.type.includes("png") ? "png" : "jpg";
+        return new File([blob], `envelope-custom.${ext}`, { type: blob.type });
+      }
+    }
+    // Preset: fetch image by URL
+    const res = await fetch(bgUrl);
+    const blob = await res.blob();
+    const ext = blob.type.includes("png") ? "png" : "jpg";
+    return new File([blob], `envelope-preset.${ext}`, { type: blob.type });
+  };
+
+  const handleConfirm = async () => {
+    if (state.recipients.length === 0) {
+      alert("Please add at least one recipient.");
+      return;
+    }
+
+    state.setStatus("processing");
+
+    // ── Pre-flight: Get live Freighter address & verify network ───────────────
+    // IMPORTANT: must get address BEFORE building the transaction so the same
+    // key is used as both the source account and the signer.
+    const { requestAccess, getNetwork, signTransaction } = await import("@stellar/freighter-api");
+    const { config } = await import("@/lib/stellar/transactions");
+
+    const { address: senderAddress, error: addrErr } = await requestAccess();
+    if (addrErr || !senderAddress) {
+      state.setStatus("error");
+      alert("Could not read address from Freighter. Please unlock your wallet and try again.");
+      return;
+    }
+
+    const { network: freighterNetwork } = await getNetwork();
+    const expectedNetwork = process.env.NEXT_PUBLIC_STELLAR_NETWORK || "TESTNET";
+    if (freighterNetwork && freighterNetwork.toUpperCase() !== expectedNetwork.toUpperCase()) {
+      state.setStatus("error");
+      alert(`Wallet is on ${freighterNetwork} but app expects ${expectedNetwork}. Please switch networks in Freighter.`);
+      return;
+    }
+
+    try {
+      // ── Step 1: Resolve usernames → wallet addresses ──────────────────────
+      console.debug('[BagiTHR] senderAddress (from Freighter):', senderAddress);
+
+      const resolvedRecipients: Array<{
+        walletAddress: string;
+        username: string;
+      }> = [];
+
+      for (const rec of state.recipients) {
+        try {
+          const userData = await usersService.getUserByUsername(rec.username);
+          resolvedRecipients.push({
+            walletAddress: userData.wallet_address,
+            username: rec.username,
+          });
+        } catch {
+          throw new Error(`Username not found or invalid: @${rec.username}`);
+        }
+      }
+
+      const totalAmount = parseFloat(state.amount);
+      const amountPerRecipient = (
+        totalAmount / resolvedRecipients.length
+      ).toFixed(7);
+
+      const isExistingNft = state.uploadMode === 'my_nfts' && state.selectedNftTokenId != null;
+
+      let xdr: string;
+      const { submitNftGiftTx } = await import("@/lib/stellar/nft-gift");
+
+      if (isExistingNft) {
+        // ── Re-gift existing NFT (does NOT mint a new one) ─────────────────
+        const { buildForwardGiftTx } = await import(
+          "@/lib/stellar/nft-gift"
+        );
+
+        const forwardRecipients = resolvedRecipients.map((r) => ({
+          walletAddress: r.walletAddress,
+          tokenId: state.selectedNftTokenId!,
+          amount: amountPerRecipient,
+          message: state.message || "",
+        }));
+
+        xdr = await buildForwardGiftTx(
+          senderAddress,
+          state.tokenId,
+          forwardRecipients
+        );
+      } else {
+        // ── Mint new NFT: upload envelope to IPFS first ────────────────────
+        const { pinFileToIPFS, pinJSONToIPFS } = await import("@/lib/pinata.js");
+
+        let tokenUri: string;
+        try {
+          const envelopeFile = await getEnvelopeFile();
+          const imageHash = await pinFileToIPFS(envelopeFile, {
+            name: `Berbagift-envelope-${Date.now()}`,
+          });
+
+          const metadataHash = await pinJSONToIPFS(
+            {
+              name: state.title || "Berbagift NFT",
+              description: state.message || "A Berbagift gift sent via Berbagift Platform",
+              image: `ipfs://${imageHash}`,
+              attributes: [
+                { trait_type: "Token", value: state.activeToken.symbol },
+                { trait_type: "Amount", value: state.amount },
+                {
+                  trait_type: "Recipients",
+                  value: resolvedRecipients.map((r) => r.username).join(", "),
+                },
+                { trait_type: "Sender", value: senderAddress },
+                { trait_type: "Platform", value: "Berbagift" },
+                { trait_type: "Mint Date", value: new Date().toISOString() },
+              ],
+            },
+            { name: `Berbagift-metadata-${Date.now()}` }
+          );
+          tokenUri = `ipfs://${metadataHash}`;
+        } catch (pinErr: any) {
+          throw new Error(
+            "Failed to upload envelope to IPFS. Check your Pinata API keys. Details: " +
+            (pinErr?.message || pinErr)
+          );
+        }
+
+        const nftRecipients = resolvedRecipients.map((r) => ({
+          walletAddress: r.walletAddress,
+          amount: amountPerRecipient,
+          message: state.message || "",
+          tokenUri,
+        }));
+
+        // ── Step 4: Build Soroban transaction (use senderAddress from Freighter) ─
+        const { buildNftGiftTx } = await import("@/lib/stellar/nft-gift");
+        // senderAddress was fetched live from Freighter BEFORE this step,
+        // guaranteeing it's the same key that will sign the transaction.
+        xdr = await buildNftGiftTx(
+          senderAddress,
+          state.tokenId,
+          nftRecipients
+        );
+      }
+
+      // ── Step 5: Sign via Freighter (same address used to build the tx) ───────
+      const { signedTxXdr, error: signError } = await signTransaction(xdr, {
+        networkPassphrase: config.networkPassphrase,
+        address: senderAddress,
+      });
+
+      if (signError) {
+        throw new Error(signError.message || "Transaction signing rejected by user");
+      }
+      if (!signedTxXdr) {
+        throw new Error("Freighter returned empty signed XDR");
+      }
+
+      const signedXdr = signedTxXdr;
+
+      // ── Step 6: Submit to Soroban RPC ──────────────────────────────────────
+      const result = await submitNftGiftTx(signedXdr);
+
+      state.setTxHash(result.hash);
+      state.setStatus("success");
+      
+      // Auto refresh balance, activity, and NFTs on dashboard
+      queryClient.invalidateQueries({ queryKey: ['userProfile'] });
+      queryClient.invalidateQueries({ queryKey: ['activities'] });
+      queryClient.invalidateQueries({ queryKey: ['nfts'] });
+      
       setTimeout(() => {
-        state.setStatus('success');
-      }, 2000);
+        queryClient.invalidateQueries({ queryKey: ['userProfile'] });
+        queryClient.invalidateQueries({ queryKey: ['activities'] });
+        queryClient.invalidateQueries({ queryKey: ['nfts'] });
+      }, 3000);
+      
+      // Form state will be reset when the user clicks "Done" on the success screen.
+    } catch (err: any) {
+      console.error("Transaction failed:", err);
+      alert(err.message || "Transaction failed. Please try again.");
+      state.setStatus("error");
     }
   };
 

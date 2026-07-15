@@ -15,7 +15,6 @@ class DatabaseConnection:
         finally:
             db.close()
 
-# Global instance
 db_connection = DatabaseConnection()
 engine = db_connection.engine
 get_db_session = db_connection.get_db_session

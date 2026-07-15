@@ -5,10 +5,6 @@ from sqlalchemy.sql import func
 Base = declarative_base()
 
 class TimestampMixin:
-    """
-    Mixin to automatically add standard audit timestamps to models.
-    Supports soft deletes via the deleted_at column.
-    """
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
     deleted_at = Column(DateTime(timezone=True), nullable=True)

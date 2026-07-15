@@ -19,42 +19,62 @@ class AuthController:
         self.nonce_db = NonceDatabase(db)
 
     def _fetch_stellar_balances(self, wallet_address: str):
+        xlm_balance = 0.0
+        rpk_balance = 0.0
         try:
             from stellar_sdk import Server
             from stellar_sdk.exceptions import NotFoundError
-            
             server = Server("https://horizon-testnet.stellar.org")
-            
             try:
                 account = server.accounts().account_id(wallet_address).call()
+                for b in account.get("balances", []):
+                    if b.get("asset_type") == "native":
+                        xlm_balance = float(b.get("balance", 0.0))
             except NotFoundError:
-                # Wallet exists but is unfunded on Stellar Testnet
-                return {"XLM": 0.0, "USDC": 0.0}
-                
-            balances = account.get("balances", [])
-            xlm_balance = 0.0
-            usdc_balance = 0.0
-            
-            for b in balances:
-                if b.get("asset_type") == "native":
-                    xlm_balance = float(b.get("balance", 0.0))
-                elif b.get("asset_code") == "USDC" and b.get("asset_issuer") == os.getenv("USDC_ISSUER_ADDRESS", "GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5"):
-                    usdc_balance = float(b.get("balance", 0.0))
-            return {"XLM": xlm_balance, "USDC": usdc_balance}
+                pass
+        except Exception:
+            pass
+        try:
+            from stellar_sdk import SorobanServer, TransactionBuilder, Network, Account, scval
+            from stellar_sdk.xdr import SCVal
+            import os
+            contract_id = os.getenv("RPK_CONTRACT", "CAXMJUKELFC7THVUKVH4NA5RYUDLORCKSZ5HTOPOMEXRMZJLFHKZJCQZ")
+            contract_id = contract_id.strip('"').strip("'")
+            rpc_server = SorobanServer("https://soroban-testnet.stellar.org")
+            dummy = Account("GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5", 1)
+            tx = (
+                TransactionBuilder(
+                    source_account=dummy,
+                    network_passphrase=Network.TESTNET_NETWORK_PASSPHRASE,
+                    base_fee=100,
+                )
+                .append_invoke_contract_function_op(
+                    contract_id=contract_id,
+                    function_name="balance",
+                    parameters=[scval.to_address(wallet_address)],
+                )
+                .set_timeout(30)
+                .build()
+            )
+            sim = rpc_server.simulate_transaction(tx)
+            if sim and sim.results:
+                xdr_str = sim.results[0].xdr
+                sc_val = SCVal.from_xdr(xdr_str)
+                if sc_val.i128 is not None:
+                    hi = sc_val.i128.hi.int64
+                    lo = sc_val.i128.lo.uint64
+                    val = (hi << 64) | lo
+                    rpk_balance = float(val) / 10000000.0
         except Exception as e:
-            pass # Suppress network errors silently
-            return {"XLM": 0.0, "USDC": 0.0}
+            print(f"[!] Error fetching RPK via Soroban: {e}")
+            pass
+        return {"XLM": xlm_balance, "RPK": rpk_balance}
 
 
     def generate_nonce(self, request: NonceRequest):
-        # Generate a random 16-byte hex string
         random_nonce = secrets.token_hex(16)
-        # Format the message to be human-readable for the wallet signing prompt
         message = f"Welcome to BagiTHR!\n\nPlease sign this message to authenticate.\nNonce: {random_nonce}"
-        
-        # Upsert nonce in DB
         self.nonce_db.upsert_nonce(wallet_address=request.wallet_address, nonce_message=message)
-        
         return {
             "message": "Nonce generated successfully",
             "data": {
@@ -64,7 +84,6 @@ class AuthController:
         }, 201
 
     def sign_in(self, request: SignInRequest):
-        # 1. Fetch Nonce
         stored_nonce = self.nonce_db.get_nonce(request.wallet_address)
         if not stored_nonce:
             return {
@@ -74,7 +93,6 @@ class AuthController:
                     "wallet_address": "IS_INVALID"
                 }
             }, 400
-            
         if datetime.utcnow() > stored_nonce.expires_at:
             self.nonce_db.delete_nonce(request.wallet_address)
             return {
@@ -85,30 +103,20 @@ class AuthController:
                 }
             }, 400
 
-        # 2. Verify Stellar Signature against the stored nonce message
         try:
             kp = Keypair.from_public_key(request.wallet_address)
-            
             try:
                 signature_bytes = base64.b64decode(request.signature)
             except Exception:
                 signature_bytes = bytes.fromhex(request.signature)
-            
-            # Freighter's signMessage automatically prefixes the message
             SIGN_MESSAGE_PREFIX = "Stellar Signed Message:\n"
             data_to_verify = (SIGN_MESSAGE_PREFIX + stored_nonce.nonce_message).encode('utf-8')
-            
-            # Freighter signs the SHA-256 hash of the prefixed message
             import hashlib
             data_hash = hashlib.sha256(data_to_verify).digest()
-            
             try:
-                # Some versions might sign the raw data, but usually it's the hash
                 kp.verify(data_hash, signature_bytes)
             except Exception:
-                # Fallback to verify raw data just in case
                 kp.verify(data_to_verify, signature_bytes)
-            
         except Exception as e:
             return {
                 "message": "Signature verification failed",
@@ -118,28 +126,27 @@ class AuthController:
                 }
             }, 400
 
-        # 3. Clean up used nonce (Prevent replay attack)
         self.nonce_db.delete_nonce(request.wallet_address)
 
-        # 4. Check if user exists, else create
         user = self.user_db.get_user_by_wallet(request.wallet_address)
-        
         if not user:
             user = self.user_db.create_user(
                 wallet_address=request.wallet_address,
-                username=request.wallet_address
+                username=None
             )
             status_code = 201
             message = "User registered and logged in successfully"
         else:
+            if user.username == user.wallet_address or user.username == user.wallet_address[:50]:
+                user = self.user_db.update_user(user, clear_username=True)
             status_code = 201
             message = "Login successful"
-            
-        # Generate JWT access token
         access_token = create_access_token(
             data={"sub": str(user.id), "wallet_address": user.wallet_address}
         )
-            
+        import urllib.parse
+        avatar_name = urllib.parse.quote(user.username) if user.username else "USR"
+        avatar_url = f"https://ui-avatars.com/api/?name={avatar_name}&background=D1FAE5&color=047857&rounded=true"
         return {
             "message": message,
             "data": {
@@ -147,6 +154,7 @@ class AuthController:
                 "username": user.username,
                 "wallet_address": user.wallet_address,
                 "role": user.role,
+                "avatar_url": avatar_url,
                 "access_token": access_token
             },
             "errors": None
@@ -159,7 +167,6 @@ class AuthController:
                 "data": None,
                 "errors": None
             }, 401
-            
         token = authorization.split(" ")[1]
         try:
             payload = verify_access_token(token)
@@ -175,7 +182,6 @@ class AuthController:
                 "data": None,
                 "errors": None
             }, 401
-            
         user_id = payload.get("sub")
         if not user_id:
             return {
@@ -183,7 +189,6 @@ class AuthController:
                 "data": None,
                 "errors": None
             }, 401
-            
         user = self.user_db.get_user_by_id(int(user_id))
         if not user:
             return {
@@ -191,26 +196,34 @@ class AuthController:
                 "data": None,
                 "errors": None
             }, 404
-            
-        # Fetch on-chain balances dynamically
+        if user.username == user.wallet_address or user.username == user.wallet_address[:50]:
+            user = self.user_db.update_user(user, clear_username=True)
         balances = self._fetch_stellar_balances(user.wallet_address)
-        
-        # Fetch token prices in IDR (Rupiah) with waterfall fallback
-        balances_idr = {"XLM": 0, "USDC": 0}
+        balances_idr = {"XLM": 0, "RPK": 0}
         try:
             from controllers.token import TokenController
             token_controller = TokenController()
             prices, _ = token_controller.get_prices_waterfall()
-            
             xlm_price = prices.get("XLM", 0)
             usdc_price = prices.get("USDC", 0)
             
-            balances_idr["XLM"] = int(round(balances.get("XLM", 0.0) * xlm_price))
-            balances_idr["USDC"] = int(round(balances.get("USDC", 0.0) * usdc_price))
-        except Exception as e:
-            # Fallback warning if pricing fails
-            print(f"[!] Warning: Failed to calculate balance in IDR. Error: {e}")
+            xlm_idr = int(round(balances.get("XLM", 0.0) * xlm_price))
+            rpk_idr = int(round(balances.get("RPK", 0.0)))
             
+            balances_idr["XLM"] = xlm_idr
+            balances_idr["RPK"] = rpk_idr
+            balances_idr["total"] = xlm_idr + rpk_idr
+            
+            if xlm_price > 0:
+                balances["total_xlm"] = balances.get("XLM", 0.0) + (rpk_idr / xlm_price)
+            else:
+                balances["total_xlm"] = balances.get("XLM", 0.0)
+                
+        except Exception as e:
+            print(f"[!] Warning: Failed to calculate balance in IDR. Error: {e}")
+        import urllib.parse
+        avatar_name = urllib.parse.quote(user.username) if user.username else "USR"
+        avatar_url = f"https://ui-avatars.com/api/?name={avatar_name}&background=D1FAE5&color=047857&rounded=true"
         return {
             "message": "Successfully retrieved user data",
             "data": {
@@ -219,6 +232,7 @@ class AuthController:
                 "email": user.email,
                 "wallet_address": user.wallet_address,
                 "role": user.role,
+                "avatar_url": avatar_url,
                 "balances": balances,
                 "balances_idr": balances_idr
             },
@@ -226,14 +240,12 @@ class AuthController:
         }, 200
 
     def update_me(self, authorization: str | None, request: UpdateProfileRequest):
-        # 1. Authenticate user via JWT
         if not authorization or not authorization.startswith("Bearer "):
             return {
                 "message": "Authentication failed: Missing or invalid Authorization header",
                 "data": None,
                 "errors": None
             }, 401
-            
         token = authorization.split(" ")[1]
         try:
             payload = verify_access_token(token)
@@ -249,7 +261,6 @@ class AuthController:
                 "data": None,
                 "errors": None
             }, 401
-            
         user_id_str = payload.get("sub")
         if not user_id_str:
             return {
@@ -257,7 +268,6 @@ class AuthController:
                 "data": None,
                 "errors": None
             }, 401
-            
         user_id = int(user_id_str)
         user = self.user_db.get_user_by_id(user_id)
         if not user:
@@ -267,16 +277,20 @@ class AuthController:
                 "errors": None
             }, 404
 
-        # 2. Extract fields
         new_username = request.username
         new_email = request.email
 
-        # 3. Validate inputs & handle conflicts
         errors = {}
 
         if new_username is not None:
             if len(new_username) > 50:
                 errors["username"] = "TOO_LONG"
+            elif self.user_db.check_username_exists(new_username, user_id):
+                return {
+                    "message": "Username already taken",
+                    "data": None,
+                    "errors": None
+                }, 409
 
         if new_email is not None:
             if len(new_email) > 100:
@@ -295,14 +309,16 @@ class AuthController:
                 "errors": errors
             }, 400
 
-        # 4. Update the DB
         updated_user = self.user_db.update_user(
             user=user,
             username=new_username,
             email=new_email
         )
 
-        # 5. Return success per rules (201 for PUT success)
+        import urllib.parse
+        avatar_name = urllib.parse.quote(updated_user.username) if updated_user.username else "USR"
+        avatar_url = f"https://ui-avatars.com/api/?name={avatar_name}&background=D1FAE5&color=047857&rounded=true"
+
         return {
             "message": "Profile updated successfully",
             "data": {
@@ -310,7 +326,8 @@ class AuthController:
                 "username": updated_user.username,
                 "email": updated_user.email,
                 "wallet_address": updated_user.wallet_address,
-                "role": updated_user.role
+                "role": updated_user.role,
+                "avatar_url": avatar_url
             },
             "errors": None
         }, 201

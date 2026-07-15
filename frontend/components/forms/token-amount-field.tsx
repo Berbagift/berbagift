@@ -68,7 +68,7 @@ export function TokenAmountField({
       )}
 
       {/* Middle Row: Selectors & Input */}
-      <div className="flex gap-2 md:gap-3">
+      <div className="flex gap-2 md:gap-3 items-stretch">
         {/* Token Selector Pill */}
         <div className="relative" ref={dropdownRef}>
           <button
@@ -76,7 +76,7 @@ export function TokenAmountField({
             onClick={handlePillClick}
             disabled={!showDropdown || (!onTokenClick && (!availableTokens || availableTokens.length === 0))}
             className={cn(
-              "flex items-center justify-between gap-1.5 md:gap-3 px-2 md:px-3 py-2 md:py-2.5 border border-border rounded-md bg-white dark:bg-card transition-colors shrink-0 w-[110px] md:w-[130px]",
+              "flex items-center justify-between gap-1.5 md:gap-3 px-2 md:px-3 h-full min-h-[46px] border border-border rounded-md bg-white dark:bg-card transition-colors shrink-0 w-[110px] md:w-[130px]",
               showDropdown && (onTokenClick || availableTokens) ? "hover:bg-neutral-2 cursor-pointer" : "cursor-default"
             )}
           >
@@ -116,7 +116,7 @@ export function TokenAmountField({
         </div>
 
         {/* Amount Input */}
-        <div className="flex-grow border border-border rounded-md bg-white dark:bg-card overflow-hidden flex items-center px-3 py-1.5 focus-within:border-neutral-8 transition-colors">
+        <div className="flex-grow border border-border rounded-md bg-white dark:bg-card overflow-hidden flex items-center px-3 h-full min-h-[46px] focus-within:border-neutral-8 transition-colors">
           <input
             type="text"
             inputMode="decimal"

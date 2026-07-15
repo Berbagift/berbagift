@@ -1,8 +1,20 @@
+import { useState } from 'react';
+
 interface IdrBalanceCardProps {
   onTopUpClick?: () => void;
+  balance?: number;
 }
 
-export function IdrBalanceCard({ onTopUpClick }: IdrBalanceCardProps) {
+export function IdrBalanceCard({ onTopUpClick, balance = 0 }: IdrBalanceCardProps) {
+  const [isVisible, setIsVisible] = useState(true);
+
+  const formattedBalance = new Intl.NumberFormat('id-ID', {
+    style: 'currency',
+    currency: 'IDR',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0
+  }).format(balance);
+
   return (
     <div className="bg-white dark:bg-card border border-border rounded-md p-6 md:p-8 flex flex-col justify-between h-full shadow-[0_2px_8px_-2px_rgba(0,0,0,0.02)]">
       {/* Top Section */}
@@ -16,17 +28,20 @@ export function IdrBalanceCard({ onTopUpClick }: IdrBalanceCardProps) {
           {/* Text Block */}
           <div className="flex flex-col pt-1">
             <span className="text-[15px] text-neutral-8 font-medium mb-1">
-              Your IDR Balance
+              RPK Balance
             </span>
             <span className="text-3xl md:text-[32px] font-semibold text-black dark:text-neutral-1 leading-none tracking-tight">
-              Rp 1.595.000
+              {isVisible ? formattedBalance : 'Rp •••••••'}
             </span>
           </div>
         </div>
 
         {/* Visibility Toggle - Anchored Top Right */}
-        <button className="w-10 h-10 border border-border rounded-md flex items-center justify-center text-neutral-7 dark:text-neutral-6 hover:bg-neutral-2 hover:text-neutral-9 transition-colors shrink-0 absolute right-0 top-0">
-          <i className="fi fi-rr-eye text-base"></i>
+        <button 
+          onClick={() => setIsVisible(!isVisible)}
+          className="w-10 h-10 border border-border rounded-md flex items-center justify-center text-neutral-7 dark:text-neutral-6 hover:bg-neutral-2 hover:text-neutral-9 transition-colors shrink-0 absolute right-0 top-0"
+        >
+          <i className={`fi ${isVisible ? 'fi-rr-eye-crossed' : 'fi-rr-eye'} text-base`}></i>
         </button>
       </div>
 

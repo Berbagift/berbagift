@@ -1,22 +1,67 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { RoomFilterTabs } from '@/components/rooms/RoomFilterTabs';
 import { RoomSearch } from '@/components/rooms/RoomSearch';
 import { RoomGrid } from '@/components/rooms/RoomGrid';
 import { RoomCard } from '@/components/rooms/RoomCard';
 import { EmptyState } from '@/components/rooms/EmptyState';
 import { useRouter } from 'next/navigation';
-import { useRooms } from '@/lib/api/queries';
+import { useExploreRooms } from '@/lib/api/queries';
+import { getAuthToken } from '@/lib/auth';
+
+const RoomCardSkeleton = () => (
+  <div className="flex flex-col bg-emerald-50/50 dark:bg-emerald-900/10 border border-border rounded-xl p-6 h-[380px] animate-pulse">
+    {/* Header */}
+    <div className="flex flex-col gap-2 mb-4">
+      <div className="h-6 w-3/4 bg-emerald-100/80 dark:bg-emerald-800/30 rounded" />
+      <div className="h-4 w-full bg-emerald-100/80 dark:bg-emerald-800/30 rounded mt-1" />
+      <div className="h-4 w-5/6 bg-emerald-100/80 dark:bg-emerald-800/30 rounded" />
+    </div>
+
+    {/* Creator Info */}
+    <div className="flex items-center gap-3 mb-4">
+      <div className="w-10 h-10 rounded-full bg-emerald-100/80 dark:bg-emerald-800/30 flex-shrink-0" />
+      <div className="flex flex-col gap-1 w-full">
+        <div className="h-4 w-24 bg-emerald-100/80 dark:bg-emerald-800/30 rounded" />
+        <div className="h-3 w-16 bg-emerald-100/80 dark:bg-emerald-800/30 rounded" />
+      </div>
+    </div>
+
+    {/* Stats */}
+    <div className="h-12 w-full bg-emerald-100/80 dark:bg-emerald-800/30 rounded mb-4" />
+
+    {/* Participant Stack */}
+    <div className="h-8 w-1/2 bg-emerald-100/80 dark:bg-emerald-800/30 rounded mb-4" />
+
+    <div className="mt-auto">
+      {/* Actions */}
+      <div className="flex gap-2 mb-4">
+        <div className="h-10 w-full bg-emerald-100/80 dark:bg-emerald-800/30 rounded" />
+        <div className="h-10 w-12 bg-emerald-100/80 dark:bg-emerald-800/30 rounded flex-shrink-0" />
+      </div>
+
+      {/* Footer Status */}
+      <div className="pt-4 border-t border-border">
+        <div className="h-4 w-1/3 bg-emerald-100/80 dark:bg-emerald-800/30 rounded" />
+      </div>
+    </div>
+  </div>
+);
 
 export default function ExploreRoomsPage() {
   const router = useRouter();
   const [activeFilter, setActiveFilter] = useState('All Rooms');
   const [searchQuery, setSearchQuery] = useState('');
   const [savedRoomIds, setSavedRoomIds] = useState<string[]>([]);
+  const [token, setToken] = useState<string | null>(null);
+
+  useEffect(() => {
+    setToken(getAuthToken() || null);
+  }, []);
 
   // Fetch rooms reactively via TanStack Query
-  const { data: rooms = [], isLoading } = useRooms({
+  const { data: rooms = [], isLoading } = useExploreRooms(token, {
     status: activeFilter,
     search: searchQuery,
   });
@@ -67,9 +112,11 @@ export default function ExploreRoomsPage() {
       {/* Main Content Area */}
       <div className="flex-1 mt-6 bg-background">
         {isLoading ? (
-          <div className="flex justify-center items-center h-64">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-secondary-500"></div>
-          </div>
+          <RoomGrid>
+            {[...Array(8)].map((_, i) => (
+              <RoomCardSkeleton key={i} />
+            ))}
+          </RoomGrid>
         ) : processedRooms.length > 0 ? (
           <RoomGrid>
             {processedRooms.map((room) => (
