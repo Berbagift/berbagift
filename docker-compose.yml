@@ -37,7 +37,7 @@ services:
     environment:
       - DB_HOST=db
       - APP_ENV=development
-      - MONGO_URI=mongodb://${MONGO_USER}:${MONGO_PASSWORD}@mongo:27017/${MONGO_DB_NAME}?authSource=admin
+      - MONGO_HOST=mongo
     ports:
       # Expose backend directly only to localhost for local testing (Swagger docs)
       - "127.0.0.1:8000:8000"

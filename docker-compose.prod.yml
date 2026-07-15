@@ -58,7 +58,7 @@ services:
     environment:
       - DB_HOST=db
       - APP_ENV=production
-      - MONGO_URI=mongodb://${MONGO_USER:-admin}:${MONGO_PASSWORD:-password}@mongo:27017/${MONGO_DB_NAME:-bagithr_indexer}?authSource=admin
+      - MONGO_HOST=mongo
     depends_on:
       db:
         condition: service_healthy

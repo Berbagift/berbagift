@@ -37,7 +37,7 @@ services:
     environment:
       - DB_HOST=db
       - APP_ENV=staging
-      - MONGO_URI=mongodb://${MONGO_USER}:${MONGO_PASSWORD}@mongo:27017/${MONGO_DB_NAME}?authSource=admin
+      - MONGO_HOST=mongo
     depends_on:
       db:
         condition: service_healthy
