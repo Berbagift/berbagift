@@ -32,10 +32,12 @@ services:
       - .env
     environment:
       - APP_ENV=production
+      - DB_HOST=db
     ports:
       - "8005:8000"
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     restart: always
     healthcheck:
       test:
