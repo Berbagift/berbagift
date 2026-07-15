@@ -1,6 +1,6 @@
 interface RoomStatsProps {
   rewardPool: string;
-  winners: string[] | number;
+  winners: { wallet_address: string; username: string }[] | number;
 }
 
 export function RoomStats({ rewardPool, winners }: RoomStatsProps) {
