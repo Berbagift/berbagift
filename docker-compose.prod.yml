@@ -148,11 +148,11 @@ services:
     volumes:
       - mongo_data_prod:/data/db
     healthcheck:
-      test: ["CMD-SHELL", "mongosh --eval 'db.adminCommand(\"ping\")' -u $${MONGO_INITDB_ROOT_USERNAME} -p $${MONGO_INITDB_ROOT_PASSWORD} --authenticationDatabase admin"]
+      test: ["CMD-SHELL", "mongosh --eval 'db.adminCommand(\"ping\")'"]
       interval: 10s
       timeout: 5s
-      retries: 3
-      start_period: 10s
+      retries: 5
+      start_period: 15s
     logging:
       driver: "json-file"
       options:
