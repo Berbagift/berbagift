@@ -1,49 +1,6 @@
 version: '3.8'
 
 services:
-  # ── MySQL 8 ─────────────────────────────────────────────────
-  db:
-    image: mysql:8.0
-    container_name: bagithr_db_prod
-    restart: always
-    env_file:
-      - .env
-    environment:
-      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
-      MYSQL_DATABASE: ${DB_NAME:-bagithr}
-      MYSQL_ROOT_HOST: '%'
-    volumes:
-      - db_data_prod:/var/lib/mysql
-    healthcheck:
-      test:
-        ["CMD-SHELL", "mysqladmin ping -h localhost -uroot -p$$MYSQL_ROOT_PASSWORD"]
-      timeout: 10s
-      retries: 10
-      interval: 10s
-      start_period: 30s
-
-  # ── MongoDB 6 ───────────────────────────────────────────────
-  mongo:
-    image: mongo:6.0
-    container_name: bagithr_mongo_prod
-    restart: always
-    environment:
-      - MONGO_INITDB_ROOT_USERNAME=${MONGO_USER:-root}
-      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_PASSWORD:-password}
-      - MONGO_INITDB_DATABASE=${MONGO_DB_NAME:-bagithr_indexer}
-    volumes:
-      - mongo_data_prod:/data/db
-    healthcheck:
-      test:
-        [
-          "CMD-SHELL",
-          "mongosh --eval 'db.adminCommand(\"ping\")' -u $${MONGO_INITDB_ROOT_USERNAME} -p $${MONGO_INITDB_ROOT_PASSWORD} --authenticationDatabase admin"
-        ]
-      interval: 10s
-      timeout: 5s
-      retries: 3
-      start_period: 10s
-
   # ── FastAPI Backend (production image) ──────────────────────
   backend:
     build:
@@ -53,14 +10,9 @@ services:
     env_file:
       - .env
     environment:
-      - DB_HOST=db
-      - MONGO_URI=mongodb://${MONGO_USER:-root}:${MONGO_PASSWORD:-password}@mongo:27017/${MONGO_DB_NAME:-bagithr_indexer}?authSource=admin
       - APP_ENV=production
     ports:
       - "8005:8000"
-    depends_on:
-      - db
-      - mongo
     restart: always
     healthcheck:
       test:
@@ -68,7 +20,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-      start_period: 60s
+      start_period: 30s
 
   # ── Adminer (MySQL browser) ─────────────────────────────────
   adminer:
@@ -76,9 +28,3 @@ services:
     container_name: bagithr_adminer_prod
     ports:
       - "8082:8080"
-    depends_on:
-      - db
-
-volumes:
-  db_data_prod:
-  mongo_data_prod:
