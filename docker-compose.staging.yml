@@ -38,6 +38,8 @@ services:
       - DB_HOST=db
       - APP_ENV=staging
       - MONGO_HOST=mongo
+      - MONGO_USER=${MONGO_USER}
+      - MONGO_PASSWORD=${MONGO_PASSWORD}
     depends_on:
       db:
         condition: service_healthy
