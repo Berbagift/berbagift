@@ -14,7 +14,7 @@ services:
       # Securely expose database port only to localhost (127.0.0.1)
       - "127.0.0.1:5432:5432"
     volumes:
-      - db_data_dev:/var/lib/postgresql/data
+      - pg_data_dev:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       timeout: 5s
@@ -163,5 +163,5 @@ services:
         max-file: "3"
 
 volumes:
-  db_data_dev:
+  pg_data_dev:
   mongo_data_dev:

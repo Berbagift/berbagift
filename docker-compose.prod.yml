@@ -13,7 +13,7 @@ services:
     ports:
       - "127.0.0.1:3307:5432"
     volumes:
-      - db_data_prod:/var/lib/postgresql/data
+      - pg_data_prod:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       timeout: 20s
@@ -139,5 +139,5 @@ services:
         max-file: "3"
 
 volumes:
-  db_data_prod:
+  pg_data_prod:
   mongo_data_prod:
