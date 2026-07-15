@@ -196,12 +196,7 @@ export function LightweightChart({ activeTokenId, activeRange }: LightweightChar
 
   return (
     <div className="relative w-full h-[400px] md:h-[500px]">
-      {(isLoading || isFetchingNextPage) && (
-        <div className="absolute top-4 right-4 z-10 flex items-center gap-2 px-3 py-1.5 bg-neutral-2/80 dark:bg-neutral-900/80 backdrop-blur border border-border rounded-full text-xs text-neutral-6 shadow-sm">
-          <div className="w-3.5 h-3.5 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
-          <span>Fetching history...</span>
-        </div>
-      )}
+      {(isLoading || isFetchingNextPage) && null}
       {isError && (
         <div className="absolute inset-0 z-10 flex items-center justify-center bg-background/50 text-neutral-500">
           Failed to load chart data

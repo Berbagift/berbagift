@@ -65,9 +65,7 @@ export function CreateRoomModule() {
             className="w-full bg-[#16a34a] hover:bg-[#15803d] text-white py-3 rounded-md text-[16px] font-medium flex items-center justify-center transition-colors shadow-sm cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {state.isSubmitting ? (
-              <span className="flex items-center gap-2">
-                <i className="fi fi-rr-spinner animate-spin"></i> Processing...
-              </span>
+              <span>Processing...</span>
             ) : (
               "Create Room"
             )}

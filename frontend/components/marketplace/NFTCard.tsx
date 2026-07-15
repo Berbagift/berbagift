@@ -116,9 +116,7 @@ export function NFTCard({ nft, onBuy, isBuying = false }: NFTCardProps) {
             disabled={isBuying}
           >
             {isBuying ? (
-              <span className="flex items-center gap-2">
-                <i className="fi fi-rr-spinner animate-spin" /> Buying...
-              </span>
+              <span>Buying...</span>
             ) : (
               'Buy Now'
             )}

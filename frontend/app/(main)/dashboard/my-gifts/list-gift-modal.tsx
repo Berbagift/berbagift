@@ -125,13 +125,7 @@ export function ListGiftModal({ tokenId, isOpen, onClose, onSuccess }: ListGiftM
               disabled={isProcessing}
               className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm font-semibold h-10 cursor-pointer"
             >
-              {isProcessing ? (
-                <span className="flex items-center gap-2">
-                  <i className="fi fi-rr-spinner animate-spin" /> Listing...
-                </span>
-              ) : (
-                'Confirm Listing'
-              )}
+              {isProcessing ? 'Listing...' : 'Confirm Listing'}
             </Button>
           </div>
         </form>

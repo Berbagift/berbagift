@@ -131,13 +131,7 @@ function GiftCard({ nft, onListClick, onUnlistClick, isUnlisting }: { nft: any; 
               onClick={() => onUnlistClick(nft.token_id)}
               disabled={isUnlisting}
             >
-              {isUnlisting ? (
-                <span className="flex items-center gap-2">
-                  <i className="fi fi-rr-spinner animate-spin" /> Unlisting...
-                </span>
-              ) : (
-                'Unlist'
-              )}
+              {isUnlisting ? 'Unlisting...' : 'Unlist'}
             </Button>
           </div>
         ) : (

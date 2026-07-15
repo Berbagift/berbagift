@@ -168,7 +168,6 @@ export function MintNFTModal({ isOpen, onClose }: MintNFTModalProps) {
 
           {isProcessing ? (
             <div className="flex flex-col items-center justify-center py-10 gap-4">
-              <div className="w-12 h-12 rounded-full border-[3px] border-emerald-200 border-t-emerald-600 animate-spin" />
               <p className="text-sm font-medium text-neutral-7">{stepLabels[step]}</p>
               {imagePreview && (
                 <img
