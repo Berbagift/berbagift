@@ -1,6 +1,6 @@
 import os
 from dotenv import load_dotenv
-load_dotenv(override=False)  # Docker env vars take precedence
+load_dotenv()
 
 from fastapi import FastAPI
 from routes.hello import router as hello_router
@@ -12,6 +12,8 @@ from databases.connection import engine
 from models.base import Base
 import models.user
 import models.nonce
+from alembic import command
+from alembic.config import Config
 from schemas.indodax import IndodaxCallbackPayload
 from services.indodax import validate_withdrawal_request
 from services.socket_manager import create_socket_app
@@ -20,6 +22,9 @@ from fastapi.responses import PlainTextResponse
 import logging
 
 logger = logging.getLogger(__name__)
+
+alembic_cfg = Config("alembic.ini")
+command.upgrade(alembic_cfg, "head")
 
 from fastapi.middleware.cors import CORSMiddleware
 import threading
