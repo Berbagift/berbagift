@@ -29,6 +29,8 @@ services:
     image: mongo:6.0
     container_name: bagithr_mongo_prod
     restart: always
+    env_file:
+      - .env
     environment:
       - MONGO_INITDB_ROOT_USERNAME=${MONGO_USER:-admin}
       - MONGO_INITDB_ROOT_PASSWORD=${MONGO_PASSWORD:-password}
@@ -38,7 +40,7 @@ services:
     volumes:
       - mongo_data_prod:/data/db
     healthcheck:
-      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      test: ["CMD-SHELL", "mongosh --authenticationDatabase admin -u $MONGO_INITDB_ROOT_USERNAME -p $MONGO_INITDB_ROOT_PASSWORD --eval \"db.adminCommand('ping')\" --quiet"]
       timeout: 20s
       retries: 10
       start_period: 15s
