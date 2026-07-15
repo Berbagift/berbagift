@@ -8,8 +8,9 @@ services:
     env_file:
       - .env
     environment:
-      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-${DB_PASSWORD}}
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
       MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_ROOT_HOST: '%'
     ports:
       # Prod MySQL on 3307 to avoid conflict with staging (3306)
       - "127.0.0.1:3307:3306"
