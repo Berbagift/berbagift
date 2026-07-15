@@ -12,7 +12,7 @@ export function connectSocket(backendUrl?: string): Socket {
   const url =
     backendUrl ||
     process.env.NEXT_PUBLIC_SOCKET_URL ||
-    "http://localhost:8000";
+    "";
 
   socket = io(url, {
     transports: ["websocket", "polling"],
