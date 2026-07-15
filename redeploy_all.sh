@@ -2,13 +2,13 @@
 set -e
 
 echo "=========================================="
-echo "Resetting Databases (MySQL & MongoDB)"
+echo "Resetting Databases (PostgreSQL & MongoDB)"
 echo "=========================================="
 
-echo "1. Dropping and recreating MySQL database 'bagithr'..."
-podman exec mysql-1 mysql -uroot -p1234567890 -e "DROP DATABASE IF EXISTS bagithr; CREATE DATABASE bagithr;"
+echo "1. Dropping and recreating PostgreSQL database 'bagithr'..."
+podman exec postgres-1 psql -U postgres -c "DROP DATABASE IF EXISTS bagithr;" -c "CREATE DATABASE bagithr;"
 
-echo "2. Running Alembic migrations for MySQL..."
+echo "2. Running Alembic migrations for PostgreSQL..."
 cd backend
 source venv/bin/activate
 alembic upgrade head

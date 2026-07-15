@@ -14,8 +14,8 @@ class DatabaseConfig:
 
         # 2. Construct from parts
         host = os.getenv("DB_HOST", "db")
-        port = os.getenv("DB_PORT", "3306")
-        user = os.getenv("DB_USER", "root")
+        port = os.getenv("DB_PORT", "5432")
+        user = os.getenv("DB_USER", "postgres")
         password = os.getenv("DB_PASSWORD", "")
         name = os.getenv("DB_NAME", "bagithr")
-        return f"mysql+pymysql://{user}:{password}@{host}:{port}/{name}"
+        return f"postgresql+psycopg2://{user}:{password}@{host}:{port}/{name}"
