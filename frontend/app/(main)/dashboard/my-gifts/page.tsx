@@ -94,7 +94,7 @@ function GiftCard({ nft, onListClick, onUnlistClick, isUnlisting }: { nft: any; 
           </div>
         </div>
 
-        {nft.sender_username && (
+        {nft.sender_username && !nft.is_purchased && (
           <div className="flex items-center gap-2 mb-4 bg-neutral-50 dark:bg-neutral-900 rounded-md p-2 border border-neutral-100 dark:border-neutral-800">
             <div className="w-6 h-6 rounded-full bg-emerald-100 dark:bg-emerald-900 flex items-center justify-center text-xs font-medium text-emerald-700 dark:text-emerald-300 shrink-0">
               {initials}
@@ -106,7 +106,14 @@ function GiftCard({ nft, onListClick, onUnlistClick, isUnlisting }: { nft: any; 
           </div>
         )}
 
-        {nft.message && (
+        {nft.is_purchased && (
+          <div className="flex items-center gap-2 mb-4 bg-amber-50 dark:bg-amber-900/20 rounded-md p-2 border border-amber-100 dark:border-amber-800">
+            <i className="fi fi-rr-shopping-cart text-xs text-amber-600" />
+            <span className="text-xs text-amber-700 dark:text-amber-300">Purchased</span>
+          </div>
+        )}
+
+        {nft.message && !nft.is_purchased && (
           <p className="text-xs text-neutral-600 dark:text-neutral-400 line-clamp-2 mb-4 flex-1 italic">
             &ldquo;{nft.message}&rdquo;
           </p>

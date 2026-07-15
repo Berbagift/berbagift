@@ -19,8 +19,12 @@ def emit_threadsafe(event: str, data: dict) -> None:
     """Emit a Socket.IO event safely from any thread."""
     if _event_loop is not None and _event_loop.is_running():
         asyncio.run_coroutine_threadsafe(sio.emit(event, data), _event_loop)
+    elif _event_loop is not None:
+        # Event loop exists but not running — schedule on it anyway
+        asyncio.run_coroutine_threadsafe(sio.emit(event, data), _event_loop)
     else:
-        sio.emit(event, data)
+        # No event loop yet: no clients connected, nothing to emit to
+        pass
 
 
 def create_socket_app(app):

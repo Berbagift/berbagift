@@ -297,6 +297,7 @@ class IndexerController:
                                 "message": user_message,
                                 "token_used": token_addr,
                                 "token_amount": formatted_amount,
+                                "is_purchased": False,
                                 "datetime": datetime.now(timezone.utc),
                                 "transaction_hash": tx_hash
                             })
@@ -307,8 +308,8 @@ class IndexerController:
                         from_addr = scval_to_native(topic_scval[1])
                         to_addr = scval_to_native(topic_scval[2])
                         token_id = scval_to_native(topic_scval[3])
-                        default_uri = scval_to_native(value_scval) if value_scval else None
-                        NFTDatabase.update_owner(token_id, to_addr, default_uri)
+                        # Don't overwrite token_uri — keep the original IPFS metadata
+                        NFTDatabase.update_owner(token_id, to_addr, default_uri=None)
                         print(f"✅ Indexed NFT Transfer #{token_id} from {from_addr} to {to_addr}")
 
                     elif event_type == "Listed":
@@ -406,6 +407,7 @@ class IndexerController:
                             
                             NFTDatabase.set_listing_status(token_id, False, None)
                             NFTDatabase.update_owner(token_id, buyer)
+                            NFTDatabase.clear_personal_data(token_id)
                             ListingDatabase.remove_listing(token_id)
                             
                             print(f"✅ Indexed Activity: Sold NFT #{token_id} from {seller} to {buyer}")

@@ -48,21 +48,31 @@ SWAP_ID=$(stellar contract deploy --wasm target/wasm32v1-none/release/token_swap
 echo "SWAP_ID=$SWAP_ID"
 stellar contract invoke --id $SWAP_ID --source user_1 --network testnet -- initialize --base_token $XLM --token_registry $REGISTRY_ID --platform_wallet $ADMIN
 
-echo "Funding admin wallet..."
+echo "Funding admin wallet (XLM)..."
 curl -s "https://friendbot.stellar.org?addr=$ADMIN" > /dev/null || true
 
-echo "Checking XLM and RPK balances..."
+echo "Checking XLM balance..."
+MIN_XLM=5000000000  # 500 XLM minimum
 XLM_BAL_RAW=$(stellar contract invoke --id $XLM --source user_1 --network testnet -- balance --id $ADMIN | grep -v 'A new release' | grep -v 'Warning' | tail -n 1 | tr -d '"')
-RPK_BAL_RAW=$(stellar contract invoke --id $RPK --source user_1 --network testnet -- balance --id $ADMIN | grep -v 'A new release' | grep -v 'Warning' | tail -n 1 | tr -d '"')
-
 echo "Current XLM Balance (stroops): $XLM_BAL_RAW"
+
+while [ "$XLM_BAL_RAW" -lt "$MIN_XLM" ]; do
+    echo "XLM balance too low ($XLM_BAL_RAW < $MIN_XLM). Requesting more from friendbot..."
+    curl -s "https://friendbot.stellar.org?addr=$ADMIN" > /dev/null || true
+    sleep 2
+    XLM_BAL_RAW=$(stellar contract invoke --id $XLM --source user_1 --network testnet -- balance --id $ADMIN | grep -v 'A new release' | grep -v 'Warning' | tail -n 1 | tr -d '"')
+    echo "Updated XLM Balance (stroops): $XLM_BAL_RAW"
+done
+
+echo "Checking RPK balance..."
+RPK_BAL_RAW=$(stellar contract invoke --id $RPK --source user_1 --network testnet -- balance --id $ADMIN | grep -v 'A new release' | grep -v 'Warning' | tail -n 1 | tr -d '"')
 echo "Current RPK Balance (stroops): $RPK_BAL_RAW"
 
-XLM_10=$(( XLM_BAL_RAW / 10 ))
-RPK_10=$(( RPK_BAL_RAW / 10 ))
+XLM_50=$(( XLM_BAL_RAW / 2 ))
+RPK_50=$(( RPK_BAL_RAW / 2 ))
 
-echo "Depositing 10% liquidity: $XLM_10 XLM stroops and $RPK_10 RPK stroops..."
-stellar contract invoke --id $SWAP_ID --source user_1 --network testnet -- add_liquidity --provider $ADMIN --token $RPK --base_token_amount $XLM_10 --token_amount $RPK_10
+echo "Depositing 50% liquidity: $XLM_50 XLM stroops and $RPK_50 RPK stroops..."
+stellar contract invoke --id $SWAP_ID --source user_1 --network testnet -- add_liquidity --provider $ADMIN --token $RPK --base_token_amount $XLM_50 --token_amount $RPK_50
 
 echo "Deploying Marketplace..."
 MARKET_ID=$(stellar contract deploy --wasm target/wasm32v1-none/release/marketplace.wasm --source user_1 --network testnet | grep -v 'A new release' | grep -v 'Warning' | tail -n 1)

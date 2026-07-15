@@ -7,6 +7,10 @@ import { RoomSearch } from '@/components/rooms/RoomSearch';
 import { EmptyState } from '@/components/rooms/EmptyState';
 import { Button } from '@/components/ui/button';
 import { MintNFTModal } from '@/components/marketplace/mint-nft-modal';
+import { useWalletStore } from '@/hooks/use-wallet-state';
+import { buildBuyItemTx } from '@/lib/stellar/marketplace';
+import { submitTransaction } from '@/lib/stellar/transactions';
+import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'react-toastify';
 
 const NFTCardSkeleton = () => (
@@ -26,7 +30,10 @@ const NFTCardSkeleton = () => (
 export default function MarketplacePage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [isMintModalOpen, setIsMintModalOpen] = useState(false);
+  const [buyingTokenId, setBuyingTokenId] = useState<number | null>(null);
   const { data: nfts = [], isLoading } = useMarketplaceNfts();
+  const { publicKey, isConnected, signTransaction } = useWalletStore();
+  const queryClient = useQueryClient();
 
   const filteredNfts = nfts.filter((nft) => {
     if (!searchQuery) return true;
@@ -38,9 +45,40 @@ export default function MarketplacePage() {
     );
   });
 
-  const handleBuy = (tokenId: string, price: string) => {
-    // In the future, integrate smart contract call here
-    toast.info(`Buying NFT #${tokenId} for ${price} - Coming Soon!`);
+  const handleBuy = async (tokenId: string, price: string) => {
+    if (!isConnected || !publicKey) {
+      toast.error('Please connect your wallet first.');
+      return;
+    }
+
+    const numericTokenId = Number(tokenId);
+    setBuyingTokenId(numericTokenId);
+
+    try {
+      const txXdr = await buildBuyItemTx(publicKey, numericTokenId);
+      const signedXdr = await signTransaction(txXdr, 'testnet');
+      const result = await submitTransaction(signedXdr);
+
+      toast.success(`Purchased NFT #${tokenId} for ${price}!`);
+
+      queryClient.invalidateQueries({ queryKey: ['marketplace_nfts'] });
+      queryClient.invalidateQueries({ queryKey: ['nfts', publicKey] });
+      queryClient.invalidateQueries({ queryKey: ['userProfile'] });
+      queryClient.invalidateQueries({ queryKey: ['activities'] });
+
+      // Delayed re-fetch for indexer to catch up
+      setTimeout(() => {
+        queryClient.invalidateQueries({ queryKey: ['marketplace_nfts'] });
+        queryClient.invalidateQueries({ queryKey: ['nfts', publicKey] });
+        queryClient.invalidateQueries({ queryKey: ['userProfile'] });
+        queryClient.invalidateQueries({ queryKey: ['activities'] });
+      }, 3000);
+    } catch (err: any) {
+      console.error('Purchase failed:', err);
+      toast.error(err.message || 'Purchase failed. Please try again.');
+    } finally {
+      setBuyingTokenId(null);
+    }
   };
 
   return (
@@ -84,6 +122,7 @@ export default function MarketplacePage() {
                 key={nft.token_id}
                 nft={nft}
                 onBuy={handleBuy}
+                isBuying={buyingTokenId === nft.token_id}
               />
             ))}
           </div>

@@ -6,6 +6,7 @@ import { Tooltip } from '@/components/ui/tooltip';
 interface NFTCardProps {
   nft: any;
   onBuy?: (id: string, price: string) => void;
+  isBuying?: boolean;
 }
 
 function resolveUri(uri: string) {
@@ -15,7 +16,7 @@ function resolveUri(uri: string) {
   return uri;
 }
 
-export function NFTCard({ nft, onBuy }: NFTCardProps) {
+export function NFTCard({ nft, onBuy, isBuying = false }: NFTCardProps) {
   const rawUri = nft.token_uri || '';
   const [resolvedImage, setResolvedImage] = useState('');
   const [metadataTitle, setMetadataTitle] = useState('');
@@ -94,19 +95,33 @@ export function NFTCard({ nft, onBuy }: NFTCardProps) {
           </div>
         </div>
 
-        {nft.message && (
+        {nft.message && !nft.is_purchased && (
           <p className="text-xs text-neutral-600 dark:text-neutral-400 line-clamp-2 mb-4 flex-1 italic">
             &ldquo;{nft.message}&rdquo;
           </p>
         )}
 
+        {nft.is_purchased && (
+          <div className="flex items-center gap-2 mb-4 bg-amber-50 dark:bg-amber-900/20 rounded-md p-2 border border-amber-100 dark:border-amber-800">
+            <i className="fi fi-rr-shopping-cart text-xs text-amber-600" />
+            <span className="text-xs text-amber-700 dark:text-amber-300">Purchased</span>
+          </div>
+        )}
+
         {/* Actions */}
         <div className="mt-auto pt-4 border-t border-border">
           <Button
-            className="w-full bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm font-semibold h-10"
+            className="w-full bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm font-semibold h-10 cursor-pointer"
             onClick={() => onBuy?.(nft.token_id, nft.price)}
+            disabled={isBuying}
           >
-            Buy Now
+            {isBuying ? (
+              <span className="flex items-center gap-2">
+                <i className="fi fi-rr-spinner animate-spin" /> Buying...
+              </span>
+            ) : (
+              'Buy Now'
+            )}
           </Button>
         </div>
       </div>

@@ -2,7 +2,8 @@
 #![allow(deprecated)]
 #![allow(unused_imports)]
 use soroban_sdk::{
-    contract, contractimpl, contracttype, symbol_short, token, Address, Env, String, Symbol, Vec,
+    contract, contractimpl, contracttype, symbol_short, token, Address, Env, IntoVal, String,
+    Symbol, Vec,
 };
 
 #[contracttype]
@@ -318,19 +319,19 @@ impl BundleBatchTransferContract {
             panic!("Bukan pemilik NFT");
         }
 
-        // Update owner
+        // Update owner — keep original token_uri (don't overwrite)
         env.storage()
             .persistent()
             .set(&DataKey::Owner(token_id), &to);
 
-        // Timpa token URI menjadi default (metadata personal dihapus)
-        let default_uri = String::from_str(&env, "ipfs://default-opened-gift");
-        env.storage()
+        let token_uri: String = env
+            .storage()
             .persistent()
-            .set(&DataKey::TokenUri(token_id), &default_uri);
+            .get(&DataKey::TokenUri(token_id))
+            .unwrap();
 
         env.events()
-            .publish((symbol_short!("Transfer"), from, to, token_id), default_uri);
+            .publish((symbol_short!("Transfer"), from, to, token_id), token_uri);
     }
 
     pub fn name(env: Env) -> String {

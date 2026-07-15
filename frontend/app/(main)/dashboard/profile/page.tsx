@@ -9,6 +9,48 @@ import { Button } from "@/components/ui/button";
 import { getErrorMessage } from "@/lib/api/client";
 import { User, Mail, Wallet, Copy, Check, Save, ShieldCheck, Loader2 } from "lucide-react";
 
+function ProfileSkeleton() {
+  return (
+    <div className="flex flex-col justify-center min-h-[calc(100vh-120px)] max-w-4xl mx-auto space-y-8 pb-8 px-4">
+      {/* Header skeleton */}
+      <div className="flex flex-col md:flex-row items-center gap-6 p-6 rounded-2xl bg-card border border-border animate-pulse">
+        <div className="w-24 h-24 rounded-full bg-emerald-100/80 dark:bg-emerald-800/30" />
+        <div className="flex-1 space-y-3">
+          <div className="h-8 w-48 bg-emerald-100/80 dark:bg-emerald-800/30 rounded" />
+          <div className="h-4 w-36 bg-emerald-100/80 dark:bg-emerald-800/30 rounded" />
+        </div>
+      </div>
+
+      {/* Form skeleton */}
+      <div className="rounded-2xl border border-border bg-card animate-pulse">
+        <div className="border-b border-border p-6 bg-emerald-50/20 dark:bg-emerald-900/5 space-y-2">
+          <div className="h-6 w-48 bg-emerald-100/80 dark:bg-emerald-800/30 rounded" />
+          <div className="h-4 w-72 bg-emerald-100/80 dark:bg-emerald-800/30 rounded" />
+        </div>
+        <div className="p-6 space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {[1, 2].map((i) => (
+              <div key={i} className="space-y-3">
+                <div className="h-4 w-20 bg-emerald-100/80 dark:bg-emerald-800/30 rounded" />
+                <div className="h-12 w-full bg-emerald-100/80 dark:bg-emerald-800/30 rounded-xl" />
+                <div className="h-3 w-48 bg-emerald-100/80 dark:bg-emerald-800/30 rounded" />
+              </div>
+            ))}
+          </div>
+          <div className="pt-4 border-t border-border space-y-3">
+            <div className="h-4 w-28 bg-emerald-100/80 dark:bg-emerald-800/30 rounded" />
+            <div className="h-12 w-full bg-emerald-100/80 dark:bg-emerald-800/30 rounded-xl" />
+            <div className="h-3 w-64 bg-emerald-100/80 dark:bg-emerald-800/30 rounded" />
+          </div>
+        </div>
+        <div className="border-t border-border p-6 bg-emerald-50/20 dark:bg-emerald-900/5 flex justify-end">
+          <div className="h-12 w-36 bg-emerald-100/80 dark:bg-emerald-800/30 rounded-xl" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function ProfilePage() {
   const { data: user, isLoading } = useUserProfile();
   const updateProfile = useUpdateProfile();
@@ -52,7 +94,6 @@ export default function ProfilePage() {
     }
   };
 
-  // Generate a display initial for the avatar
   const getInitial = () => {
     if (user?.username) return user.username.charAt(0).toUpperCase();
     if (user?.wallet_address) return user.wallet_address.charAt(0).toUpperCase();
@@ -60,11 +101,7 @@ export default function ProfilePage() {
   };
 
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-[50vh]">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
-      </div>
-    );
+    return <ProfileSkeleton />;
   }
 
   return (

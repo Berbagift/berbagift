@@ -35,6 +35,20 @@ class NFTDatabase:
         return False
 
     @staticmethod
+    def clear_personal_data(token_id: int):
+        """Strips personal info (sender, message) after marketplace purchase."""
+        nft = NFT.objects(token_id=token_id).first()
+        if nft:
+            nft.sender_address = ""
+            nft.message = ""
+            nft.token_used = None
+            nft.token_amount = None
+            nft.is_purchased = True
+            nft.save()
+            return True
+        return False
+
+    @staticmethod
     def set_listing_status(token_id: int, is_listed: bool, price: str = None):
         nft = NFT.objects(token_id=token_id).first()
         if nft:

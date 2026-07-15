@@ -11,6 +11,7 @@ class NFT(TimestampedDocument):
     token_used = StringField(null=True)
     token_amount = StringField(null=True)
     is_listed = BooleanField(default=False)
+    is_purchased = BooleanField(default=False)
     price = StringField(null=True)
     datetime = DateTimeField(required=True)
     transaction_hash = StringField(default="")
