@@ -16,11 +16,11 @@ services:
     volumes:
       - db_data_staging:/var/lib/mysql
     healthcheck:
-      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
-      timeout: 5s
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -uroot -p$$MYSQL_ROOT_PASSWORD"]
+      timeout: 10s
       retries: 10
-      interval: 5s
-      start_period: 5s
+      interval: 10s
+      start_period: 30s
     logging:
       driver: "json-file"
       options:
@@ -37,8 +37,11 @@ services:
     environment:
       - DB_HOST=db
       - APP_ENV=staging
+      - MONGO_URI=mongodb://${MONGO_USER}:${MONGO_PASSWORD}@mongo:27017/${MONGO_DB_NAME}?authSource=admin
     depends_on:
       db:
+        condition: service_healthy
+      mongo:
         condition: service_healthy
     restart: always
     healthcheck:
@@ -129,12 +132,36 @@ services:
           cpus: '0.1'
           memory: 64M
 
+  mongo:
+    image: mongo:6.0
+    container_name: berbagift_mongo_staging
+    restart: always
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_USER}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_PASSWORD}
+      - MONGO_INITDB_DATABASE=${MONGO_DB_NAME}
+    ports:
+      - "127.0.0.1:27018:${MONGO_PORT}"
+    volumes:
+      - mongo_data_staging:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
   adminer:
     image: adminer:latest
     container_name: berbagift_adminer_staging
     ports:
       # Staging database browser client
-      - "8080:8081"
+      - "8088:8080"
     depends_on:
       - db
     restart: always
@@ -146,3 +173,4 @@ services:
 
 volumes:
   db_data_staging:
+  mongo_data_staging:

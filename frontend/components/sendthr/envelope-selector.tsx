@@ -4,6 +4,7 @@ import { PRESET_ENVELOPES } from '@/lib/data/envelopes';
 import { EnvelopeTemplateCard } from './envelope-template-card';
 import { UploadSection } from './upload-section';
 import { cn } from '@/lib/utils';
+import { MyNftsSelector } from './my-nfts-selector';
 import { useEnvelopes } from '@/lib/api/queries';
 
 const PAGE_SIZE = 3;
@@ -49,6 +50,22 @@ export function EnvelopeSelector() {
         >
           <i className="fi fi-rr-cloud-upload text-lg mt-0.5"></i>
           Upload Your Own Design
+        </button>
+
+        {/* Divider */}
+        <div className="w-full sm:w-[1px] h-[1px] sm:h-8 bg-neutral-5 shrink-0"></div>
+
+        <button
+          onClick={() => state.setUploadMode('my_nfts')}
+          className={cn(
+            "w-full sm:flex-1 flex items-center justify-center gap-2 py-3 sm:py-4 text-sm sm:text-base font-medium transition-colors",
+            state.uploadMode === 'my_nfts' 
+              ? "text-[#16a34a] bg-neutral-2/50 dark:bg-neutral-10/50" 
+              : "text-neutral-6 hover:text-black dark:text-neutral-1 hover:bg-neutral-2 dark:hover:bg-neutral-10"
+          )}
+        >
+          <i className="fi fi-rr-layer-plus text-lg mt-0.5"></i>
+          My NFTs
         </button>
       </div>
 
@@ -113,6 +130,8 @@ export function EnvelopeSelector() {
               </div>
             )}
           </div>
+        ) : state.uploadMode === 'my_nfts' ? (
+          <MyNftsSelector />
         ) : (
           <UploadSection />
         )}

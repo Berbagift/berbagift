@@ -8,7 +8,7 @@ export interface MyRoom {
   title: string;
   description: string;
   rewardPool: string;
-  winners: number;
+  winners: { wallet_address: string; username: string; }[] | number;
   participants: Participant[];
   joined: number;
   maxParticipants: number;
@@ -22,9 +22,10 @@ interface MyRoomCardProps {
   onShare?: (id: string) => void;
   onViewResult?: (id: string) => void;
   onDelete?: (id: string) => void;
+  onJoin?: (id: string) => void;
 }
 
-export function MyRoomCard({ room, onEdit, onShare, onViewResult, onDelete }: MyRoomCardProps) {
+export function MyRoomCard({ room, onEdit, onShare, onViewResult, onDelete, onJoin }: MyRoomCardProps) {
   const isCompleted = room.status === 'Completed';
   const isDraft = room.status === 'Draft';
 
@@ -61,38 +62,50 @@ export function MyRoomCard({ room, onEdit, onShare, onViewResult, onDelete }: My
 
       <div className="flex flex-col gap-4 mt-auto">
         {/* Actions Row */}
-        <div className="flex items-center gap-3">
-          {isDraft ? (
-            <>
-              <button
-                onClick={() => onDelete?.(room.id)}
-                className="flex-1 h-10 rounded-lg border border-neutral-3 dark:border-neutral-800 hover:border-red-500 hover:text-red-500 text-neutral-8 dark:text-neutral-3 font-semibold text-sm transition-colors flex items-center justify-center gap-1.5 cursor-pointer bg-white dark:bg-card"
-              >
-                <i className="fi fi-rr-trash text-sm mt-[1px]" />
-                Delete
-              </button>
-              <button
-                onClick={() => onEdit?.(room.id)}
-                className="flex-1 h-10 rounded-lg bg-[#16A34A] hover:bg-[#15803d] text-white font-medium text-sm transition-colors flex items-center justify-center cursor-pointer"
-              >
-                View Draft
-              </button>
-            </>
-          ) : (
-            <>
-              <button
-                onClick={() => onShare?.(room.id)}
-                className="flex-1 h-10 rounded-lg border border-[#16a34a] hover:bg-[#16a34a]/5 dark:hover:bg-[#16a34a]/10 bg-white dark:bg-card text-[#16a34a] font-medium text-sm transition-colors flex items-center justify-center cursor-pointer"
-              >
-                {isCompleted ? 'Share Result' : 'Share Room'}
-              </button>
-              <button
-                onClick={() => isCompleted ? onViewResult?.(room.id) : onEdit?.(room.id)}
-                className="flex-1 h-10 rounded-lg bg-[#16A34A] hover:bg-[#15803d] text-white font-medium text-sm transition-colors flex items-center justify-center cursor-pointer"
-              >
-                {isCompleted ? 'View Result' : 'Edit Room'}
-              </button>
-            </>
+        <div className="flex flex-col gap-3">
+          <div className="flex items-center gap-3">
+            {isDraft ? (
+              <>
+                <button
+                  onClick={() => onDelete?.(room.id)}
+                  className="flex-1 h-10 rounded-lg border border-neutral-3 dark:border-neutral-800 hover:border-red-500 hover:text-red-500 text-neutral-8 dark:text-neutral-3 font-semibold text-sm transition-colors flex items-center justify-center gap-1.5 cursor-pointer bg-white dark:bg-card"
+                >
+                  <i className="fi fi-rr-trash text-sm mt-[1px]" />
+                  Delete
+                </button>
+                <button
+                  onClick={() => onEdit?.(room.id)}
+                  className="flex-1 h-10 rounded-lg bg-[#16A34A] hover:bg-[#15803d] text-white font-medium text-sm transition-colors flex items-center justify-center cursor-pointer"
+                >
+                  View Draft
+                </button>
+              </>
+            ) : (
+              <>
+                <button
+                  onClick={() => onShare?.(room.id)}
+                  className="flex-1 h-10 rounded-lg border border-[#16a34a] hover:bg-[#16a34a]/5 dark:hover:bg-[#16a34a]/10 bg-white dark:bg-card text-[#16a34a] font-medium text-sm transition-colors flex items-center justify-center cursor-pointer"
+                >
+                  {isCompleted ? 'Share Result' : 'Share Room'}
+                </button>
+                {isCompleted && isDraft && (
+                  <button
+                    onClick={() => onViewResult?.(room.id)}
+                    className="flex-1 h-10 rounded-lg bg-[#16A34A] hover:bg-[#15803d] text-white font-medium text-sm transition-colors flex items-center justify-center cursor-pointer"
+                  >
+                    Join Room
+                  </button>
+                )}
+              </>
+            )}
+          </div>
+          {!isDraft && (
+            <button
+              onClick={() => onJoin?.(room.id)}
+              className="w-full h-10 rounded-lg bg-[#16A34A] hover:bg-[#15803d] text-white font-medium text-sm transition-colors flex items-center justify-center cursor-pointer"
+            >
+              Join Room
+            </button>
           )}
         </div>
 

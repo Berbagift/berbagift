@@ -7,6 +7,7 @@ import { isConnected as isFreighterConnected, requestAccess, getNetworkDetails, 
 import { useWalletStore } from '@/hooks/use-wallet-state';
 import { setAuthToken } from '@/lib/auth';
 import { apiClient, getErrorMessage } from '@/lib/api/client';
+import { toast } from 'react-toastify';
 
 type SignaturePayload = {
   signedMessage?: unknown;
@@ -71,12 +72,12 @@ export function ConnectWalletButton() {
         const targetNetwork = expectedNetwork === 'MAINNET' ? 'PUBLIC' : expectedNetwork;
 
         if (!network || networkError) {
-          alert("Error fetching network details: " + (networkError || "Wallet not ready"));
+          toast.error("Error fetching network details: " + (networkError || "Wallet not ready"));
           return;
         }
 
         if (network?.toUpperCase() !== targetNetwork) {
-          alert(`Please switch your Freighter wallet network to ${targetNetwork}. Current network: ${network}`);
+          toast.error(`Please switch your Freighter wallet network to ${targetNetwork}. Current network: ${network}`);
           return;
         }
 
@@ -88,7 +89,7 @@ export function ConnectWalletButton() {
             const nonceRes = await apiClient.post('/auth/nonce', { wallet_address: address });
             nonceString = nonceRes.data.data.nonce;
           } catch (err) {
-            alert(`Error getting nonce: ${getErrorMessage(err)}`);
+            toast.error(`Error getting nonce: ${getErrorMessage(err)}`);
             return;
           }
 
@@ -101,7 +102,7 @@ export function ConnectWalletButton() {
             // @ts-ignore - Handle various Freighter API version return types
             if (!signResult || signResult.error || (!signResult.signedMessage && !signResult.signature && typeof signResult === 'object' && !Buffer.isBuffer(signResult) && !(signResult instanceof Uint8Array))) {
               // @ts-ignore
-              alert("Signature failed or rejected by user: " + (signResult?.error || ""));
+              toast.error("Signature failed or rejected by user: " + (signResult?.error || ""));
               return;
             }
 
@@ -125,20 +126,20 @@ export function ConnectWalletButton() {
               connect(address, userId);
               window.location.href = '/dashboard';
             } catch (err) {
-              alert(`Authentication failed: ${getErrorMessage(err)}`);
+              toast.error(`Authentication failed: ${getErrorMessage(err)}`);
               return;
             }
 
           } catch (signErr) {
             console.error("Signature error:", signErr);
-            alert("Failed to sign message: " + getErrorMessage(signErr));
+            toast.error("Failed to sign message: " + getErrorMessage(signErr));
           }
         } else {
           console.error("Freighter error:", error);
-          alert(getErrorMessage(error) || "Failed to connect Freighter.");
+          toast.error(getErrorMessage(error) || "Failed to connect Freighter.");
         }
       } else {
-        alert("Please install the Freighter wallet extension to continue.");
+        toast.error("Please install the Freighter wallet extension to continue.");
       }
     } catch (error) {
       console.error("Error connecting wallet:", error);

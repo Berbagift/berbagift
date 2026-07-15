@@ -3,6 +3,7 @@ import { activitiesService } from '../services';
 
 /**
  * Hook to retrieve user transaction and activity logs.
+ * Uses regular polling every 5 seconds.
  */
 export function useActivities() {
   return useQuery({
@@ -10,6 +11,7 @@ export function useActivities() {
     queryFn: async () => {
       return activitiesService.getActivities();
     },
-    staleTime: 1000 * 30,
+    refetchInterval: false as const,
+    staleTime: 3000,
   });
 }

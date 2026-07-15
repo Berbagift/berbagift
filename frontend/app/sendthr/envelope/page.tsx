@@ -20,7 +20,7 @@ export default function EnvelopeSelectionPage() {
   const resetState = () => {
     queryClient.invalidateQueries({ queryKey: ["userProfile"] });
     originalResetState();
-    router.push("/sendthr");
+    router.push("/dashboard");
   };
 
   if (status === "processing") {

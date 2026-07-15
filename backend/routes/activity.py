@@ -28,6 +28,7 @@ def get_inbox(
     response_data, status_code = activity_controller.get_inbox(authorization, limit, category)
     return JSONResponse(status_code=status_code, content=response_data)
 
+
 from schemas.activity import UpdateInboxRequest, MarkAllReadRequest
 
 @router.patch("/inbox/{activity_id}", response_model=APIResponse)

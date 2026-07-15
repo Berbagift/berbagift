@@ -1,4 +1,5 @@
 import React from 'react';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { InboxMailItemData } from './InboxMailItem';
 import { RewardPreview } from './previews/RewardPreview';
@@ -9,11 +10,13 @@ import { SwapPreview } from './previews/SwapPreview';
 
 interface InboxMailPreviewProps {
   item: InboxMailItemData;
-  onBack: () => void; // Used for mobile viewport navigation back to list
+  onBack: () => void;
 }
 
 export function InboxMailPreview({ item, onBack }: InboxMailPreviewProps) {
+  const router = useRouter();
   const { title, date, category, description, details } = item;
+
 
   // Category Configuration
   const categoryConfig = {
@@ -47,7 +50,7 @@ export function InboxMailPreview({ item, onBack }: InboxMailPreviewProps) {
   const config = categoryConfig[category] || categoryConfig.System;
 
   return (
-    <div className="flex-1 flex flex-col h-full bg-white dark:bg-card p-8 md:p-10 min-h-[400px] md:min-h-[500px]">
+    <div className="flex-1 flex flex-col h-full bg-white dark:bg-card p-8 md:p-10 min-h-[400px] md:min-h-[500px] max-h-[600px] md:max-h-[700px] overflow-y-auto custom-scrollbar">
       {/* Mobile Back Button */}
       <button
         onClick={onBack}
@@ -64,12 +67,12 @@ export function InboxMailPreview({ item, onBack }: InboxMailPreviewProps) {
           <i className={`fi ${config.icon} text-[10px] mt-[1px]`} />
           {category}
         </span>
-        
+
         {/* Title */}
         <h3 className="text-lg md:text-xl font-bold text-black dark:text-neutral-1 leading-snug tracking-tight">
           {title}
         </h3>
-        
+
         {/* Date */}
         <p className="text-xs text-neutral-7 dark:text-neutral-6 font-medium">{date}</p>
       </div>
@@ -86,7 +89,7 @@ export function InboxMailPreview({ item, onBack }: InboxMailPreviewProps) {
             <RewardPreview details={details} />
           )}
           {category === 'Transfer' && (
-            <TransferPreview details={details} />
+            <TransferPreview details={details} title={title} />
           )}
           {category === 'Swap' && (
             <SwapPreview details={details} />
@@ -95,15 +98,19 @@ export function InboxMailPreview({ item, onBack }: InboxMailPreviewProps) {
             <RoomPreview details={details} />
           )}
           {category === 'System' && (
-            <SystemPreview details={details} />
+            <SystemPreview details={details} title={title} />
           )}
         </div>
 
         {/* Footer/CTA Row */}
         <div className="mt-8 flex justify-end">
-          {category === 'Rewards' && (
-            <Button className="bg-[#22c55e] hover:bg-[#1fb356] text-white font-semibold rounded-md shadow-sm h-10 px-5 cursor-pointer">
-              Claim Gift Box
+          {category === 'Rewards' && details?.txHash && (
+            <Button
+              variant="outline"
+              className="border-border text-black dark:text-neutral-1 font-semibold rounded-md h-10 px-5 cursor-pointer"
+              onClick={() => window.open(`https://stellar.expert/explorer/testnet/tx/${details.txHash}`, '_blank')}
+            >
+              Verify on Explorer
             </Button>
           )}
           {category === 'Transfer' && details?.txHash && (
@@ -124,16 +131,28 @@ export function InboxMailPreview({ item, onBack }: InboxMailPreviewProps) {
               Verify on Explorer
             </Button>
           )}
-          {category === 'Rooms' && (
-            <Button className="bg-[#22c55e] hover:bg-[#1fb356] text-white font-semibold rounded-md shadow-sm h-10 px-5 cursor-pointer">
-              Enter Gifting Room
+          {category === 'Rooms' && details?.roomId != null && (
+            <Button
+              variant="outline"
+              className="border-border text-black dark:text-neutral-1 font-semibold rounded-md h-10 px-5 cursor-pointer"
+              onClick={() => router.push(`/community/explore/join/${details.roomId}`)}
+            >
+              Join Room
             </Button>
           )}
-          {category === 'System' && (
+          {category === 'System' && details?.txHash ? (
+            <Button
+              variant="outline"
+              className="border-border text-black dark:text-neutral-1 font-semibold rounded-md h-10 px-5 cursor-pointer"
+              onClick={() => window.open(`https://stellar.expert/explorer/testnet/tx/${details.txHash}`, '_blank')}
+            >
+              Verify on blockchain
+            </Button>
+          ) : category === 'System' ? (
             <Button variant="ghost" className="text-neutral-7 hover:text-black dark:text-neutral-5 dark:hover:text-white rounded-md h-10 px-4 cursor-pointer">
               Acknowledge
             </Button>
-          )}
+          ) : null}
         </div>
       </div>
     </div>

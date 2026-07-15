@@ -2,34 +2,36 @@
 pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
-contract BundleBatchTransferXLMRPK is ERC721URIStorage, Ownable {
-    // Interface spesifik untuk token XLM (ERC-20) dan RPK
-    IERC20 public xlmToken;
-    IERC20 public rpkToken;
+// Interface untuk TokenRegistry
+interface ITokenRegistry {
+    function isValidToken(address _token) external view returns (bool);
+    function getAllTokens() external view returns (address[] memory);
+}
 
-    // Alamat Smart Contract Marketplace Resmi
+contract BerbagiftNFT is ERC721URIStorage, Ownable {
+    using SafeERC20 for IERC20;
+
+    ITokenRegistry public tokenRegistry;
+
     address public marketplaceAddress;
-
-    // Counter untuk ID NFT
+    uint256 public maxBatchSize = 3;
     uint256 private _currentTokenID = 0;
 
-    // Flag Kunci Cadangan untuk mengirim NFT yang sudah ada
-    bool private _isSendingExistingGift = false;
+    address public platformWallet;
+    uint256 public feePercentage = 5; // 5 / 1000 = 0.5%
 
-    // Struct untuk menyimpan data on-chain
     struct NFTData {
         address recipient;
-        address tokenUsed;
+        address tokenUsed; // address(0) for native token
         uint256 tokenAmount;
     }
 
-    // Mapping public agar compiler otomatis membuat fungsi getter
     mapping(uint256 => NFTData) public nftDataMap;
 
-    // Event untuk tracking di blockchain
     event BundleSent(
         address indexed sender,
         address indexed recipient,
@@ -40,62 +42,169 @@ contract BundleBatchTransferXLMRPK is ERC721URIStorage, Ownable {
         string message
     );
 
-    constructor(
-        address _xlmAddress,
-        address _rpkAddress
-    ) ERC721("Batch Bundle NFT", "BBNFT") Ownable(msg.sender) {
-        xlmToken = IERC20(_xlmAddress);
-        rpkToken = IERC20(_rpkAddress);
+    event MaxBatchSizeUpdated(uint256 oldSize, uint256 newSize);
+
+    event FeePaid(
+        address indexed sender,
+        address indexed platformWallet,
+        address tokenUsed,
+        uint256 feeAmount
+    );
+
+    constructor(address _tokenRegistry) ERC721("Berbagift NFT", "BGFT") Ownable(msg.sender) {
+        require(_tokenRegistry != address(0), "Token registry tidak valid");
+        tokenRegistry = ITokenRegistry(_tokenRegistry);
+        platformWallet = msg.sender;
+    }
+
+    modifier onlyMarketplace() {
+        require(
+            msg.sender == marketplaceAddress,
+            "Hanya marketplace yang diizinkan"
+        );
+        _;
+    }
+
+    function mintFromMarketplace(
+        address recipient,
+        string calldata customTokenURI
+    ) external onlyMarketplace returns (uint256) {
+        _currentTokenID++;
+        uint256 newItemID = _currentTokenID;
+
+        // Kosongkan data bundle karena ini murni minting custom dari marketplace
+        nftDataMap[newItemID] = NFTData({
+            recipient: recipient,
+            tokenUsed: address(0),
+            tokenAmount: 0
+        });
+
+        _mint(recipient, newItemID);
+        _setTokenURI(newItemID, customTokenURI);
+
+        return newItemID;
     }
 
     function setMarketplaceAddress(address _marketplace) external onlyOwner {
         marketplaceAddress = _marketplace;
     }
 
+    function setPlatformWallet(address _platformWallet) external onlyOwner {
+        require(
+            _platformWallet != address(0),
+            "Alamat platform tidak boleh nol"
+        );
+        platformWallet = _platformWallet;
+    }
+
+    event FeePercentageUpdated(uint256 oldFee, uint256 newFee);
+
+    function setFeePercentage(uint256 _feePercentage) external onlyOwner {
+        require(_feePercentage <= 100, "Fee maksimal 10%");
+        uint256 oldFee = feePercentage;
+        feePercentage = _feePercentage;
+        emit FeePercentageUpdated(oldFee, _feePercentage);
+    }
+
+    function setMaxBatchSize(uint256 _newSize) external onlyOwner {
+        require(_newSize > 0, "Kapasitas tidak boleh 0");
+        uint256 oldSize = maxBatchSize;
+        maxBatchSize = _newSize;
+        emit MaxBatchSizeUpdated(oldSize, _newSize);
+    }
+
+    event TokenRegistryUpdated(address oldRegistry, address newRegistry);
+
+    function setTokenRegistry(address _tokenRegistry) external onlyOwner {
+        require(_tokenRegistry != address(0), "Alamat registry tidak boleh nol");
+        address oldRegistry = address(tokenRegistry);
+        tokenRegistry = ITokenRegistry(_tokenRegistry);
+        emit TokenRegistryUpdated(oldRegistry, _tokenRegistry);
+    }
+
     // ========================================================
-    // FUNGSI 1 & 2: MINTING NFT BARU (Seperti Sebelumnya)
+    // FUNGSI 1 & 2: MINTING NFT BARU
     // ========================================================
 
-    function sendBatchXLMAndNFT(
+    function sendBatchGift(
+        address _token,
+        uint256 _totalTokenAmount, // Diabaikan jika _token == address(0)
         address[] calldata recipients,
-        uint256[] calldata tokenAmounts,
+        bool isSplit, // <-- Opsi: true untuk dibagi rata, false untuk nominal sama per user
         string[] calldata customTokenURIs,
         string[] calldata messages
-    ) external {
+    ) external payable {
+        require(tokenRegistry.isValidToken(_token), "Token tidak terdaftar");
+        
         uint256 totalRecipients = recipients.length;
-        require(totalRecipients <= 3, "Maksimal 3 user");
-        require(totalRecipients > 0, "Daftar kosong");
         require(
-            totalRecipients == tokenAmounts.length &&
-                totalRecipients == customTokenURIs.length,
-            "Panjang array tidak sama"
+            totalRecipients <= maxBatchSize,
+            "Melebihi batas maksimal user per batch"
+        );
+        require(totalRecipients > 0, "Daftar kosong");
+        
+        uint256 totalAmount = _token == address(0) ? msg.value : _totalTokenAmount;
+        require(totalAmount > 0, "Amount harus lebih besar dari 0");
+        
+        if (_token != address(0)) {
+            require(msg.value == 0, "Jangan kirim ETH jika pakai ERC20");
+        }
+
+        require(
+            totalRecipients == customTokenURIs.length,
+            "Panjang array URI tidak sama"
         );
         require(
             messages.length == 0 || messages.length == totalRecipients,
             "Panjang array pesan tidak valid"
         );
 
-        address xlmAddress = address(xlmToken);
+        // Hitung fee 0.5% untuk platform
+        uint256 totalFeeAmount = (totalAmount * feePercentage) / 1000;
+        uint256 actualRewardPool = totalAmount - totalFeeAmount;
+
+        // Transfer fee ke platform wallet
+        if (totalFeeAmount > 0) {
+            if (_token == address(0)) {
+                (bool feeSuccess, ) = payable(platformWallet).call{value: totalFeeAmount}("");
+                require(feeSuccess, "Transfer fee ETH gagal");
+            } else {
+                IERC20(_token).safeTransferFrom(msg.sender, platformWallet, totalFeeAmount);
+            }
+            emit FeePaid(msg.sender, platformWallet, _token, totalFeeAmount);
+        }
+
+        // Jika menggunakan ERC20, transfer reward pool ke kontrak ini sementara
+        if (_token != address(0) && actualRewardPool > 0) {
+            IERC20(_token).safeTransferFrom(msg.sender, address(this), actualRewardPool);
+        }
+
+        // Menghitung jumlah token yang sebenarnya akan diterima setiap user
+        uint256 amountPerUser = actualRewardPool / totalRecipients;
+        require(amountPerUser > 0, "Amount per user terlalu kecil");
 
         for (uint256 i = 0; i < totalRecipients; i++) {
             address recipient = recipients[i];
-            uint256 amount = tokenAmounts[i];
             string memory customTokenURI = customTokenURIs[i];
             string memory userMessage = messages.length > 0 ? messages[i] : "";
 
             require(recipient != address(0), "Zero address");
-            require(amount > 0, "Amount > 0");
 
-            bool success = xlmToken.transferFrom(msg.sender, recipient, amount);
-            require(success, "Transfer XLM gagal");
+            // Transfer ke recipient
+            if (_token == address(0)) {
+                (bool success, ) = payable(recipient).call{value: amountPerUser}("");
+                require(success, "Transfer ETH gagal");
+            } else {
+                IERC20(_token).safeTransfer(recipient, amountPerUser);
+            }
 
             _currentTokenID++;
             uint256 newItemID = _currentTokenID;
 
             nftDataMap[newItemID] = NFTData({
                 recipient: recipient,
-                tokenUsed: xlmAddress,
-                tokenAmount: amount
+                tokenUsed: _token,
+                tokenAmount: amountPerUser
             });
 
             _mint(recipient, newItemID);
@@ -105,233 +214,108 @@ contract BundleBatchTransferXLMRPK is ERC721URIStorage, Ownable {
                 msg.sender,
                 recipient,
                 newItemID,
-                xlmAddress,
-                amount,
+                _token,
+                amountPerUser,
                 customTokenURI,
                 userMessage
             );
         }
     }
 
-    function sendBatchRPKAndNFT(
+    function sendExistingBatchGift(
+        address _token,
+        uint256 _totalTokenAmount, // Diabaikan jika _token == address(0)
         address[] calldata recipients,
-        uint256[] calldata tokenAmounts,
-        string[] calldata customTokenURIs,
-        string[] calldata messages
-    ) external {
-        uint256 totalRecipients = recipients.length;
-        require(totalRecipients <= 3, "Maksimal 3 user");
-        require(totalRecipients > 0, "Daftar kosong");
-        require(
-            totalRecipients == tokenAmounts.length &&
-                totalRecipients == customTokenURIs.length,
-            "Panjang array tidak sama"
-        );
-        require(
-            messages.length == 0 || messages.length == totalRecipients,
-            "Panjang array pesan tidak valid"
-        );
-
-        address rpkAddress = address(rpkToken);
-
-        for (uint256 i = 0; i < totalRecipients; i++) {
-            address recipient = recipients[i];
-            uint256 amount = tokenAmounts[i];
-            string memory customTokenURI = customTokenURIs[i];
-            string memory userMessage = messages.length > 0 ? messages[i] : "";
-
-            require(recipient != address(0), "Zero address");
-            require(amount > 0, "Amount > 0");
-
-            bool success = rpkToken.transferFrom(msg.sender, recipient, amount);
-            require(success, "Transfer RPK gagal");
-
-            _currentTokenID++;
-            uint256 newItemID = _currentTokenID;
-
-            nftDataMap[newItemID] = NFTData({
-                recipient: recipient,
-                tokenUsed: rpkAddress,
-                tokenAmount: amount
-            });
-
-            _mint(recipient, newItemID);
-            _setTokenURI(newItemID, customTokenURI);
-
-            emit BundleSent(
-                msg.sender,
-                recipient,
-                newItemID,
-                rpkAddress,
-                amount,
-                customTokenURI,
-                userMessage
-            );
-        }
-    }
-
-    // ========================================================
-    // FUNGSI 3 & 4: MENGIRIM NFT YANG SUDAH ADA (BARU)
-    // ========================================================
-
-    /**
-     * @dev Mengirim NFT yang sudah dimiliki beserta token XLM
-     */
-    function sendBatchExistingXLMAndNFT(
-        address[] calldata recipients,
-        uint256[] calldata tokenIds, // Gunakan ID NFT yang sudah ada
-        uint256[] calldata tokenAmounts,
-        string[] calldata messages
-    ) external {
-        uint256 totalRecipients = recipients.length;
-        require(totalRecipients <= 3, "Maksimal 3 user");
-        require(totalRecipients > 0, "Daftar kosong");
-        require(
-            totalRecipients == tokenIds.length &&
-                totalRecipients == tokenAmounts.length,
-            "Panjang array tidak sama"
-        );
-        require(
-            messages.length == 0 || messages.length == totalRecipients,
-            "Panjang array pesan tidak valid"
-        );
-
-        address xlmAddress = address(xlmToken);
-
-        // Buka Kunci Sementara
-        _isSendingExistingGift = true;
-
-        for (uint256 i = 0; i < totalRecipients; i++) {
-            address recipient = recipients[i];
-            uint256 tokenId = tokenIds[i];
-            uint256 amount = tokenAmounts[i];
-            string memory userMessage = messages.length > 0 ? messages[i] : "";
-
-            require(recipient != address(0), "Zero address");
-            require(amount > 0, "Amount > 0");
-            require(
-                ownerOf(tokenId) == msg.sender,
-                "Anda bukan pemilik NFT ini"
-            );
-
-            // 1. Transfer XLM
-            bool success = xlmToken.transferFrom(msg.sender, recipient, amount);
-            require(success, "Transfer XLM gagal");
-
-            // 2. Transfer NFT
-            _transfer(msg.sender, recipient, tokenId);
-
-            // 3. Update Data di Mapping
-            nftDataMap[tokenId] = NFTData({
-                recipient: recipient,
-                tokenUsed: xlmAddress,
-                tokenAmount: amount
-            });
-
-            emit BundleSent(
-                msg.sender,
-                recipient,
-                tokenId,
-                xlmAddress,
-                amount,
-                tokenURI(tokenId),
-                userMessage
-            );
-        }
-
-        // Tutup Kunci Kembali
-        _isSendingExistingGift = false;
-    }
-
-    /**
-     * @dev Mengirim NFT yang sudah dimiliki beserta token RPK
-     */
-    function sendBatchExistingRPKAndNFT(
-        address[] calldata recipients,
+        bool isSplit,
         uint256[] calldata tokenIds,
-        uint256[] calldata tokenAmounts,
         string[] calldata messages
-    ) external {
+    ) external payable {
+        require(tokenRegistry.isValidToken(_token), "Token tidak terdaftar");
+        
         uint256 totalRecipients = recipients.length;
-        require(totalRecipients <= 3, "Maksimal 3 user");
-        require(totalRecipients > 0, "Daftar kosong");
         require(
-            totalRecipients == tokenIds.length &&
-                totalRecipients == tokenAmounts.length,
-            "Panjang array tidak sama"
+            totalRecipients <= maxBatchSize,
+            "Melebihi batas maksimal user"
+        );
+        require(totalRecipients > 0, "Daftar kosong");
+        
+        uint256 totalAmount = _token == address(0) ? msg.value : _totalTokenAmount;
+        require(totalAmount > 0, "Amount > 0");
+
+        if (_token != address(0)) {
+            require(msg.value == 0, "Jangan kirim ETH jika pakai ERC20");
+        }
+
+        require(
+            totalRecipients == tokenIds.length,
+            "Panjang array token ID beda"
         );
         require(
             messages.length == 0 || messages.length == totalRecipients,
-            "Panjang array pesan tidak valid"
+            "Panjang array pesan invalid"
         );
 
-        address rpkAddress = address(rpkToken);
+        // Hitung fee 0.5% untuk platform
+        uint256 totalFeeAmount = (totalAmount * feePercentage) / 1000;
+        uint256 actualRewardPool = totalAmount - totalFeeAmount;
 
-        // Buka Kunci Sementara
-        _isSendingExistingGift = true;
+        // Transfer fee ke platform wallet
+        if (totalFeeAmount > 0) {
+            if (_token == address(0)) {
+                (bool feeSuccess, ) = payable(platformWallet).call{value: totalFeeAmount}("");
+                require(feeSuccess, "Transfer fee ETH gagal");
+            } else {
+                IERC20(_token).safeTransferFrom(msg.sender, platformWallet, totalFeeAmount);
+            }
+            emit FeePaid(msg.sender, platformWallet, _token, totalFeeAmount);
+        }
+        
+        // Jika menggunakan ERC20, transfer reward pool ke kontrak ini sementara
+        if (_token != address(0) && actualRewardPool > 0) {
+            IERC20(_token).safeTransferFrom(msg.sender, address(this), actualRewardPool);
+        }
+
+        uint256 amountPerUser = actualRewardPool / totalRecipients;
+        require(amountPerUser > 0, "Amount per user terlalu kecil");
 
         for (uint256 i = 0; i < totalRecipients; i++) {
             address recipient = recipients[i];
             uint256 tokenId = tokenIds[i];
-            uint256 amount = tokenAmounts[i];
             string memory userMessage = messages.length > 0 ? messages[i] : "";
 
             require(recipient != address(0), "Zero address");
-            require(amount > 0, "Amount > 0");
             require(
                 ownerOf(tokenId) == msg.sender,
                 "Anda bukan pemilik NFT ini"
             );
 
-            // 1. Transfer RPK
-            bool success = rpkToken.transferFrom(msg.sender, recipient, amount);
-            require(success, "Transfer RPK gagal");
+            // Transfer ke recipient
+            if (_token == address(0)) {
+                (bool success, ) = payable(recipient).call{value: amountPerUser}("");
+                require(success, "Transfer ETH gagal");
+            } else {
+                IERC20(_token).safeTransfer(recipient, amountPerUser);
+            }
 
-            // 2. Transfer NFT
             _transfer(msg.sender, recipient, tokenId);
 
-            // 3. Update Data di Mapping
             nftDataMap[tokenId] = NFTData({
                 recipient: recipient,
-                tokenUsed: rpkAddress,
-                tokenAmount: amount
+                tokenUsed: _token,
+                tokenAmount: amountPerUser
             });
+
+            string memory currentURI = tokenURI(tokenId);
 
             emit BundleSent(
                 msg.sender,
                 recipient,
                 tokenId,
-                rpkAddress,
-                amount,
-                tokenURI(tokenId),
+                _token,
+                amountPerUser,
+                currentURI,
                 userMessage
             );
         }
-
-        // Tutup Kunci Kembali
-        _isSendingExistingGift = false;
-    }
-
-    // ========================================================
-    // FUNGSI BLOKIR TRANSFER (SATPAM)
-    // ========================================================
-
-    function _update(
-        address to,
-        uint256 tokenId,
-        address auth
-    ) internal virtual override returns (address) {
-        address from = _ownerOf(tokenId);
-
-        // Aturan Tambahan:
-        // _isSendingExistingGift == true (Izinkan jalur resmi dari fungsi sendBatchExisting)
-        require(
-            from == address(0) ||
-                msg.sender == marketplaceAddress ||
-                _isSendingExistingGift,
-            "NFT ini terkunci! Hanya bisa dijual/ditransfer melalui Marketplace Resmi"
-        );
-
-        return super._update(to, tokenId, auth);
     }
 }

@@ -1,13 +1,14 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { RoomFilterTabs } from '@/components/rooms/RoomFilterTabs';
 import { RoomSearch } from '@/components/rooms/RoomSearch';
 import { RoomGrid } from '@/components/rooms/RoomGrid';
 import { RoomCard } from '@/components/rooms/RoomCard';
 import { EmptyState } from '@/components/rooms/EmptyState';
 import { useRouter } from 'next/navigation';
-import { useRooms } from '@/lib/api/queries';
+import { useExploreRooms } from '@/lib/api/queries';
+import { getAuthToken } from '@/lib/auth';
 
 const RoomCardSkeleton = () => (
   <div className="flex flex-col bg-emerald-50/50 dark:bg-emerald-900/10 border border-border rounded-xl p-6 h-[380px] animate-pulse">
@@ -53,9 +54,14 @@ export default function ExploreRoomsPage() {
   const [activeFilter, setActiveFilter] = useState('All Rooms');
   const [searchQuery, setSearchQuery] = useState('');
   const [savedRoomIds, setSavedRoomIds] = useState<string[]>([]);
+  const [token, setToken] = useState<string | null>(null);
+
+  useEffect(() => {
+    setToken(getAuthToken() || null);
+  }, []);
 
   // Fetch rooms reactively via TanStack Query
-  const { data: rooms = [], isLoading } = useRooms({
+  const { data: rooms = [], isLoading } = useExploreRooms(token, {
     status: activeFilter,
     search: searchQuery,
   });

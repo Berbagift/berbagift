@@ -37,6 +37,7 @@ services:
     environment:
       - DB_HOST=db
       - APP_ENV=development
+      - MONGO_URI=mongodb://${MONGO_USER}:${MONGO_PASSWORD}@mongo:27017/${MONGO_DB_NAME}?authSource=admin
     ports:
       # Expose backend directly only to localhost for local testing (Swagger docs)
       - "127.0.0.1:8000:8000"
@@ -44,6 +45,8 @@ services:
       - ./backend:/app
     depends_on:
       db:
+        condition: service_healthy
+      mongo:
         condition: service_healthy
     restart: always
     healthcheck:
@@ -121,6 +124,30 @@ services:
         max-size: "10m"
         max-file: "3"
 
+  mongo:
+    image: mongo:6.0
+    container_name: bagithr_mongo_dev
+    restart: always
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_USER}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_PASSWORD}
+      - MONGO_INITDB_DATABASE=${MONGO_DB_NAME}
+    ports:
+      - "127.0.0.1:${MONGO_PORT}:${MONGO_PORT}"
+    volumes:
+      - mongo_data_dev:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
   adminer:
     image: adminer:latest
     container_name: bagithr_adminer_dev
@@ -137,3 +164,4 @@ services:
 
 volumes:
   db_data_dev:
+  mongo_data_dev:

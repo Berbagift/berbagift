@@ -9,10 +9,11 @@ import { RecipientChip } from '@/components/shared/recipient-chip';
 import { FeeBadge } from '@/components/finance/fee-badge';
 import { ActionSubmitButton } from '@/components/forms/action-submit-button';
 import { SecurityNote } from '@/components/finance/security-note';
-import { TOKENS } from '@/lib/data/tokens';
+import { useRegistryTokens } from '@/hooks/use-registry-tokens';
 import { useUserProfile } from '@/hooks/use-user-profile';
 
 import { useCryptoPrices } from '@/lib/api/queries/prices';
+import { toast } from 'react-toastify';
 
 export function SendThrModule() {
   const router = useRouter();
@@ -21,7 +22,9 @@ export function SendThrModule() {
   const { data: cryptoPrices } = useCryptoPrices();
   const [recipientInput, setRecipientInput] = React.useState('');
 
-  const activeSymbol = state.activeToken.id; // 'XLM' or 'RPK'
+  const { tokens, getToken } = useRegistryTokens();
+  const activeToken = getToken(state.tokenId);
+  const activeSymbol = activeToken.symbol; // 'XLM' or 'RPK'
   const realBalance = Number(userProfile?.balances?.[activeSymbol] ?? 0);
   
   // Format the IDR dynamically. The API returns a number or string number for IDR.
@@ -44,7 +47,7 @@ export function SendThrModule() {
     const pendingInput = recipientInput.trim().replace(/^@/, '');
     
     if (state.recipients.length === 0 && !pendingInput) {
-      alert('Please add at least one recipient');
+      toast.error('Please add at least one recipient');
       return;
     }
     
@@ -54,7 +57,7 @@ export function SendThrModule() {
     }
 
     if (!state.amount || parseFloat(state.amount) <= 0) {
-      alert('Please enter a valid amount');
+      toast.error('Please enter a valid amount');
       return;
     }
     
@@ -64,7 +67,7 @@ export function SendThrModule() {
 
     // Check balance before proceeding
     if (totalAmount > realBalance) {
-      alert(`Insufficient ${activeSymbol} balance. You need ${totalAmount} ${activeSymbol} (including 0.5% platform fee).`);
+      toast.error(`Insufficient ${activeSymbol} balance. You need ${totalAmount} ${activeSymbol} (including 0.5% platform fee).`);
       return;
     }
 
@@ -76,9 +79,8 @@ export function SendThrModule() {
       {/* Top Balance Card */}
       <BalanceHeaderCard
         balance={realBalance}
-        symbol={state.activeToken.symbol}
+        symbol={activeToken.symbol}
         equivalentIdr={realIdr}
-        onToggleToken={state.toggleToken}
       />
 
       {/* Main Send Form */}
@@ -122,12 +124,12 @@ export function SendThrModule() {
         <div className="flex flex-col gap-1">
           <TokenAmountField
             label="Amount"
-            token={state.activeToken}
+            token={activeToken}
             amount={state.amount}
             onAmountChange={state.handleAmountChange}
             equivalentFiat={getDynamicFiatEquivalent(state.amount, activeSymbol)}
             showDropdown={true}
-            availableTokens={Object.values(TOKENS)}
+            availableTokens={tokens}
             onTokenSelect={(id) => state.setTokenId(id)}
             size="lg"
           />
@@ -138,17 +140,7 @@ export function SendThrModule() {
           )}
         </div>
 
-        {/* Title Section */}
-        <div className="flex flex-col gap-2">
-          <label className="text-neutral-8 font-medium text-sm">NFT Title</label>
-          <input
-            type="text"
-            value={state.title}
-            onChange={(e) => state.handleTitleChange(e.target.value)}
-            placeholder="e.g. Happy Eid Mubarak!"
-            className="w-full border border-border rounded-md p-3 bg-white dark:bg-card outline-none focus:border-neutral-8 transition-colors text-sm text-black dark:text-neutral-1 placeholder:text-neutral-6 font-sans"
-          />
-        </div>
+        {/* Title Section Removed */}
 
         {/* Message Section */}
         <div className="flex flex-col gap-2">

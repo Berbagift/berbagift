@@ -4,6 +4,7 @@ import { InboxMailItemData } from '@/components/inbox/InboxMailItem';
 
 /**
  * Hook to retrieve user notifications and inbox messages.
+ * Uses regular polling every 5 seconds.
  */
 export function useNotifications(category?: string) {
   return useQuery({
@@ -11,7 +12,8 @@ export function useNotifications(category?: string) {
     queryFn: async () => {
       return notificationsService.getNotifications(category);
     },
-    staleTime: 1000 * 30, // 30 seconds
+    refetchInterval: false as const,
+    staleTime: 3000,
   });
 }
 
@@ -26,7 +28,6 @@ export function useUpdateNotification() {
       return notificationsService.updateNotification(id, updates);
     },
     onSuccess: () => {
-      // Invalidate query to refetch updated state
       queryClient.invalidateQueries({ queryKey: ['notifications'] });
     },
   });

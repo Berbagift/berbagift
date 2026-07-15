@@ -6,14 +6,18 @@ const MARKETPLACE_CONTRACT_ID =
 
 const rpc = new StellarSdk.rpc.Server(config.rpcUrl);
 
+function dummyAccount(): StellarSdk.Account {
+  return new StellarSdk.Account(StellarSdk.Keypair.random().publicKey(), "0");
+}
+
 /**
  * Lists an NFT on the marketplace.
  */
 export async function buildListItemTx(
   sellerAddress: string,
   tokenId: number,
-  paymentTokenAddress: string, // XLM or RPK contract ID
-  priceStr: string // human-readable
+  paymentTokenAddress: string,
+  priceStr: string
 ): Promise<string> {
   const account = await rpc.getAccount(sellerAddress);
   const contract = new StellarSdk.Contract(MARKETPLACE_CONTRACT_ID);
@@ -32,13 +36,7 @@ export async function buildListItemTx(
     networkPassphrase: config.networkPassphrase,
   })
     .addOperation(
-      contract.call(
-        "list_item",
-        sellerScVal,
-        tokenIdScVal,
-        paymentTokenScVal,
-        priceScVal
-      )
+      contract.call("list_item", sellerScVal, tokenIdScVal, paymentTokenScVal, priceScVal)
     )
     .setTimeout(180)
     .build();
@@ -124,20 +122,24 @@ export interface ListingDetail {
  */
 export async function getListingDetail(tokenId: number): Promise<ListingDetail | null> {
   const contract = new StellarSdk.Contract(MARKETPLACE_CONTRACT_ID);
-  
-  const tx = new StellarSdk.TransactionBuilder(await rpc.getAccount("GA7YBESG35U5TKNV4281Y3C4M4C4U4Y4C4U4Y4C4U4Y4C4U4Y4C4U4Y"), {
+
+  const tx = new StellarSdk.TransactionBuilder(dummyAccount(), {
     fee: StellarSdk.BASE_FEE,
     networkPassphrase: config.networkPassphrase,
-  }).addOperation(contract.call("get_listing_detail", StellarSdk.nativeToScVal(tokenId, { type: "u32" }))).setTimeout(30).build();
-  
+  })
+    .addOperation(
+      contract.call("get_listing_detail", StellarSdk.nativeToScVal(tokenId, { type: "u32" }))
+    )
+    .setTimeout(30)
+    .build();
+
   const sim = await rpc.simulateTransaction(tx);
   if (StellarSdk.rpc.Api.isSimulationError(sim)) {
     return null;
   }
-  
+
   if (sim.result) {
     const val = StellarSdk.scValToNative(sim.result.retval);
-    // val is a struct/map.
     return {
       seller: val.seller,
       paymentToken: val.payment_token,
@@ -145,6 +147,6 @@ export async function getListingDetail(tokenId: number): Promise<ListingDetail |
       isActive: val.is_active,
     };
   }
-  
+
   return null;
 }

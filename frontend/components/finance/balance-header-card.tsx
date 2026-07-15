@@ -6,7 +6,7 @@ interface BalanceHeaderCardProps {
   balance: number;
   symbol: string;
   equivalentIdr: number;
-  onToggleToken: () => void;
+  onToggleToken?: () => void;
   className?: string;
 }
 
@@ -14,7 +14,7 @@ export function BalanceHeaderCard({
   balance,
   symbol,
   equivalentIdr,
-  onToggleToken,
+  onToggleToken = () => {},
   className
 }: BalanceHeaderCardProps) {
   return (

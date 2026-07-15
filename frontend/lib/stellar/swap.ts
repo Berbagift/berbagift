@@ -20,10 +20,11 @@ export async function buildSwapTx(
   const parsedAmountIn = BigInt(Math.round(parseAmount(amountIn) * 10_000_000));
   const parsedMinAmountOut = BigInt(Math.round(parseAmount(minAmountOut) * 10_000_000));
 
-  const tokenInAddress = tokenIn === 'XLM' ? XLM_CONTRACT : RPK_CONTRACT;
+  const functionName = tokenIn === 'XLM' ? "swap_base_for_token" : "swap_token_for_base";
+  // For both, the second argument 'token' is always the OTHER token, which in our case is RPK
+  const tokenScVal = new StellarSdk.Address(RPK_CONTRACT).toScVal();
 
   const senderScVal = new StellarSdk.Address(senderAddress).toScVal();
-  const tokenInScVal = new StellarSdk.Address(tokenInAddress).toScVal();
   const amountInScVal = StellarSdk.nativeToScVal(parsedAmountIn, { type: "i128" });
   const minAmountOutScVal = StellarSdk.nativeToScVal(parsedMinAmountOut, { type: "i128" });
 
@@ -32,7 +33,7 @@ export async function buildSwapTx(
     networkPassphrase: config.networkPassphrase,
   })
     .addOperation(
-      contract.call("swap", senderScVal, tokenInScVal, amountInScVal, minAmountOutScVal)
+      contract.call(functionName, senderScVal, tokenScVal, amountInScVal, minAmountOutScVal)
     )
     .setTimeout(180)
     .build();
@@ -57,10 +58,11 @@ export async function buildDepositTx(
   const account = await rpc.getAccount(senderAddress);
   const contract = new StellarSdk.Contract(SWAP_CONTRACT_ID);
 
-  const parsedAmountA = BigInt(Math.round(parseAmount(amountA) * 10_000_000));
-  const parsedAmountB = BigInt(Math.round(parseAmount(amountB) * 10_000_000));
+  const parsedAmountA = BigInt(Math.round(parseAmount(amountA) * 10_000_000)); // XLM
+  const parsedAmountB = BigInt(Math.round(parseAmount(amountB) * 10_000_000)); // RPK
 
   const senderScVal = new StellarSdk.Address(senderAddress).toScVal();
+  const tokenScVal = new StellarSdk.Address(RPK_CONTRACT).toScVal();
   const amountAScVal = StellarSdk.nativeToScVal(parsedAmountA, { type: "i128" });
   const amountBScVal = StellarSdk.nativeToScVal(parsedAmountB, { type: "i128" });
 
@@ -69,7 +71,7 @@ export async function buildDepositTx(
     networkPassphrase: config.networkPassphrase,
   })
     .addOperation(
-      contract.call("deposit", senderScVal, amountAScVal, amountBScVal)
+      contract.call("add_liquidity", senderScVal, tokenScVal, amountAScVal, amountBScVal)
     )
     .setTimeout(180)
     .build();
@@ -96,7 +98,7 @@ export async function getReserves(): Promise<{ reserveA: number, reserveB: numbe
       networkPassphrase: config.networkPassphrase,
     })
       .addOperation(
-        contract.call("get_reserves")
+        contract.call("get_reserves", new StellarSdk.Address(RPK_CONTRACT).toScVal())
       )
       .setTimeout(180)
       .build();

@@ -1,6 +1,6 @@
 import os
 from dotenv import load_dotenv
-load_dotenv(override=True)
+load_dotenv()
 
 from fastapi import FastAPI
 from routes.hello import router as hello_router
@@ -16,6 +16,7 @@ from alembic import command
 from alembic.config import Config
 from schemas.indodax import IndodaxCallbackPayload
 from services.indodax import validate_withdrawal_request
+from services.socket_manager import create_socket_app
 from fastapi import APIRouter, Form, HTTPException
 from fastapi.responses import PlainTextResponse
 import logging
@@ -32,6 +33,8 @@ from contextlib import asynccontextmanager
 from configs.mongo_db import connect_db as connect_mongo_db
 from controllers.indexer import IndexerController
 from routes.activity import router as activity_router
+import models.mongo_activity_read  # ensure ActivityRead collection/indexes are created
+import models.mongo_listing       # ensure Listing collection/indexes are created
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -86,7 +89,10 @@ app.include_router(user_router)
 app.include_router(activity_router)
 
 from routes.nft import router as nft_router
+from routes.room import router as room_router
+
 app.include_router(nft_router)
+app.include_router(room_router)
 
 @app.get("/", response_model=APIResponse, status_code=200)
 def root():
@@ -111,3 +117,7 @@ async def indodax_withdraw_callback(
     if is_valid:
         return "ok"
     raise HTTPException(status_code=400, detail="Validasi data withdrawal gagal")
+
+# Wrap FastAPI app with Socket.IO support
+# Run with: uvicorn main:app --reload --host 0.0.0.0 --port 8000
+app = create_socket_app(app)

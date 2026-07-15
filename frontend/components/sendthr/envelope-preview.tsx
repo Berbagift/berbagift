@@ -7,10 +7,11 @@ import { useSendThrStore } from "@/hooks/use-send-thr-state";
 import { PRESET_ENVELOPES } from "@/lib/data/envelopes";
 import { useEnvelopes } from "@/lib/api/queries";
 import { usersService } from "@/lib/api/services/users";
-
+import { useQueryClient } from "@tanstack/react-query";
 
 export function EnvelopePreview() {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const state = useSendThrStore();
   const { data: envelopes } = useEnvelopes();
   const presetEnvelopes = envelopes?.length ? envelopes : PRESET_ENVELOPES;
@@ -27,6 +28,8 @@ export function EnvelopePreview() {
       (d) => d.id === state.selectedUploadedDesignId,
     );
     if (custom) bgUrl = custom.url;
+  } else if (state.uploadMode === "my_nfts" && state.selectedNftImageUrl) {
+    bgUrl = state.selectedNftImageUrl;
   }
 
   // Recipient Display Logic
@@ -46,6 +49,12 @@ export function EnvelopePreview() {
    * - upload: already stored as a blob URL in uploadedDesigns
    */
   const getEnvelopeFile = async (): Promise<File> => {
+    if (state.uploadMode === "my_nfts" && state.selectedNftImageUrl) {
+      const res = await fetch(state.selectedNftImageUrl);
+      const blob = await res.blob();
+      const ext = blob.type.includes("png") ? "png" : "jpg";
+      return new File([blob], `envelope-mynft.${ext}`, { type: blob.type });
+    }
     if (state.uploadMode === "upload" && state.selectedUploadedDesignId) {
       const custom = state.uploadedDesigns.find(
         (d) => d.id === state.selectedUploadedDesignId
@@ -114,65 +123,89 @@ export function EnvelopePreview() {
         }
       }
 
-      const { pinFileToIPFS, pinJSONToIPFS } = await import("@/lib/pinata.js");
-
-      let tokenUri: string;
-      try {
-        const envelopeFile = await getEnvelopeFile();
-        const imageHash = await pinFileToIPFS(envelopeFile, {
-          name: `Berbagift-envelope-${Date.now()}`,
-        });
-
-        const metadataHash = await pinJSONToIPFS(
-          {
-            name: state.title || "Berbagift NFT",
-            description: state.message || "A Berbagift gift sent via Berbagift Platform",
-            image: `ipfs://${imageHash}`,
-            attributes: [
-              { trait_type: "Token", value: state.activeToken.symbol },
-              { trait_type: "Amount", value: state.amount },
-              {
-                trait_type: "Recipients",
-                value: resolvedRecipients.map((r) => r.username).join(", "),
-              },
-              { trait_type: "Sender", value: senderAddress },
-              { trait_type: "Platform", value: "Berbagift" },
-              { trait_type: "Mint Date", value: new Date().toISOString() },
-            ],
-          },
-          { name: `Berbagift-metadata-${Date.now()}` }
-        );
-        tokenUri = `ipfs://${metadataHash}`;
-      } catch (pinErr: any) {
-        throw new Error(
-          "Failed to upload envelope to IPFS. Check your Pinata API keys. Details: " +
-          (pinErr?.message || pinErr)
-        );
-      }
-
       const totalAmount = parseFloat(state.amount);
       const amountPerRecipient = (
         totalAmount / resolvedRecipients.length
       ).toFixed(7);
 
-      const nftRecipients = resolvedRecipients.map((r) => ({
-        walletAddress: r.walletAddress,
-        amount: amountPerRecipient,
-        message: state.message || "Selamat Hari Raya! 🎁",
-        tokenUri,
-      }));
+      const isExistingNft = state.uploadMode === 'my_nfts' && state.selectedNftTokenId != null;
 
-      // ── Step 4: Build Soroban transaction (use senderAddress from Freighter) ─
-      const { buildNftGiftTx, submitNftGiftTx } = await import(
-        "@/lib/stellar/nft-gift"
-      );
-      // senderAddress was fetched live from Freighter BEFORE this step,
-      // guaranteeing it's the same key that will sign the transaction.
-      const xdr = await buildNftGiftTx(
-        senderAddress,
-        state.activeToken.id, // 'XLM' or 'RPK'
-        nftRecipients
-      );
+      let xdr: string;
+      const { submitNftGiftTx } = await import("@/lib/stellar/nft-gift");
+
+      if (isExistingNft) {
+        // ── Re-gift existing NFT (does NOT mint a new one) ─────────────────
+        const { buildForwardGiftTx } = await import(
+          "@/lib/stellar/nft-gift"
+        );
+
+        const forwardRecipients = resolvedRecipients.map((r) => ({
+          walletAddress: r.walletAddress,
+          tokenId: state.selectedNftTokenId!,
+          amount: amountPerRecipient,
+          message: state.message || "",
+        }));
+
+        xdr = await buildForwardGiftTx(
+          senderAddress,
+          state.tokenId,
+          forwardRecipients
+        );
+      } else {
+        // ── Mint new NFT: upload envelope to IPFS first ────────────────────
+        const { pinFileToIPFS, pinJSONToIPFS } = await import("@/lib/pinata.js");
+
+        let tokenUri: string;
+        try {
+          const envelopeFile = await getEnvelopeFile();
+          const imageHash = await pinFileToIPFS(envelopeFile, {
+            name: `Berbagift-envelope-${Date.now()}`,
+          });
+
+          const metadataHash = await pinJSONToIPFS(
+            {
+              name: state.title || "Berbagift NFT",
+              description: state.message || "A Berbagift gift sent via Berbagift Platform",
+              image: `ipfs://${imageHash}`,
+              attributes: [
+                { trait_type: "Token", value: state.activeToken.symbol },
+                { trait_type: "Amount", value: state.amount },
+                {
+                  trait_type: "Recipients",
+                  value: resolvedRecipients.map((r) => r.username).join(", "),
+                },
+                { trait_type: "Sender", value: senderAddress },
+                { trait_type: "Platform", value: "Berbagift" },
+                { trait_type: "Mint Date", value: new Date().toISOString() },
+              ],
+            },
+            { name: `Berbagift-metadata-${Date.now()}` }
+          );
+          tokenUri = `ipfs://${metadataHash}`;
+        } catch (pinErr: any) {
+          throw new Error(
+            "Failed to upload envelope to IPFS. Check your Pinata API keys. Details: " +
+            (pinErr?.message || pinErr)
+          );
+        }
+
+        const nftRecipients = resolvedRecipients.map((r) => ({
+          walletAddress: r.walletAddress,
+          amount: amountPerRecipient,
+          message: state.message || "",
+          tokenUri,
+        }));
+
+        // ── Step 4: Build Soroban transaction (use senderAddress from Freighter) ─
+        const { buildNftGiftTx } = await import("@/lib/stellar/nft-gift");
+        // senderAddress was fetched live from Freighter BEFORE this step,
+        // guaranteeing it's the same key that will sign the transaction.
+        xdr = await buildNftGiftTx(
+          senderAddress,
+          state.tokenId,
+          nftRecipients
+        );
+      }
 
       // ── Step 5: Sign via Freighter (same address used to build the tx) ───────
       const { signedTxXdr, error: signError } = await signTransaction(xdr, {
@@ -194,6 +227,18 @@ export function EnvelopePreview() {
 
       state.setTxHash(result.hash);
       state.setStatus("success");
+      
+      // Auto refresh balance, activity, and NFTs on dashboard
+      queryClient.invalidateQueries({ queryKey: ['userProfile'] });
+      queryClient.invalidateQueries({ queryKey: ['activities'] });
+      queryClient.invalidateQueries({ queryKey: ['nfts'] });
+      
+      setTimeout(() => {
+        queryClient.invalidateQueries({ queryKey: ['userProfile'] });
+        queryClient.invalidateQueries({ queryKey: ['activities'] });
+        queryClient.invalidateQueries({ queryKey: ['nfts'] });
+      }, 3000);
+      
       // Form state will be reset when the user clicks "Done" on the success screen.
     } catch (err: any) {
       console.error("Transaction failed:", err);

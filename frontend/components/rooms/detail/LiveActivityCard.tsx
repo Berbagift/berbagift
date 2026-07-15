@@ -1,13 +1,9 @@
 import React, { useState } from 'react';
 import { LiveActivityItem } from './LiveActivityItem';
+import { LiveActivity } from '@/lib/api/types';
 
 interface LiveActivityCardProps {
-  activities: Array<{
-    username: string;
-    initials: string;
-    action: string;
-    timestamp: string;
-  }>;
+  activities: LiveActivity[];
 }
 
 export function LiveActivityCard({ activities }: LiveActivityCardProps) {
@@ -15,7 +11,7 @@ export function LiveActivityCard({ activities }: LiveActivityCardProps) {
 
   return (
     <div className="bg-white dark:bg-card border border-border rounded-lg p-6 lg:p-8 shadow-none flex flex-col h-full lg:max-h-[826px]">
-      <div 
+      <div
         className="flex items-center justify-between cursor-pointer lg:cursor-default mb-6 lg:mb-8"
         onClick={() => setIsExpanded(!isExpanded)}
       >
@@ -29,7 +25,7 @@ export function LiveActivityCard({ activities }: LiveActivityCardProps) {
       <div className={`flex-1 overflow-y-auto pr-2 lg:pr-4 ${isExpanded ? 'block' : 'hidden lg:block'} lg:custom-scrollbar`}>
         <div className="flex flex-col gap-5">
           {activities.map((activity, i) => (
-            <LiveActivityItem key={i} activity={activity} />
+            <LiveActivityItem key={activity.id || i} activity={activity} />
           ))}
         </div>
         {activities.length === 0 && (
