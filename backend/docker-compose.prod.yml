@@ -57,8 +57,7 @@ services:
       - MONGO_URI=mongodb://${MONGO_USER:-root}:${MONGO_PASSWORD:-password}@mongo:27017/${MONGO_DB_NAME:-bagithr_indexer}?authSource=admin
       - APP_ENV=production
     ports:
-      - "8000:8000"
-      - "8002:8002"
+      - "8005:8000"
     depends_on:
       - db
       - mongo

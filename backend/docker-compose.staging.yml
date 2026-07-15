@@ -60,7 +60,6 @@ services:
       - APP_ENV=staging
     ports:
       - "8001:8000"
-      - "8003:8002"
     depends_on:
       - db
       - mongo

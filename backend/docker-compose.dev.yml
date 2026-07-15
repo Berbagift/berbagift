@@ -59,7 +59,6 @@ services:
       - APP_ENV=development
     ports:
       - "8000:8000"
-      - "8002:8002"   # Socket.IO
     volumes:
       - .:/app
     depends_on:
