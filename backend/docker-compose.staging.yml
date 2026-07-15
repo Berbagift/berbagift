@@ -1,6 +1,7 @@
 version: '3.8'
 
 services:
+  # ── MySQL 8 ─────────────────────────────────────────────────
   db:
     image: mysql:8.0
     container_name: bagithr_db_staging
@@ -10,14 +11,42 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-${DB_PASSWORD}}
       MYSQL_DATABASE: ${DB_NAME:-bagithr}
-
+      MYSQL_ROOT_HOST: '%'
     volumes:
       - db_data_staging:/var/lib/mysql
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
-      timeout: 5s
+      test:
+        ["CMD-SHELL", "mysqladmin ping -h localhost -uroot -p$$MYSQL_ROOT_PASSWORD"]
+      timeout: 10s
       retries: 10
+      interval: 10s
+      start_period: 30s
 
+  # ── MongoDB 6 ───────────────────────────────────────────────
+  mongo:
+    image: mongo:6.0
+    container_name: bagithr_mongo_staging
+    restart: always
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_USER:-root}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_PASSWORD:-password}
+      - MONGO_INITDB_DATABASE=${MONGO_DB_NAME:-bagithr_indexer}
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data_staging:/data/db
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "mongosh --eval 'db.adminCommand(\"ping\")' -u $${MONGO_INITDB_ROOT_USERNAME} -p $${MONGO_INITDB_ROOT_PASSWORD} --authenticationDatabase admin"
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  # ── FastAPI Backend (production image) ──────────────────────
   backend:
     build:
       context: .
@@ -26,13 +55,33 @@ services:
     env_file:
       - .env
     environment:
-      - APP_ENV=staging
       - DB_HOST=db
+      - MONGO_URI=mongodb://${MONGO_USER:-root}:${MONGO_PASSWORD:-password}@mongo:27017/${MONGO_DB_NAME:-bagithr_indexer}?authSource=admin
+      - APP_ENV=staging
     ports:
       - "8001:8000"
+      - "8003:8002"
     depends_on:
-      db:
-        condition: service_healthy
+      - db
+      - mongo
+    restart: always
+    healthcheck:
+      test:
+        ["CMD-SHELL", "python -c 'import urllib.request; urllib.request.urlopen(\"http://localhost:8000/\")'"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 60s
+
+  # ── Adminer (MySQL browser) ─────────────────────────────────
+  adminer:
+    image: adminer:latest
+    container_name: bagithr_adminer_staging
+    ports:
+      - "8081:8080"
+    depends_on:
+      - db
 
 volumes:
   db_data_staging:
+  mongo_data_staging:
