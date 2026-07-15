@@ -1,7 +1,26 @@
 version: '3.8'
 
 services:
-  # ── FastAPI Backend (production image) ──────────────────────
+  # ── MySQL 8 ─────────────────────────────────────────────────
+  db:
+    image: mysql:8.0
+    container_name: bagithr_db_prod
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME:-bagithr}
+      MYSQL_ROOT_HOST: '%'
+    volumes:
+      - db_data_prod:/var/lib/mysql
+    healthcheck:
+      test:
+        ["CMD-SHELL", "mysqladmin ping -h localhost -uroot -p$$MYSQL_ROOT_PASSWORD"]
+      timeout: 10s
+      retries: 10
+      interval: 10s
+      start_period: 30s
+
+  # ── FastAPI Backend ─────────────────────────────────────────
   backend:
     build:
       context: .
@@ -13,6 +32,8 @@ services:
       - APP_ENV=production
     ports:
       - "8005:8000"
+    depends_on:
+      - db
     restart: always
     healthcheck:
       test:
@@ -20,7 +41,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-      start_period: 30s
+      start_period: 60s
 
   # ── Adminer (MySQL browser) ─────────────────────────────────
   adminer:
@@ -28,3 +49,8 @@ services:
     container_name: bagithr_adminer_prod
     ports:
       - "8082:8080"
+    depends_on:
+      - db
+
+volumes:
+  db_data_prod:
