@@ -1,73 +1,66 @@
-version: '3.8'
-
 services:
   db:
     image: mysql:8.0
     container_name: bagithr_db_prod
     restart: always
-    env_file:
-      - .env
     environment:
-      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-1234567890}
-      MYSQL_DATABASE: ${DB_NAME:-bagithr}
+      MYSQL_ROOT_PASSWORD: "${DB_PASSWORD:-1234567890}"
+      MYSQL_DATABASE: "${DB_NAME:-bagithr}"
       MYSQL_ROOT_HOST: "%"
     ports:
       - "127.0.0.1:${DB_PORT:-3307}:3306"
     volumes:
       - mysql_data_prod:/var/lib/mysql
     healthcheck:
-      test: ["CMD-SHELL", "bash -c 'echo > /dev/tcp/127.0.0.1/3306' 2>/dev/null"]
+      test:
+        [
+          "CMD-SHELL",
+          "bash -c 'echo > /dev/tcp/127.0.0.1/3306' 2>/dev/null",
+        ]
       interval: 5s
       timeout: 5s
       retries: 20
       start_period: 60s
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "3"
 
   mongo:
     image: mongo:6.0
     container_name: bagithr_mongo_prod
     restart: always
     environment:
-      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER:-admin}
-      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD:-password}
-      MONGO_INITDB_DATABASE: ${MONGO_DB_NAME:-bagithr_indexer}
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: password
+      MONGO_INITDB_DATABASE: bagithr_indexer
     ports:
       - "127.0.0.1:${MONGO_PORT:-27017}:27017"
     volumes:
       - mongo_data_prod:/data/db
     healthcheck:
-      test: ["CMD-SHELL", "mongosh --authenticationDatabase admin -u ${MONGO_USER:-admin} -p ${MONGO_PASSWORD:-password} --eval \"db.adminCommand('ping')\" --quiet"]
+      test:
+        [
+          "CMD-SHELL",
+          "mongosh --authenticationDatabase admin -u admin -p password --eval \"db.adminCommand('ping')\" --quiet",
+        ]
       timeout: 20s
       retries: 10
       start_period: 15s
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "3"
 
   backend:
     build:
       context: ./backend
       target: prod
     container_name: bagithr_backend_prod
-    env_file:
-      - .env
     environment:
       DB_HOST: db
       DB_PORT: "3306"
-      DB_USER: ${DB_USER:-root}
-      DB_PASSWORD: ${DB_PASSWORD:-1234567890}
-      DB_NAME: ${DB_NAME:-bagithr}
+      DB_USER: root
+      DB_PASSWORD: "${DB_PASSWORD:-1234567890}"
+      DB_NAME: "${DB_NAME:-bagithr}"
       APP_ENV: production
       MONGO_HOST: mongo
-      MONGO_USER: ${MONGO_USER:-admin}
-      MONGO_PASSWORD: ${MONGO_PASSWORD:-password}
-      MONGO_DB_NAME: ${MONGO_DB_NAME:-bagithr_indexer}
+      MONGO_USER: admin
+      MONGO_PASSWORD: password
+      MONGO_DB_NAME: bagithr_indexer
+      SOROBAN_RPC_URL: https://soroban-testnet.stellar.org
     depends_on:
       db:
         condition: service_healthy
@@ -75,16 +68,15 @@ services:
         condition: service_healthy
     restart: always
     healthcheck:
-      test: ["CMD-SHELL", "python -c 'import urllib.request; urllib.request.urlopen(\"http://localhost:8000/\")'"]
+      test:
+        [
+          "CMD-SHELL",
+          "python -c 'import urllib.request; urllib.request.urlopen(\"http://localhost:8000/\")'",
+        ]
       interval: 30s
       timeout: 10s
       retries: 10
       start_period: 90s
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "3"
 
   frontend:
     build:
@@ -92,20 +84,24 @@ services:
       dockerfile: ./frontend/Dockerfile
       target: runner
       args:
-        - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
-        - NEXT_PUBLIC_API_MODE=${NEXT_PUBLIC_API_MODE}
-        - NEXT_PUBLIC_STELLAR_NETWORK=${NEXT_PUBLIC_STELLAR_NETWORK}
-        - NEXT_PUBLIC_ENABLE_AUTH_MIDDLEWARE=${NEXT_PUBLIC_ENABLE_AUTH_MIDDLEWARE}
-        - NEXT_PUBLIC_SOCKET_URL=${NEXT_PUBLIC_SOCKET_URL}
+        - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-/api}
+        - NEXT_PUBLIC_API_MODE=${NEXT_PUBLIC_API_MODE:-server}
+        - NEXT_PUBLIC_STELLAR_NETWORK=${NEXT_PUBLIC_STELLAR_NETWORK:-TESTNET}
+        - NEXT_PUBLIC_ENABLE_AUTH_MIDDLEWARE=${NEXT_PUBLIC_ENABLE_AUTH_MIDDLEWARE:-true}
+        - NEXT_PUBLIC_SOCKET_URL=${NEXT_PUBLIC_SOCKET_URL:-}
     container_name: bagithr_frontend_prod
     environment:
-      - BACKEND_URL=http://backend:8000
+      BACKEND_URL: http://backend:8000
     depends_on:
       backend:
         condition: service_healthy
     restart: always
     healthcheck:
-      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://127.0.0.1:3000/ || exit 1"]
+      test:
+        [
+          "CMD-SHELL",
+          "wget --no-verbose --tries=1 --spider http://127.0.0.1:3000/ || exit 1",
+        ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -117,16 +113,11 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '1.0'
+          cpus: "1.0"
           memory: 1G
         reservations:
-          cpus: '0.25'
+          cpus: "0.25"
           memory: 256M
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "3"
 
   nginx:
     image: nginxinc/nginx-unprivileged:alpine
@@ -146,7 +137,15 @@ services:
         condition: service_healthy
     restart: always
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:8080/"]
+      test:
+        [
+          "CMD",
+          "wget",
+          "--no-verbose",
+          "--tries=1",
+          "--spider",
+          "http://127.0.0.1:8080/",
+        ]
       interval: 10s
       timeout: 5s
       retries: 3
@@ -154,16 +153,11 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '0.5'
+          cpus: "0.5"
           memory: 256M
         reservations:
-          cpus: '0.1'
+          cpus: "0.1"
           memory: 64M
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "3"
 
 volumes:
   mysql_data_prod:
