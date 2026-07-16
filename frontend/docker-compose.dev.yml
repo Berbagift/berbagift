@@ -1,0 +1,15 @@
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.standalone
+      target: dev
+    container_name: bagithr_frontend_dev
+    environment:
+      BACKEND_URL: "${BACKEND_URL:-http://backend:8000}"
+    ports:
+      - "127.0.0.1:3000:3000"
+    volumes:
+      - .:/app
+      - /app/node_modules
+    restart: unless-stopped

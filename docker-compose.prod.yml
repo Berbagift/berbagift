@@ -91,7 +91,7 @@ services:
         - NEXT_PUBLIC_SOCKET_URL=${NEXT_PUBLIC_SOCKET_URL:-}
     container_name: bagithr_frontend_prod
     environment:
-      BACKEND_URL: http://backend:8000
+      BACKEND_URL: "${BACKEND_URL:-http://backend:8000}"
     depends_on:
       backend:
         condition: service_healthy
