@@ -18,18 +18,16 @@ from services.socket_manager import create_socket_app
 from fastapi import APIRouter, Form, HTTPException
 from fastapi.responses import PlainTextResponse
 import logging
-
-logger = logging.getLogger(__name__)
-
 from fastapi.middleware.cors import CORSMiddleware
 import threading
 from contextlib import asynccontextmanager
-
 from configs.mongo_db import connect_db as connect_mongo_db
 from controllers.indexer import IndexerController
 from routes.activity import router as activity_router
 import models.mongo_activity_read  # ensure ActivityRead collection/indexes are created
-import models.mongo_listing       # ensure Listing collection/indexes are created
+import models.mongo_listing
+
+logger = logging.getLogger(__name__)       # ensure Listing collection/indexes are created
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -106,7 +104,7 @@ async def indodax_withdraw_callback(
     withdraw_currency: str = Form(...),
     withdraw_address: str = Form(...),
     withdraw_amount: str = Form(...),
-    withdraw_memo: str = Form(None),                        
+    withdraw_memo: str = Form(None),
     requester_ip: str = Form(...),
     request_date: str = Form(...)
 ):
